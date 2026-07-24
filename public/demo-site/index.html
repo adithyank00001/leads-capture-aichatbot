@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Demo Customer Website</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        color: #1f2937;
+        background: linear-gradient(180deg, #fff7ed 0%, #ffffff 240px);
+      }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 24px;
+        background: #7c2d12;
+        color: #fff7ed;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      }
+
+      .site-header a {
+        color: inherit;
+        text-decoration: none;
+        font-weight: 700;
+      }
+
+      .hero,
+      .section {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 48px 24px;
+      }
+
+      .hero h1 {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        line-height: 1.1;
+        margin: 0 0 16px;
+      }
+
+      .hero p,
+      .section p {
+        font-size: 1.05rem;
+        line-height: 1.7;
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-top: 24px;
+      }
+
+      .card {
+        padding: 20px;
+        border: 2px solid #fdba74;
+        border-radius: 16px;
+        background: #fff;
+      }
+
+      .cta-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      button,
+      .button {
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 20px;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+
+      .primary-button {
+        background: #ea580c;
+        color: white;
+      }
+
+      .floating-sale {
+        position: fixed;
+        left: 16px;
+        bottom: 16px;
+        z-index: 40;
+        border-radius: 999px;
+        background: #111827;
+        color: white;
+        padding: 12px 18px;
+        font-family: Arial, sans-serif;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      }
+
+      .note {
+        margin-top: 32px;
+        padding: 16px;
+        border-left: 4px solid #ea580c;
+        background: #fff7ed;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <a href="#">Austin Fresh Interiors</a>
+      <nav>Home · Services · Contact</nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <h1>Beautiful spaces, locally crafted.</h1>
+        <p>
+          This page is a fake customer website. It has its own fonts, colors,
+          buttons, and a floating promo badge. The chatbot should appear in the
+          bottom-right without breaking this page.
+        </p>
+        <div class="cta-row">
+          <button class="primary-button" type="button">Book a visit</button>
+          <button class="button" type="button">See gallery</button>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Why this test page exists</h2>
+        <p>
+          We use this page to confirm that one script tag can load the chatbot
+          iframe, keep styles isolated, and still let the customer website work
+          normally.
+        </p>
+        <div class="cards">
+          <div class="card">
+            <h3>Sticky header</h3>
+            <p>Checks that the chatbot does not break page scrolling.</p>
+          </div>
+          <div class="card">
+            <h3>Floating button</h3>
+            <p>Checks z-index and bottom-corner layout conflicts.</p>
+          </div>
+          <div class="card">
+            <h3>Strong CSS</h3>
+            <p>Checks that global page styles do not affect the chatbot.</p>
+          </div>
+        </div>
+        <div class="note">
+          Scroll down, resize the browser, and try the chatbot in the
+          bottom-right corner.
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>More content</h2>
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non
+          risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec,
+          ultricies sed, dolor. Cras elementum ultrices diam. Maecenas ligula
+          massa, varius a, semper congue, euismod non, mi.
+        </p>
+        <p>
+          Proin porttitor, orci nec nonummy molestie, enim est eleifend mi, non
+          fermentum diam nisl sit amet erat. Duis semper. Duis arcu massa,
+          scelerisque vitae, consequat in, pretium a, enim.
+        </p>
+      </section>
+    </main>
+
+    <button class="floating-sale" type="button">Summer sale</button>
+
+    <script
+      src="/widget.js"
+      data-bot-id="test-business-1"
+      async
+    ></script>
+  </body>
+</html>
