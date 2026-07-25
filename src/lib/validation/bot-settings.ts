@@ -10,6 +10,9 @@ export type BotSettingsInput = {
   openingHours: string;
   contactMethod: string;
   extraNotes: string;
+  allowedDomains: string;
+  consentText: string;
+  privacyPolicyUrl: string;
 };
 
 function readString(value: unknown, fieldName: string, required = false) {
@@ -51,5 +54,8 @@ export function parseBotSettingsPayload(body: unknown): BotSettingsInput {
     openingHours: readString(payload.openingHours, "openingHours"),
     contactMethod: readString(payload.contactMethod, "contactMethod"),
     extraNotes: readString(payload.extraNotes, "extraNotes"),
+    allowedDomains: readString(payload.allowedDomains, "allowedDomains"),
+    consentText: readString(payload.consentText, "consentText"),
+    privacyPolicyUrl: readString(payload.privacyPolicyUrl, "privacyPolicyUrl"),
   };
 }

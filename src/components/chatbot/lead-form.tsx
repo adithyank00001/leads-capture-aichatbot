@@ -27,6 +27,7 @@ export function LeadForm({
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [consentAccepted, setConsentAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -53,6 +54,11 @@ export function LeadForm({
       return;
     }
 
+    if (!consentAccepted) {
+      setError("Please accept the privacy notice before continuing.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -64,6 +70,7 @@ export function LeadForm({
         email: trimmedEmail || undefined,
         pageUrl:
           typeof window !== "undefined" ? window.location.href : undefined,
+        consentAccepted: true,
       });
 
       markLeadCompleted(botId, sessionId);
@@ -125,6 +132,33 @@ export function LeadForm({
               autoComplete="email"
               disabled={isSubmitting}
             />
+          </label>
+
+          <label className="flex items-start gap-2 text-sm text-zinc-700">
+            <input
+              type="checkbox"
+              checked={consentAccepted}
+              onChange={(event) => setConsentAccepted(event.target.checked)}
+              className="mt-1"
+              disabled={isSubmitting}
+            />
+            <span>
+              Your information will be shared with <strong>{business.name}</strong>
+              . {business.consentText}
+              {business.privacyPolicyUrl ? (
+                <>
+                  {" "}
+                  <a
+                    href={business.privacyPolicyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline"
+                  >
+                    Privacy policy
+                  </a>
+                </>
+              ) : null}
+            </span>
           </label>
         </div>
 

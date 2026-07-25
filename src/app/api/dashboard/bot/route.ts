@@ -5,6 +5,11 @@ import { getBotByCustomerId, updateBotBusinessName } from "@/lib/db/bots";
 import { getCustomerByUserId } from "@/lib/db/customers";
 import { ensureCustomerOnboarding } from "@/lib/dashboard/onboarding";
 import { handleRouteError, parseJsonBody } from "@/lib/api/request";
+import {
+  listAllowedDomainsForDashboard,
+  replaceAllowedDomains,
+} from "@/lib/security/domain";
+import { getBotUsageSummary } from "@/lib/usage/bot-usage";
 import { parseBotSettingsPayload } from "@/lib/validation/bot-settings";
 
 export async function GET() {
@@ -16,10 +21,17 @@ export async function GET() {
     });
 
     const knowledge = await getBotKnowledge(supabase, bot.bot_id);
+    const allowedDomains = await listAllowedDomainsForDashboard(
+      supabase,
+      bot.bot_id,
+    );
+    const usage = await getBotUsageSummary(bot.bot_id);
 
     return apiSuccess({
       bot,
       knowledge,
+      allowedDomains,
+      usage,
     });
   } catch (error) {
     const routeError = handleRouteError(error);
@@ -60,11 +72,25 @@ export async function PUT(request: Request) {
       opening_hours: input.openingHours,
       contact_method: input.contactMethod,
       extra_notes: input.extraNotes,
+      consent_text: input.consentText,
+      privacy_policy_url: input.privacyPolicyUrl || null,
     });
+
+    const allowedDomains = await replaceAllowedDomains(
+      bot.bot_id,
+      input.allowedDomains
+        .split(",")
+        .map((domain) => domain.trim())
+        .filter(Boolean),
+    );
+
+    const usage = await getBotUsageSummary(bot.bot_id);
 
     return apiSuccess({
       bot: updatedBot,
       knowledge,
+      allowedDomains,
+      usage,
     });
   } catch (error) {
     const routeError = handleRouteError(error);

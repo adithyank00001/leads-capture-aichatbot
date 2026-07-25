@@ -1,4 +1,9 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+import type { Database } from "@/lib/supabase/admin";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+
+type Client = SupabaseClient<Database>;
 
 export type CreateLeadInput = {
   botId: string;
@@ -47,4 +52,59 @@ export async function getLeadBySession(botId: string, sessionId: string) {
   }
 
   return data;
+}
+
+export async function getLeadByIdForBot(
+  supabase: Client,
+  botId: string,
+  leadId: string,
+) {
+  const { data, error } = await supabase
+    .from("chatbot_leads")
+    .select("id, bot_id, name, phone, email, session_id, page_url, created_at")
+    .eq("bot_id", botId)
+    .eq("id", leadId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+export async function deleteLeadByIdForBot(
+  supabase: Client,
+  botId: string,
+  leadId: string,
+) {
+  const lead = await getLeadByIdForBot(supabase, botId, leadId);
+
+  if (!lead) {
+    return null;
+  }
+
+  const admin = getSupabaseAdmin();
+
+  const { error: messageError } = await admin
+    .from("chatbot_messages")
+    .delete()
+    .eq("bot_id", botId)
+    .eq("session_id", lead.session_id);
+
+  if (messageError) {
+    throw new Error(messageError.message);
+  }
+
+  const { error: leadError } = await admin
+    .from("chatbot_leads")
+    .delete()
+    .eq("bot_id", botId)
+    .eq("id", leadId);
+
+  if (leadError) {
+    throw new Error(leadError.message);
+  }
+
+  return lead;
 }

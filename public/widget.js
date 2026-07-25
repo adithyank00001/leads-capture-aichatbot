@@ -34,11 +34,30 @@
     }
   }
 
+  function resolveBotId(script) {
+    var botId = script.getAttribute("data-bot-id");
+    var allowTestFallback =
+      script.getAttribute("data-allow-test-fallback") === "true";
+
+    if (botId && botId.trim()) {
+      return botId.trim();
+    }
+
+    if (allowTestFallback) {
+      return "test-business-1";
+    }
+
+    console.error(
+      "[Chatbot] Missing data-bot-id on the embed script. Add data-bot-id=\"YOUR_BOT_ID\" to the script tag.",
+    );
+    return null;
+  }
+
   function createWidget(script) {
-    var botId = script.getAttribute("data-bot-id") || "test-business-1";
+    var botId = resolveBotId(script);
     var baseUrl = getBaseUrl(script);
 
-    if (!baseUrl) {
+    if (!botId || !baseUrl) {
       return null;
     }
 

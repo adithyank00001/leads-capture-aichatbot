@@ -47,6 +47,7 @@ async function run() {
       name: "Smoke Test Visitor",
       phone: "+15550111222",
       pageUrl: `${baseUrl}/demo-site/index.html`,
+      consentAccepted: true,
     }),
   });
 
@@ -63,6 +64,7 @@ async function run() {
       sessionId: sid,
       name: "Smoke Test Visitor",
       phone: "+15550111222",
+      consentAccepted: true,
     }),
   });
 

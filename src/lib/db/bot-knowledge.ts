@@ -14,6 +14,8 @@ export type BotKnowledgeRecord = {
   opening_hours: string;
   contact_method: string;
   extra_notes: string;
+  consent_text: string;
+  privacy_policy_url: string | null;
   updated_at: string;
 };
 
@@ -23,7 +25,7 @@ export async function getBotKnowledge(supabase: Client, botId: string) {
   const { data, error } = await supabase
     .from("bot_knowledge")
     .select(
-      "bot_id, description, location, services, pricing_notes, current_offer, opening_hours, contact_method, extra_notes, updated_at",
+      "bot_id, description, location, services, pricing_notes, current_offer, opening_hours, contact_method, extra_notes, consent_text, privacy_policy_url, updated_at",
     )
     .eq("bot_id", botId)
     .maybeSingle();
@@ -40,7 +42,7 @@ export async function createEmptyBotKnowledge(supabase: Client, botId: string) {
     .from("bot_knowledge")
     .insert({ bot_id: botId })
     .select(
-      "bot_id, description, location, services, pricing_notes, current_offer, opening_hours, contact_method, extra_notes, updated_at",
+      "bot_id, description, location, services, pricing_notes, current_offer, opening_hours, contact_method, extra_notes, consent_text, privacy_policy_url, updated_at",
     )
     .single();
 
@@ -68,10 +70,12 @@ export async function upsertBotKnowledge(
       opening_hours: input.opening_hours,
       contact_method: input.contact_method,
       extra_notes: input.extra_notes,
+      consent_text: input.consent_text,
+      privacy_policy_url: input.privacy_policy_url,
       updated_at: new Date().toISOString(),
     })
     .select(
-      "bot_id, description, location, services, pricing_notes, current_offer, opening_hours, contact_method, extra_notes, updated_at",
+      "bot_id, description, location, services, pricing_notes, current_offer, opening_hours, contact_method, extra_notes, consent_text, privacy_policy_url, updated_at",
     )
     .single();
 

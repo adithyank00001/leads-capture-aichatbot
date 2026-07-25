@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { DEFAULT_CONSENT_TEXT } from "@/lib/privacy/consent";
+
 type BotSettingsResponse = {
   ok: boolean;
   data?: {
@@ -18,7 +20,15 @@ type BotSettingsResponse = {
       opening_hours: string;
       contact_method: string;
       extra_notes: string;
+      consent_text: string;
+      privacy_policy_url: string | null;
     };
+    allowedDomains: string[];
+    usage: {
+      monthlyMessageLimit: number;
+      messagesUsedThisPeriod: number;
+      leadsCapturedThisPeriod: number;
+    } | null;
   };
   error?: {
     message: string;
@@ -35,6 +45,10 @@ export function BotSettingsForm() {
   const [openingHours, setOpeningHours] = useState("");
   const [contactMethod, setContactMethod] = useState("");
   const [extraNotes, setExtraNotes] = useState("");
+  const [allowedDomains, setAllowedDomains] = useState("");
+  const [consentText, setConsentText] = useState(DEFAULT_CONSENT_TEXT);
+  const [privacyPolicyUrl, setPrivacyPolicyUrl] = useState("");
+  const [usageText, setUsageText] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -59,6 +73,15 @@ export function BotSettingsForm() {
         setOpeningHours(result.data.knowledge.opening_hours ?? "");
         setContactMethod(result.data.knowledge.contact_method ?? "");
         setExtraNotes(result.data.knowledge.extra_notes ?? "");
+        setAllowedDomains((result.data.allowedDomains ?? []).join(", "));
+        setConsentText(result.data.knowledge.consent_text ?? DEFAULT_CONSENT_TEXT);
+        setPrivacyPolicyUrl(result.data.knowledge.privacy_policy_url ?? "");
+
+        if (result.data.usage) {
+          setUsageText(
+            `${result.data.usage.messagesUsedThisPeriod} / ${result.data.usage.monthlyMessageLimit} messages used this month`,
+          );
+        }
       } catch (loadError) {
         setError(
           loadError instanceof Error
@@ -95,6 +118,9 @@ export function BotSettingsForm() {
           openingHours,
           contactMethod,
           extraNotes,
+          allowedDomains,
+          consentText,
+          privacyPolicyUrl,
         }),
       });
 
@@ -102,6 +128,12 @@ export function BotSettingsForm() {
 
       if (!response.ok || !result.ok) {
         throw new Error(result.error?.message ?? "Could not save settings.");
+      }
+
+      if (result.data?.usage) {
+        setUsageText(
+          `${result.data.usage.messagesUsedThisPeriod} / ${result.data.usage.monthlyMessageLimit} messages used this month`,
+        );
       }
 
       setMessage("Saved.");
@@ -124,6 +156,7 @@ export function BotSettingsForm() {
       <p className="text-sm text-zinc-600">
         Plain MVP form. Save your business info here. The chatbot AI will use it.
       </p>
+      {usageText ? <p className="text-sm text-zinc-700">{usageText}</p> : null}
 
       {[
         ["Business name", businessName, setBusinessName],
@@ -135,6 +168,13 @@ export function BotSettingsForm() {
         ["Opening hours", openingHours, setOpeningHours],
         ["Contact method", contactMethod, setContactMethod],
         ["Extra notes", extraNotes, setExtraNotes],
+        [
+          "Allowed domains (comma separated, leave empty to allow all)",
+          allowedDomains,
+          setAllowedDomains,
+        ],
+        ["Consent text", consentText, setConsentText],
+        ["Privacy policy URL", privacyPolicyUrl, setPrivacyPolicyUrl],
       ].map(([label, value, setter]) => (
         <label key={label as string} className="block text-sm">
           {label as string}

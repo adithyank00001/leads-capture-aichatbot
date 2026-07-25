@@ -33,6 +33,11 @@ export type Database = {
           customer_id: string;
           business_name: string;
           is_active: boolean;
+          monthly_message_limit: number;
+          messages_used_this_period: number;
+          leads_captured_this_period: number;
+          billing_period_start: string;
+          billing_period_end: string;
           created_at: string;
         };
         Insert: {
@@ -41,6 +46,11 @@ export type Database = {
           customer_id: string;
           business_name?: string;
           is_active?: boolean;
+          monthly_message_limit?: number;
+          messages_used_this_period?: number;
+          leads_captured_this_period?: number;
+          billing_period_start?: string;
+          billing_period_end?: string;
           created_at?: string;
         };
         Update: {
@@ -49,6 +59,32 @@ export type Database = {
           customer_id?: string;
           business_name?: string;
           is_active?: boolean;
+          monthly_message_limit?: number;
+          messages_used_this_period?: number;
+          leads_captured_this_period?: number;
+          billing_period_start?: string;
+          billing_period_end?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      bot_allowed_domains: {
+        Row: {
+          id: string;
+          bot_id: string;
+          domain: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          bot_id: string;
+          domain: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          bot_id?: string;
+          domain?: string;
           created_at?: string;
         };
         Relationships: [];
@@ -64,6 +100,8 @@ export type Database = {
           opening_hours: string;
           contact_method: string;
           extra_notes: string;
+          consent_text: string;
+          privacy_policy_url: string | null;
           updated_at: string;
         };
         Insert: {
@@ -76,6 +114,8 @@ export type Database = {
           opening_hours?: string;
           contact_method?: string;
           extra_notes?: string;
+          consent_text?: string;
+          privacy_policy_url?: string | null;
           updated_at?: string;
         };
         Update: {
@@ -88,6 +128,8 @@ export type Database = {
           opening_hours?: string;
           contact_method?: string;
           extra_notes?: string;
+          consent_text?: string;
+          privacy_policy_url?: string | null;
           updated_at?: string;
         };
         Relationships: [];

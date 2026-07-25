@@ -50,6 +50,7 @@ export async function submitLead(input: {
   phone: string;
   email?: string;
   pageUrl?: string;
+  consentAccepted: boolean;
 }) {
   return postJson<{
     lead: {
@@ -67,6 +68,7 @@ export async function submitLead(input: {
     phone: input.phone,
     email: input.email,
     pageUrl: input.pageUrl,
+    consentAccepted: input.consentAccepted,
   });
 }
 

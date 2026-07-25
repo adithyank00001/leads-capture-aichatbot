@@ -5,6 +5,7 @@ export type ApiErrorBody = {
   error: {
     code: string;
     message: string;
+    errorId?: string;
   };
 };
 
@@ -19,9 +20,17 @@ export function apiSuccess<T>(data: T, status = 200) {
   });
 }
 
-export function apiError(code: string, message: string, status = 400) {
+export function apiError(
+  code: string,
+  message: string,
+  status = 400,
+  errorId?: string,
+) {
   return NextResponse.json(
-    { ok: false, error: { code, message } } satisfies ApiErrorBody,
+    {
+      ok: false,
+      error: { code, message, ...(errorId ? { errorId } : {}) },
+    } satisfies ApiErrorBody,
     { status },
   );
 }

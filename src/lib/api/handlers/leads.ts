@@ -1,9 +1,24 @@
 import { createLead, getLeadBySession } from "@/lib/db/leads";
+import { assertLeadRateLimits } from "@/lib/rate-limit";
+import { assertAllowedDomain } from "@/lib/security/domain";
+import { incrementLeadCount } from "@/lib/usage/bot-usage";
 import { ApiValidationError } from "@/lib/validation/errors";
 import { parseLeadPayload } from "@/lib/validation/requests";
 
-export async function captureLead(body: unknown) {
+export async function captureLead(body: unknown, request: Request) {
   const input = parseLeadPayload(body);
+
+  await assertLeadRateLimits(request, input.botId);
+  await assertAllowedDomain(request, input.botId, input.pageUrl);
+
+  if (!input.consentAccepted) {
+    throw new ApiValidationError(
+      "CONSENT_REQUIRED",
+      "Please accept the privacy notice before continuing.",
+      400,
+    );
+  }
+
   const existingLead = await getLeadBySession(input.botId, input.sessionId);
 
   if (existingLead) {
@@ -21,6 +36,8 @@ export async function captureLead(body: unknown) {
     sessionId: input.sessionId,
     pageUrl: input.pageUrl,
   });
+
+  await incrementLeadCount(input.botId);
 
   return {
     lead,

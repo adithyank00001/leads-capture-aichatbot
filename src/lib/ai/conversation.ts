@@ -3,7 +3,7 @@ import { getBusinessContext } from "@/lib/business/context";
 import type { AiChatMessage } from "@/lib/ai/openrouter";
 import type { MessageRole } from "@/lib/db/messages";
 
-const AI_HISTORY_LIMIT = 12;
+const AI_HISTORY_LIMIT = 5;
 
 type ConversationMessage = {
   role: MessageRole;
