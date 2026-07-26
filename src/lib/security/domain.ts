@@ -1,3 +1,4 @@
+import { serverEnv } from "@/lib/env.server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { ApiValidationError } from "@/lib/validation/errors";
 
@@ -16,6 +17,18 @@ export function normalizeDomain(value: string) {
   }
 }
 
+export function extractHostFromUrl(value: string) {
+  try {
+    return new URL(value).hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
+export function getAppHostname() {
+  return normalizeDomain(serverEnv.appUrl);
+}
+
 export function extractRequestHost(request: Request, pageUrl?: string | null) {
   const origin = request.headers.get("origin");
   const referer = request.headers.get("referer");
@@ -25,17 +38,22 @@ export function extractRequestHost(request: Request, pageUrl?: string | null) {
       continue;
     }
 
-    try {
-      const host = new URL(candidate).hostname.replace(/^www\./, "");
-      if (host) {
-        return host;
-      }
-    } catch {
-      continue;
+    const host = extractHostFromUrl(candidate);
+    if (host) {
+      return host;
     }
   }
 
   return null;
+}
+
+export function isHostAllowed(host: string, allowedDomains: string[]) {
+  const normalizedHost = host.replace(/^www\./, "");
+
+  return allowedDomains.some(
+    (domain) =>
+      normalizedHost === domain || normalizedHost.endsWith(`.${domain}`),
+  );
 }
 
 export async function getAllowedDomainsForBot(botId: string) {
@@ -66,9 +84,16 @@ export async function assertAllowedDomain(
     return;
   }
 
-  const requestHost = extractRequestHost(request, pageUrl);
+  const appHostname = getAppHostname();
+  const requestHost = extractRequestHost(request, null);
 
-  if (!requestHost) {
+  if (pageUrl) {
+    const pageHost = extractHostFromUrl(pageUrl);
+
+    if (pageHost && isHostAllowed(pageHost, allowedDomains)) {
+      return;
+    }
+
     throw new ApiValidationError(
       "DOMAIN_NOT_ALLOWED",
       "This chatbot can only be used from an approved website.",
@@ -76,20 +101,19 @@ export async function assertAllowedDomain(
     );
   }
 
-  const normalizedRequestHost = requestHost.replace(/^www\./, "");
-  const isAllowed = allowedDomains.some(
-    (domain) =>
-      normalizedRequestHost === domain ||
-      normalizedRequestHost.endsWith(`.${domain}`),
+  if (appHostname && requestHost === appHostname) {
+    return;
+  }
+
+  if (requestHost && isHostAllowed(requestHost, allowedDomains)) {
+    return;
+  }
+
+  throw new ApiValidationError(
+    "DOMAIN_NOT_ALLOWED",
+    "This chatbot can only be used from an approved website.",
+    403,
   );
-
-  if (!isAllowed) {
-    throw new ApiValidationError(
-      "DOMAIN_NOT_ALLOWED",
-      "This chatbot can only be used from an approved website.",
-      403,
-    );
-  }
 }
 
 export async function replaceAllowedDomains(botId: string, domains: string[]) {

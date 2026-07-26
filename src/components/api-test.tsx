@@ -92,7 +92,6 @@ export function ApiTestPanel() {
       phone: "+15551234567",
       email: "visitor@example.com",
       pageUrl: `${publicConfig.appUrl}/demo-site/index.html`,
-      consentAccepted: true,
     }),
     [sessionId],
   );
@@ -230,9 +229,9 @@ export function ApiTestPanel() {
     <section className="w-full max-w-2xl rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
       <h2 className="text-lg font-semibold text-zinc-900">Phase 4 API test</h2>
       <p className="mt-2 text-sm leading-6 text-zinc-600">
-        Uses built-in sample data (no form needed). Step 1 saves a test lead with
-        consent. Step 2 sends a chat message and gets an AI answer. Step 3 tests
-        AI directly without saving a lead. Or use Run full test flow to do steps 1
+        Uses built-in sample data (no form needed). Step 1 saves a test lead.
+        Step 2 sends a chat message and gets an AI answer. Step 3 tests AI
+        directly without saving a lead. Or use Run full test flow to do steps 1
         and 2 automatically.
       </p>
 

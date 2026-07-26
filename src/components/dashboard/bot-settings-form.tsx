@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from "react";
 
-import { DEFAULT_CONSENT_TEXT } from "@/lib/privacy/consent";
+import {
+  INVALID_DOMAIN_ERROR,
+  REQUIRED_DOMAIN_ERROR,
+  SINGLE_DOMAIN_ERROR,
+  isValidWebsiteDomain,
+  splitAllowedDomainsInput,
+} from "@/lib/validation/bot-settings";
 
 type BotSettingsResponse = {
   ok: boolean;
@@ -20,8 +26,6 @@ type BotSettingsResponse = {
       opening_hours: string;
       contact_method: string;
       extra_notes: string;
-      consent_text: string;
-      privacy_policy_url: string | null;
     };
     allowedDomains: string[];
     usage: {
@@ -46,8 +50,6 @@ export function BotSettingsForm() {
   const [contactMethod, setContactMethod] = useState("");
   const [extraNotes, setExtraNotes] = useState("");
   const [allowedDomains, setAllowedDomains] = useState("");
-  const [consentText, setConsentText] = useState(DEFAULT_CONSENT_TEXT);
-  const [privacyPolicyUrl, setPrivacyPolicyUrl] = useState("");
   const [usageText, setUsageText] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -73,9 +75,7 @@ export function BotSettingsForm() {
         setOpeningHours(result.data.knowledge.opening_hours ?? "");
         setContactMethod(result.data.knowledge.contact_method ?? "");
         setExtraNotes(result.data.knowledge.extra_notes ?? "");
-        setAllowedDomains((result.data.allowedDomains ?? []).join(", "));
-        setConsentText(result.data.knowledge.consent_text ?? DEFAULT_CONSENT_TEXT);
-        setPrivacyPolicyUrl(result.data.knowledge.privacy_policy_url ?? "");
+        setAllowedDomains((result.data.allowedDomains ?? [])[0] ?? "");
 
         if (result.data.usage) {
           setUsageText(
@@ -102,6 +102,26 @@ export function BotSettingsForm() {
     setError(null);
     setMessage(null);
 
+    const domains = splitAllowedDomainsInput(allowedDomains);
+
+    if (domains.length === 0) {
+      setError(REQUIRED_DOMAIN_ERROR);
+      setSaving(false);
+      return;
+    }
+
+    if (domains.length > 1) {
+      setError(SINGLE_DOMAIN_ERROR);
+      setSaving(false);
+      return;
+    }
+
+    if (!isValidWebsiteDomain(domains[0])) {
+      setError(INVALID_DOMAIN_ERROR);
+      setSaving(false);
+      return;
+    }
+
     try {
       const response = await fetch("/api/dashboard/bot", {
         method: "PUT",
@@ -119,8 +139,6 @@ export function BotSettingsForm() {
           contactMethod,
           extraNotes,
           allowedDomains,
-          consentText,
-          privacyPolicyUrl,
         }),
       });
 
@@ -168,13 +186,6 @@ export function BotSettingsForm() {
         ["Opening hours", openingHours, setOpeningHours],
         ["Contact method", contactMethod, setContactMethod],
         ["Extra notes", extraNotes, setExtraNotes],
-        [
-          "Allowed domains (comma separated, leave empty to allow all)",
-          allowedDomains,
-          setAllowedDomains,
-        ],
-        ["Consent text", consentText, setConsentText],
-        ["Privacy policy URL", privacyPolicyUrl, setPrivacyPolicyUrl],
       ].map(([label, value, setter]) => (
         <label key={label as string} className="block text-sm">
           {label as string}
@@ -185,6 +196,21 @@ export function BotSettingsForm() {
           />
         </label>
       ))}
+
+      <label className="block text-sm">
+        Your website domain
+        <input
+          type="text"
+          value={allowedDomains}
+          onChange={(event) => setAllowedDomains(event.target.value)}
+          placeholder="stylette.com"
+          className="mt-1 w-full border border-zinc-300 px-3 py-2"
+        />
+      </label>
+      <p className="text-sm text-zinc-600">
+        Enter the one website where your chatbot should work. Use a real domain
+        with an ending like .com or .in (example: stylette.com).
+      </p>
 
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
       {message ? <p className="text-sm text-green-700">{message}</p> : null}

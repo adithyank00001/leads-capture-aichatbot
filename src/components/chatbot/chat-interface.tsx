@@ -9,12 +9,14 @@ type ChatInterfaceProps = {
   botId: string;
   sessionId: string;
   business: BusinessDisplay;
+  parentPageUrl?: string | null;
 };
 
 export function ChatInterface({
   botId,
   sessionId,
   business,
+  parentPageUrl,
 }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -73,6 +75,9 @@ export function ChatInterface({
         botId,
         sessionId,
         message: trimmedMessage,
+        pageUrl:
+          parentPageUrl ??
+          (typeof window !== "undefined" ? window.location.href : undefined),
       });
 
       setMessages(result.messages);

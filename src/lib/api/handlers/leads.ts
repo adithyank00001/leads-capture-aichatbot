@@ -11,14 +11,6 @@ export async function captureLead(body: unknown, request: Request) {
   await assertLeadRateLimits(request, input.botId);
   await assertAllowedDomain(request, input.botId, input.pageUrl);
 
-  if (!input.consentAccepted) {
-    throw new ApiValidationError(
-      "CONSENT_REQUIRED",
-      "Please accept the privacy notice before continuing.",
-      400,
-    );
-  }
-
   const existingLead = await getLeadBySession(input.botId, input.sessionId);
 
   if (existingLead) {

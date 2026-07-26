@@ -36,15 +36,9 @@
 
   function resolveBotId(script) {
     var botId = script.getAttribute("data-bot-id");
-    var allowTestFallback =
-      script.getAttribute("data-allow-test-fallback") === "true";
 
     if (botId && botId.trim()) {
       return botId.trim();
-    }
-
-    if (allowTestFallback) {
-      return "test-business-1";
     }
 
     console.error(
@@ -83,7 +77,12 @@
     var iframe = document.createElement("iframe");
     iframe.id = WIDGET_ROOT_ID + "-iframe";
     iframe.title = "Website chatbot";
-    iframe.src = baseUrl + "/embed/" + encodeURIComponent(botId);
+    iframe.src =
+      baseUrl +
+      "/embed/" +
+      encodeURIComponent(botId) +
+      "?parentUrl=" +
+      encodeURIComponent(window.location.href);
     iframe.setAttribute("loading", "lazy");
     iframe.style.cssText = [
       "width: 100%",

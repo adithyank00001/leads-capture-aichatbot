@@ -101,7 +101,6 @@ export function parseLeadPayload(body: unknown) {
   const phone = requireNonEmptyString(payload.phone, "phone", MAX_PHONE_LENGTH);
   const email = optionalString(payload.email, "email", MAX_EMAIL_LENGTH);
   const pageUrl = optionalString(payload.pageUrl, "pageUrl", MAX_PAGE_URL_LENGTH);
-  const consentAccepted = payload.consentAccepted === true;
 
   if (email && !EMAIL_PATTERN.test(email)) {
     throw new ApiValidationError("INVALID_EMAIL", "Email format is invalid.");
@@ -114,7 +113,6 @@ export function parseLeadPayload(body: unknown) {
     phone,
     email: email ?? null,
     pageUrl: pageUrl ?? null,
-    consentAccepted,
   };
 }
 
@@ -132,11 +130,13 @@ export function parseChatPayload(body: unknown) {
     "message",
     MAX_MESSAGE_LENGTH,
   );
+  const pageUrl = optionalString(payload.pageUrl, "pageUrl", MAX_PAGE_URL_LENGTH);
 
   return {
     botId,
     sessionId,
     message,
+    pageUrl: pageUrl ?? null,
   };
 }
 

@@ -21,7 +21,7 @@ export async function sendChatMessage(body: unknown, request: Request) {
 
   await assertChatRateLimits(request, input.botId, input.sessionId);
   await getBusinessContext(input.botId);
-  await assertAllowedDomain(request, input.botId);
+  await assertAllowedDomain(request, input.botId, input.pageUrl);
   await requireLead(input.botId, input.sessionId);
   await assertBotCanUseAi(input.botId);
 

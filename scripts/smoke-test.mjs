@@ -1,5 +1,9 @@
 const baseUrl = process.env.SMOKE_TEST_BASE_URL ?? "http://localhost:3000";
 const botId = process.env.SMOKE_TEST_BOT_ID ?? "test-business-1";
+const supabaseUrl = process.env.SUPABASE_URL;
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const demoPageUrl = `${baseUrl}/demo-site/index.html`;
+const appOrigin = new URL(baseUrl).origin;
 
 async function request(path, options = {}) {
   const response = await fetch(`${baseUrl}${path}`, {
@@ -47,7 +51,6 @@ async function run() {
       name: "Smoke Test Visitor",
       phone: "+15550111222",
       pageUrl: `${baseUrl}/demo-site/index.html`,
-      consentAccepted: true,
     }),
   });
 
@@ -64,7 +67,6 @@ async function run() {
       sessionId: sid,
       name: "Smoke Test Visitor",
       phone: "+15550111222",
-      consentAccepted: true,
     }),
   });
 
@@ -158,6 +160,12 @@ async function run() {
     fail("widget script served", `status ${widget.status}`);
   }
 
+  if (widgetText.includes("parentUrl=")) {
+    pass("widget passes parent page URL to iframe");
+  } else {
+    fail("widget passes parent page URL to iframe", "parentUrl missing from widget.js");
+  }
+
   const demoSite = await fetch(`${baseUrl}/demo-site/index.html`);
   const demoHtml = await demoSite.text();
 
@@ -165,6 +173,132 @@ async function run() {
     pass("demo customer site served");
   } else {
     fail("demo customer site served", `status ${demoSite.status}`);
+  }
+
+  if (supabaseUrl && serviceRoleKey) {
+    const { createClient } = await import("@supabase/supabase-js");
+    const supabase = createClient(supabaseUrl, serviceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+
+    await supabase.from("bot_allowed_domains").delete().eq("bot_id", botId);
+    const { error: insertDomainError } = await supabase
+      .from("bot_allowed_domains")
+      .insert({ bot_id: botId, domain: "localhost" });
+
+    if (insertDomainError) {
+      fail("domain setup", insertDomainError.message);
+    } else {
+      const domainSid = sessionId();
+
+      const domainLead = await request("/api/v1/leads", {
+        method: "POST",
+        body: JSON.stringify({
+          botId,
+          sessionId: domainSid,
+          name: "Domain Test Visitor",
+          phone: "+15550113344",
+          pageUrl: demoPageUrl,
+        }),
+      });
+
+      if (domainLead.body.ok && domainLead.body.data?.created === true) {
+        pass("domain allowed lead with parent page URL");
+      } else {
+        fail("domain allowed lead with parent page URL", JSON.stringify(domainLead.body));
+      }
+
+      const domainChat = await request("/api/v1/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          botId,
+          sessionId: domainSid,
+          message: "What services do you offer?",
+          pageUrl: demoPageUrl,
+        }),
+      });
+
+      if (domainChat.body.ok && domainChat.body.data?.aiConnected === true) {
+        pass("domain allowed chat with parent page URL");
+      } else {
+        fail("domain allowed chat with parent page URL", JSON.stringify(domainChat.body));
+      }
+
+      const evilSid = sessionId();
+      await request("/api/v1/leads", {
+        method: "POST",
+        body: JSON.stringify({
+          botId,
+          sessionId: evilSid,
+          name: "Evil Domain Visitor",
+          phone: "+15550115566",
+          pageUrl: demoPageUrl,
+        }),
+      });
+
+      const evilChat = await request("/api/v1/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          botId,
+          sessionId: evilSid,
+          message: "Hello from evil site",
+          pageUrl: "https://evil.example.com/page",
+        }),
+      });
+
+      if (
+        !evilChat.body.ok &&
+        evilChat.body.error?.code === "DOMAIN_NOT_ALLOWED"
+      ) {
+        pass("domain blocked chat with unapproved page URL");
+      } else {
+        fail(
+          "domain blocked chat with unapproved page URL",
+          JSON.stringify(evilChat.body),
+        );
+      }
+
+      const embedSid = sessionId();
+      await request("/api/v1/leads", {
+        method: "POST",
+        body: JSON.stringify({
+          botId,
+          sessionId: embedSid,
+          name: "Embed Test Visitor",
+          phone: "+15550117788",
+          pageUrl: demoPageUrl,
+        }),
+      });
+
+      const embedChat = await request("/api/v1/chat", {
+        method: "POST",
+        headers: {
+          Origin: appOrigin,
+        },
+        body: JSON.stringify({
+          botId,
+          sessionId: embedSid,
+          message: "Direct embed test message",
+        }),
+      });
+
+      if (embedChat.body.ok && embedChat.body.data?.aiConnected === true) {
+        pass("domain allowed direct embed on app host without page URL");
+      } else {
+        fail(
+          "domain allowed direct embed on app host without page URL",
+          JSON.stringify(embedChat.body),
+        );
+      }
+
+      await supabase.from("bot_allowed_domains").delete().eq("bot_id", botId);
+      pass("domain test cleanup");
+    }
+  } else {
+    console.log("SKIP  domain validation tests (missing Supabase env)");
   }
 
   console.log("\nSmoke tests finished.");

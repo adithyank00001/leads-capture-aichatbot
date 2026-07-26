@@ -35,7 +35,7 @@ function createLimiter(tokens: number, window: `${number} m` | `${number} d`) {
 const chatSessionLimiter = createLimiter(10, "1 m");
 const chatIpLimiter = createLimiter(30, "1 m");
 const chatBotDailyLimiter = createLimiter(200, "1 d");
-const leadIpLimiter = createLimiter(5, "1 m");
+const leadIpLimiter = createLimiter(20, "1 m");
 const leadBotDailyLimiter = createLimiter(50, "1 d");
 
 export function getClientIp(request: Request) {

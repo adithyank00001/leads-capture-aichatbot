@@ -1,10 +1,12 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { ChatInterface } from "@/components/chatbot/chat-interface";
 import { LeadForm } from "@/components/chatbot/lead-form";
 import type { BusinessDisplay } from "@/lib/business/display";
+import { resolveParentPageUrl } from "@/lib/embed/parent-page";
 import {
   getOrCreateSessionId,
   hasCompletedLead,
@@ -16,14 +18,17 @@ type ChatbotWidgetProps = {
 };
 
 export function ChatbotWidget({ botId, business }: ChatbotWidgetProps) {
+  const searchParams = useSearchParams();
   const [sessionId, setSessionId] = useState("");
   const [showChat, setShowChat] = useState(false);
+  const [parentPageUrl, setParentPageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const id = getOrCreateSessionId(botId);
     setSessionId(id);
     setShowChat(hasCompletedLead(botId, id));
-  }, [botId]);
+    setParentPageUrl(resolveParentPageUrl(botId, searchParams.get("parentUrl")));
+  }, [botId, searchParams]);
 
   if (!sessionId) {
     return (
@@ -39,6 +44,7 @@ export function ChatbotWidget({ botId, business }: ChatbotWidgetProps) {
         botId={botId}
         sessionId={sessionId}
         business={business}
+        parentPageUrl={parentPageUrl}
         onSuccess={() => setShowChat(true)}
       />
     );
@@ -49,6 +55,7 @@ export function ChatbotWidget({ botId, business }: ChatbotWidgetProps) {
       botId={botId}
       sessionId={sessionId}
       business={business}
+      parentPageUrl={parentPageUrl}
     />
   );
 }

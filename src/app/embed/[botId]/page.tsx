@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { ChatbotWidget } from "@/components/chatbot/chatbot-widget";
 import { getBusinessContext } from "@/lib/business/context";
 import { getBusinessDisplay } from "@/lib/business/display";
@@ -18,7 +20,15 @@ export default async function EmbedPage({ params }: EmbedPageProps) {
 
     return (
       <div className="h-dvh bg-white">
-        <ChatbotWidget botId={botId} business={business} />
+        <Suspense
+          fallback={
+            <div className="flex h-full items-center justify-center text-sm text-zinc-500">
+              Loading chatbot...
+            </div>
+          }
+        >
+          <ChatbotWidget botId={botId} business={business} />
+        </Suspense>
       </div>
     );
   } catch (error) {

@@ -50,7 +50,6 @@ export async function submitLead(input: {
   phone: string;
   email?: string;
   pageUrl?: string;
-  consentAccepted: boolean;
 }) {
   return postJson<{
     lead: {
@@ -68,7 +67,6 @@ export async function submitLead(input: {
     phone: input.phone,
     email: input.email,
     pageUrl: input.pageUrl,
-    consentAccepted: input.consentAccepted,
   });
 }
 
@@ -76,6 +74,7 @@ export async function sendChatMessage(input: {
   botId: string;
   sessionId: string;
   message: string;
+  pageUrl?: string;
 }) {
   return postJson<{
     answer: string;
@@ -85,6 +84,7 @@ export async function sendChatMessage(input: {
     botId: input.botId,
     sessionId: input.sessionId,
     message: input.message,
+    pageUrl: input.pageUrl,
   });
 }
 

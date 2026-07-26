@@ -57,6 +57,8 @@ export async function PUT(request: Request) {
       throw new Error("Bot not found for this customer.");
     }
 
+    const existingKnowledge = await getBotKnowledge(supabase, bot.bot_id);
+
     const updatedBot = await updateBotBusinessName(
       supabase,
       bot.bot_id,
@@ -72,17 +74,13 @@ export async function PUT(request: Request) {
       opening_hours: input.openingHours,
       contact_method: input.contactMethod,
       extra_notes: input.extraNotes,
-      consent_text: input.consentText,
-      privacy_policy_url: input.privacyPolicyUrl || null,
+      consent_text: existingKnowledge?.consent_text ?? "",
+      privacy_policy_url: existingKnowledge?.privacy_policy_url ?? null,
     });
 
-    const allowedDomains = await replaceAllowedDomains(
-      bot.bot_id,
-      input.allowedDomains
-        .split(",")
-        .map((domain) => domain.trim())
-        .filter(Boolean),
-    );
+    const allowedDomains = await replaceAllowedDomains(bot.bot_id, [
+      input.allowedDomains,
+    ]);
 
     const usage = await getBotUsageSummary(bot.bot_id);
 
