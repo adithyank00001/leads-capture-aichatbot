@@ -194,9 +194,228 @@ export type Database = {
         };
         Relationships: [];
       };
+      bot_website_sources: {
+        Row: {
+          id: string;
+          bot_id: string;
+          website_url: string;
+          status: "idle" | "discovering" | "processing" | "ready" | "partial" | "failed";
+          total_pages: number;
+          completed_pages: number;
+          failed_pages: number;
+          current_page_index: number;
+          selected_urls: unknown | null;
+          error_message: string | null;
+          refresh_error_message: string | null;
+          embedding_model: string | null;
+          embedding_dimensions: number | null;
+          last_processed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          bot_id: string;
+          website_url?: string;
+          status?: "idle" | "discovering" | "processing" | "ready" | "partial" | "failed";
+          total_pages?: number;
+          completed_pages?: number;
+          failed_pages?: number;
+          current_page_index?: number;
+          selected_urls?: unknown | null;
+          error_message?: string | null;
+          refresh_error_message?: string | null;
+          embedding_model?: string | null;
+          embedding_dimensions?: number | null;
+          last_processed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          bot_id?: string;
+          website_url?: string;
+          status?: "idle" | "discovering" | "processing" | "ready" | "partial" | "failed";
+          total_pages?: number;
+          completed_pages?: number;
+          failed_pages?: number;
+          current_page_index?: number;
+          selected_urls?: unknown | null;
+          error_message?: string | null;
+          refresh_error_message?: string | null;
+          embedding_model?: string | null;
+          embedding_dimensions?: number | null;
+          last_processed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      bot_website_pages: {
+        Row: {
+          id: string;
+          source_id: string;
+          bot_id: string;
+          page_url: string;
+          normalized_url: string;
+          page_title: string;
+          sort_order: number;
+          status: "pending" | "processing" | "completed" | "failed";
+          processing_started_at: string | null;
+          reclaim_count: number;
+          content_hash: string | null;
+          error_message: string | null;
+          processed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          source_id: string;
+          bot_id: string;
+          page_url: string;
+          normalized_url: string;
+          page_title?: string;
+          sort_order?: number;
+          status?: "pending" | "processing" | "completed" | "failed";
+          processing_started_at?: string | null;
+          reclaim_count?: number;
+          content_hash?: string | null;
+          error_message?: string | null;
+          processed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          source_id?: string;
+          bot_id?: string;
+          page_url?: string;
+          normalized_url?: string;
+          page_title?: string;
+          sort_order?: number;
+          status?: "pending" | "processing" | "completed" | "failed";
+          processing_started_at?: string | null;
+          reclaim_count?: number;
+          content_hash?: string | null;
+          error_message?: string | null;
+          processed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      bot_website_chunks: {
+        Row: {
+          id: string;
+          source_id: string;
+          page_id: string;
+          bot_id: string;
+          source_url: string;
+          page_title: string;
+          heading: string;
+          chunk_content: string;
+          embedding: string | null;
+          chunk_order: number;
+          content_hash: string | null;
+          scraped_at: string;
+          embedding_model: string | null;
+          embedding_dimensions: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          source_id: string;
+          page_id: string;
+          bot_id: string;
+          source_url: string;
+          page_title?: string;
+          heading?: string;
+          chunk_content: string;
+          embedding?: string | null;
+          chunk_order?: number;
+          content_hash?: string | null;
+          scraped_at?: string;
+          embedding_model?: string | null;
+          embedding_dimensions?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          source_id?: string;
+          page_id?: string;
+          bot_id?: string;
+          source_url?: string;
+          page_title?: string;
+          heading?: string;
+          chunk_content?: string;
+          embedding?: string | null;
+          chunk_order?: number;
+          content_hash?: string | null;
+          scraped_at?: string;
+          embedding_model?: string | null;
+          embedding_dimensions?: number | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      bot_website_build_logs: {
+        Row: {
+          id: string;
+          source_id: string | null;
+          bot_id: string;
+          side: "nextjs" | "gas";
+          step: string;
+          status: string;
+          message: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          source_id?: string | null;
+          bot_id: string;
+          side?: "nextjs" | "gas";
+          step: string;
+          status: string;
+          message: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          source_id?: string | null;
+          bot_id?: string;
+          side?: "nextjs" | "gas";
+          step?: string;
+          status?: string;
+          message?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
-    Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      match_website_chunks: {
+        Args: {
+          p_bot_id: string;
+          p_query_embedding: string;
+          p_match_threshold?: number;
+          p_match_count?: number;
+        };
+        Returns: {
+          chunk_content: string;
+          source_url: string;
+          page_title: string;
+          heading: string;
+          similarity: number;
+        }[];
+      };
+      count_valid_website_chunks: {
+        Args: {
+          p_bot_id: string;
+        };
+        Returns: number;
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };

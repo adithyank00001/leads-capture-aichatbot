@@ -37,7 +37,11 @@ export async function sendChatMessage(body: unknown, request: Request) {
     input.sessionId,
     5,
   );
-  const aiMessages = await buildAiMessages(input.botId, conversation);
+  const aiMessages = await buildAiMessages(
+    input.botId,
+    conversation,
+    input.message,
+  );
   const assistantAnswer = await generateChatCompletion(aiMessages);
 
   const savedAssistantMessage = await createMessage({

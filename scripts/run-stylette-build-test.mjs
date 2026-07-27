@@ -1,0 +1,164 @@
+import { createHmac } from "node:crypto";
+import { readFileSync } from "node:fs";
+
+import { createClient } from "@supabase/supabase-js";
+
+const env = Object.fromEntries(
+  readFileSync(".env.local", "utf8")
+    .split(/\r?\n/)
+    .filter((line) => line && !line.startsWith("#"))
+    .map((line) => {
+      const index = line.indexOf("=");
+      const key = line.slice(0, index);
+      let value = line.slice(index + 1).trim();
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1);
+      }
+      return [key, value];
+    }),
+);
+
+const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+const sourceId = "1cb711df-22dd-473f-918e-cd27e565253a";
+const botId = "bot_d87147f9a596";
+const websiteUrl = "https://stylette.in/";
+
+const expectedPages = [
+  "https://stylette.in/",
+  "https://stylette.in/about-us",
+  "https://stylette.in/services",
+  "https://stylette.in/gents",
+  "https://stylette.in/ladies",
+  "https://stylette.in/contact",
+  "https://stylette.in/offers",
+];
+
+const startWall = Date.now();
+console.log("Resetting source to discovering...");
+
+await supabase.from("bot_website_sources").upsert(
+  {
+    id: sourceId,
+    bot_id: botId,
+    website_url: websiteUrl,
+    status: "discovering",
+    total_pages: 0,
+    completed_pages: 0,
+    failed_pages: 0,
+    current_page_index: 0,
+    error_message: null,
+    refresh_error_message: null,
+    selected_urls: null,
+    updated_at: new Date().toISOString(),
+  },
+  { onConflict: "bot_id" },
+);
+
+const exp = Math.floor(Date.now() / 1000) + 600;
+const body = { action: "start", sourceId, botId, websiteUrl, exp };
+body.sig = createHmac("sha256", env.GAS_INGESTION_HMAC_SECRET)
+  .update(JSON.stringify(body))
+  .digest("hex");
+
+console.log("Calling GAS...");
+const gasRes = await fetch(env.GAS_INGESTION_WEB_APP_URL, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(body),
+});
+const gasText = await gasRes.text();
+console.log("GAS", gasRes.status, gasText);
+
+const triggerAcceptedAt = Date.now();
+let finalSource = null;
+
+for (let poll = 1; poll <= 40; poll += 1) {
+  await new Promise((resolve) => setTimeout(resolve, 15000));
+  const { data, error } = await supabase
+    .from("bot_website_sources")
+    .select("*")
+    .eq("id", sourceId)
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  const elapsed = Math.round((Date.now() - triggerAcceptedAt) / 1000);
+  console.log(
+    `Poll ${poll} ${elapsed}s status=${data.status} pages=${data.completed_pages}/${data.total_pages} failed=${data.failed_pages}`,
+  );
+
+  if (data.status === "ready" || data.status === "failed") {
+    finalSource = data;
+    break;
+  }
+}
+
+if (!finalSource) {
+  console.error("TIMEOUT after", Math.round((Date.now() - startWall) / 1000), "seconds");
+  process.exit(1);
+}
+
+const { data: pages } = await supabase
+  .from("bot_website_pages")
+  .select("page_url, status, error_message, sort_order")
+  .eq("source_id", sourceId)
+  .order("sort_order");
+
+const { data: logs } = await supabase
+  .from("bot_website_build_logs")
+  .select("created_at, step, status, message")
+  .gte("created_at", new Date(triggerAcceptedAt - 5000).toISOString())
+  .order("created_at");
+
+const { data: chunkCount } = await supabase.rpc("count_valid_website_chunks", {
+  p_bot_id: botId,
+});
+
+const selectedUrls = finalSource.selected_urls?.urls ?? [];
+const processedUrls = (pages ?? [])
+  .filter((page) => page.status === "completed")
+  .map((page) => page.page_url.replace(/\/$/, ""));
+
+function normalize(url) {
+  return String(url).replace(/\/$/, "").toLowerCase();
+}
+
+const missingExpected = expectedPages.filter(
+  (url) => !processedUrls.some((processed) => normalize(processed) === normalize(url)),
+);
+
+console.log("\n=== RESULT ===");
+console.log("Final status:", finalSource.status);
+console.log(
+  "Total wall time (trigger to finish):",
+  Math.round((Date.now() - startWall) / 1000),
+  "seconds",
+);
+console.log("Selected URLs:", JSON.stringify(selectedUrls, null, 2));
+console.log(
+  "Pages in DB:",
+  (pages ?? []).map((page) => `${page.page_url} [${page.status}]`).join("\n"),
+);
+console.log("Chunk count:", chunkCount);
+console.log("Missing expected pages:", missingExpected.length ? missingExpected.join(", ") : "none");
+
+const keySteps = new Set([
+  "config",
+  "firecrawl",
+  "discover",
+  "process_page",
+  "finalize",
+]);
+
+console.log("\n=== KEY LOGS ===");
+for (const log of logs ?? []) {
+  if (!keySteps.has(log.step)) {
+    continue;
+  }
+  console.log(log.created_at, log.step, log.status, (log.message ?? "").slice(0, 400));
+}

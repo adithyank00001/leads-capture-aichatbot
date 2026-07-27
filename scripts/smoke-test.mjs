@@ -297,6 +297,47 @@ async function run() {
       await supabase.from("bot_allowed_domains").delete().eq("bot_id", botId);
       pass("domain test cleanup");
     }
+
+    const { data: chunkCount, error: chunkCountError } = await supabase.rpc(
+      "count_valid_website_chunks",
+      { p_bot_id: botId },
+    );
+
+    if (chunkCountError) {
+      console.log(
+        `SKIP  website RAG chunk check (${chunkCountError.message})`,
+      );
+    } else if ((chunkCount ?? 0) >= 1) {
+      const ragSid = sessionId();
+      await request("/api/v1/leads", {
+        method: "POST",
+        body: JSON.stringify({
+          botId,
+          sessionId: ragSid,
+          name: "RAG Test Visitor",
+          phone: "+15550119900",
+          pageUrl: demoPageUrl,
+        }),
+      });
+
+      const ragChat = await request("/api/v1/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          botId,
+          sessionId: ragSid,
+          message: "Tell me about your business.",
+          pageUrl: demoPageUrl,
+        }),
+      });
+
+      if (ragChat.body.ok && ragChat.body.data?.aiConnected === true) {
+        pass("chat with website RAG knowledge");
+      } else {
+        fail("chat with website RAG knowledge", JSON.stringify(ragChat.body));
+      }
+    } else {
+      console.log("SKIP  website RAG chunk check (no website chunks configured)");
+    }
   } else {
     console.log("SKIP  domain validation tests (missing Supabase env)");
   }

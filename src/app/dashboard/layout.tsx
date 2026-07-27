@@ -36,6 +36,7 @@ export default async function DashboardLayout({
           </div>
           <nav className="flex items-center gap-4 text-sm">
             <Link href="/dashboard/settings">Settings</Link>
+            <Link href="/dashboard/website">Website Knowledge</Link>
             <Link href="/dashboard/embed">Embed</Link>
             <Link href="/dashboard/leads">Leads</Link>
             <DashboardLogoutButton />
