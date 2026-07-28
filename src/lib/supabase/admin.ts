@@ -2,6 +2,14 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 import { serverEnv } from "@/lib/env.server";
 
+type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
+
 export type Database = {
   public: {
     Tables: {
@@ -414,6 +422,34 @@ export type Database = {
           p_bot_id: string;
         };
         Returns: number;
+      };
+      begin_website_page_processing: {
+        Args: {
+          p_page_id: string;
+        };
+        Returns: Json;
+      };
+      complete_website_page: {
+        Args: {
+          p_page_id: string;
+          p_success: boolean;
+          p_patch?: Json;
+        };
+        Returns: Json;
+      };
+      retry_website_page: {
+        Args: {
+          p_page_id: string;
+        };
+        Returns: Json;
+      };
+      try_finalize_website_source: {
+        Args: {
+          p_source_id: string;
+          p_min_chars?: number;
+          p_stale_minutes?: number;
+        };
+        Returns: Json;
       };
     };
     Enums: Record<string, never>;

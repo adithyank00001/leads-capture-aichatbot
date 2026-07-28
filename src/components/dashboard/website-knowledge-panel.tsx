@@ -11,6 +11,15 @@ type WebsiteBuildLog = {
   createdAt: string;
 };
 
+type WebsitePageStatus = {
+  id: string;
+  pageUrl: string;
+  pageTitle: string;
+  status: "pending" | "processing" | "completed" | "failed";
+  errorMessage: string | null;
+  sortOrder: number;
+};
+
 type WebsiteStatus = {
   status:
     | "idle"
@@ -28,6 +37,7 @@ type WebsiteStatus = {
   refreshErrorMessage: string | null;
   lastProcessedAt: string | null;
   updatedAt: string | null;
+  pages?: WebsitePageStatus[];
   logs?: WebsiteBuildLog[];
 };
 
@@ -52,23 +62,42 @@ type BuildResponse = {
 
 const POLL_INTERVAL_MS = 3000;
 
+function getPageLabel(page: WebsitePageStatus) {
+  const title =
+    page.pageTitle?.trim() ||
+    page.pageUrl.replace(/^https?:\/\//, "").replace(/\/$/, "") ||
+    "Page";
+
+  switch (page.status) {
+    case "completed":
+      return { title, label: "Saved" };
+    case "failed":
+      return { title, label: "Failed" };
+    case "processing":
+      return { title, label: "Processing" };
+    default:
+      return { title, label: "Waiting" };
+  }
+}
+
 function getStatusLabel(status: WebsiteStatus) {
+  const savedCount = status.pages?.filter((p) => p.status === "completed").length
+    ?? status.completedPages;
+
   switch (status.status) {
     case "discovering":
       return "Discovering pages on your website...";
-    case "processing": {
-      const current = Math.min(
-        status.currentPageIndex + 1,
-        Math.max(status.totalPages, 1),
-      );
+    case "processing":
       if (status.totalPages > 0) {
-        return `Processing page ${current} of ${status.totalPages}...`;
+        return `${savedCount} of ${status.totalPages} pages saved...`;
       }
       return "Processing website pages...";
-    }
     case "ready":
       return "Knowledge ready";
     case "partial":
+      if (status.totalPages > 0) {
+        return `${savedCount} of ${status.totalPages} pages saved`;
+      }
       return "Ready with warnings";
     case "failed":
       return "Build failed";
@@ -83,6 +112,7 @@ export function WebsiteKnowledgePanel() {
   const [logs, setLogs] = useState<WebsiteBuildLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [building, setBuilding] = useState(false);
+  const [retryingPageId, setRetryingPageId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -122,17 +152,32 @@ export function WebsiteKnowledgePanel() {
     void initialLoad();
   }, [loadStatus]);
 
+  const shouldPoll =
+    status?.status === "discovering" ||
+    status?.status === "processing" ||
+    status?.pages?.some((page) => page.status === "processing") ||
+    retryingPageId !== null;
+
   useEffect(() => {
-    if (!status || (status.status !== "discovering" && status.status !== "processing")) {
+    if (!shouldPoll) {
       return;
     }
 
     const interval = window.setInterval(() => {
-      void loadStatus().catch(() => undefined);
+      void loadStatus()
+        .then((data) => {
+          if (retryingPageId) {
+            const retriedPage = data.pages?.find((p) => p.id === retryingPageId);
+            if (retriedPage && retriedPage.status !== "processing") {
+              setRetryingPageId(null);
+            }
+          }
+        })
+        .catch(() => undefined);
     }, POLL_INTERVAL_MS);
 
     return () => window.clearInterval(interval);
-  }, [loadStatus, status]);
+  }, [loadStatus, retryingPageId, shouldPoll]);
 
   async function handleBuild() {
     setBuilding(true);
@@ -167,10 +212,41 @@ export function WebsiteKnowledgePanel() {
     }
   }
 
+  async function handleRetry(pageId: string) {
+    setRetryingPageId(pageId);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `/api/dashboard/website/pages/${pageId}/retry`,
+        { method: "POST" },
+      );
+      const result = (await response.json()) as {
+        ok: boolean;
+        error?: { message: string };
+      };
+
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error?.message ?? "Could not retry page.");
+      }
+
+      setMessage("Retry started for failed page.");
+      await loadStatus();
+    } catch (retryError) {
+      setRetryingPageId(null);
+      setError(
+        retryError instanceof Error
+          ? retryError.message
+          : "Could not retry page.",
+      );
+    }
+  }
+
   const isActive =
     status?.status === "discovering" || status?.status === "processing";
   const hasKnowledge =
     status?.status === "ready" || status?.status === "partial";
+  const pages = status?.pages ?? [];
 
   if (loading) {
     return <p className="text-sm text-zinc-600">Loading website knowledge...</p>;
@@ -234,11 +310,45 @@ export function WebsiteKnowledgePanel() {
       {message ? <p className="text-sm text-green-700">{message}</p> : null}
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
 
-      {status && status.totalPages > 0 ? (
-        <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
-          <p>Pages completed: {status.completedPages}</p>
-          <p>Pages failed: {status.failedPages}</p>
-          <p>Total selected pages: {status.totalPages}</p>
+      {pages.length > 0 ? (
+        <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-3">
+          <p className="mb-3 text-sm font-medium text-zinc-800">Pages</p>
+          <ul className="space-y-2">
+            {pages.map((page) => {
+              const { title, label } = getPageLabel(page);
+              const showRetry =
+                page.status === "failed" &&
+                !isActive &&
+                retryingPageId !== page.id;
+
+              return (
+                <li
+                  key={page.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-3 py-2 text-sm"
+                >
+                  <div>
+                    <p className="font-medium text-zinc-900">{title}</p>
+                    <p className="text-zinc-600">
+                      {label}
+                      {page.errorMessage ? ` — ${page.errorMessage}` : ""}
+                    </p>
+                  </div>
+                  {showRetry ? (
+                    <button
+                      type="button"
+                      onClick={() => void handleRetry(page.id)}
+                      className="rounded border border-zinc-300 px-3 py-1 text-xs font-medium hover:bg-zinc-50"
+                    >
+                      Retry
+                    </button>
+                  ) : null}
+                  {retryingPageId === page.id || page.status === "processing" ? (
+                    <span className="text-xs text-zinc-500">Working...</span>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ul>
         </div>
       ) : null}
 

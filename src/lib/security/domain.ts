@@ -47,6 +47,8 @@ export function extractRequestHost(request: Request, pageUrl?: string | null) {
   return null;
 }
 
+const LOCAL_DEVELOPMENT_HOSTS = ["localhost", "127.0.0.1"] as const;
+
 export function isHostAllowed(host: string, allowedDomains: string[]) {
   const normalizedHost = host.replace(/^www\./, "");
 
@@ -54,6 +56,27 @@ export function isHostAllowed(host: string, allowedDomains: string[]) {
     (domain) =>
       normalizedHost === domain || normalizedHost.endsWith(`.${domain}`),
   );
+}
+
+function isLocalDevelopment() {
+  if (process.env.NODE_ENV === "development") {
+    return true;
+  }
+
+  const appHostname = getAppHostname();
+  return appHostname
+    ? isHostAllowed(appHostname, [...LOCAL_DEVELOPMENT_HOSTS])
+    : false;
+}
+
+function withLocalDevelopmentHosts(allowedDomains: string[]) {
+  if (!isLocalDevelopment()) {
+    return allowedDomains;
+  }
+
+  return [
+    ...new Set([...allowedDomains, ...LOCAL_DEVELOPMENT_HOSTS]),
+  ];
 }
 
 export async function getAllowedDomainsForBot(botId: string) {
@@ -78,7 +101,9 @@ export async function assertAllowedDomain(
   botId: string,
   pageUrl?: string | null,
 ) {
-  const allowedDomains = await getAllowedDomainsForBot(botId);
+  const allowedDomains = withLocalDevelopmentHosts(
+    await getAllowedDomainsForBot(botId),
+  );
 
   if (allowedDomains.length === 0) {
     return;

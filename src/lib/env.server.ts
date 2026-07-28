@@ -40,6 +40,7 @@ export const serverEnv = {
   embeddingDimensions: readIntEnv("OPENROUTER_EMBEDDING_DIMENSIONS", 1536),
   ragTopK: readIntEnv("RAG_TOP_K", 3),
   ragSimilarityThreshold: readFloatEnv("RAG_SIMILARITY_THRESHOLD", 0.7),
+  gasMasterWebAppUrl: readOptionalEnv("GAS_MASTER_WEB_APP_URL"),
   gasIngestionWebAppUrl: readOptionalEnv("GAS_INGESTION_WEB_APP_URL"),
   gasIngestionHmacSecret: readOptionalEnv("GAS_INGESTION_HMAC_SECRET"),
   minUsableWebsiteTextChars: readIntEnv("MIN_USABLE_WEBSITE_TEXT_CHARS", 300),

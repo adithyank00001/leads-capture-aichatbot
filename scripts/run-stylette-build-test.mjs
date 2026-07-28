@@ -26,15 +26,7 @@ const sourceId = "1cb711df-22dd-473f-918e-cd27e565253a";
 const botId = "bot_d87147f9a596";
 const websiteUrl = "https://stylette.in/";
 
-const expectedPages = [
-  "https://stylette.in/",
-  "https://stylette.in/about-us",
-  "https://stylette.in/services",
-  "https://stylette.in/gents",
-  "https://stylette.in/ladies",
-  "https://stylette.in/contact",
-  "https://stylette.in/offers",
-];
+const masterUrl = env.GAS_MASTER_WEB_APP_URL || env.GAS_INGESTION_WEB_APP_URL;
 
 const startWall = Date.now();
 console.log("Resetting source to discovering...");
@@ -58,13 +50,13 @@ await supabase.from("bot_website_sources").upsert(
 );
 
 const exp = Math.floor(Date.now() / 1000) + 600;
-const body = { action: "start", sourceId, botId, websiteUrl, exp };
+const body = { action: "discover", sourceId, botId, websiteUrl, exp };
 body.sig = createHmac("sha256", env.GAS_INGESTION_HMAC_SECRET)
   .update(JSON.stringify(body))
   .digest("hex");
 
-console.log("Calling GAS...");
-const gasRes = await fetch(env.GAS_INGESTION_WEB_APP_URL, {
+console.log("Calling master GAS at", masterUrl);
+const gasRes = await fetch(masterUrl, {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify(body),
@@ -92,7 +84,11 @@ for (let poll = 1; poll <= 40; poll += 1) {
     `Poll ${poll} ${elapsed}s status=${data.status} pages=${data.completed_pages}/${data.total_pages} failed=${data.failed_pages}`,
   );
 
-  if (data.status === "ready" || data.status === "failed") {
+  if (
+    data.status === "ready" ||
+    data.status === "partial" ||
+    data.status === "failed"
+  ) {
     finalSource = data;
     break;
   }
@@ -105,7 +101,7 @@ if (!finalSource) {
 
 const { data: pages } = await supabase
   .from("bot_website_pages")
-  .select("page_url, status, error_message, sort_order")
+  .select("id, page_url, status, error_message, sort_order")
   .eq("source_id", sourceId)
   .order("sort_order");
 
@@ -119,19 +115,6 @@ const { data: chunkCount } = await supabase.rpc("count_valid_website_chunks", {
   p_bot_id: botId,
 });
 
-const selectedUrls = finalSource.selected_urls?.urls ?? [];
-const processedUrls = (pages ?? [])
-  .filter((page) => page.status === "completed")
-  .map((page) => page.page_url.replace(/\/$/, ""));
-
-function normalize(url) {
-  return String(url).replace(/\/$/, "").toLowerCase();
-}
-
-const missingExpected = expectedPages.filter(
-  (url) => !processedUrls.some((processed) => normalize(processed) === normalize(url)),
-);
-
 console.log("\n=== RESULT ===");
 console.log("Final status:", finalSource.status);
 console.log(
@@ -139,20 +122,25 @@ console.log(
   Math.round((Date.now() - startWall) / 1000),
   "seconds",
 );
-console.log("Selected URLs:", JSON.stringify(selectedUrls, null, 2));
 console.log(
   "Pages in DB:",
   (pages ?? []).map((page) => `${page.page_url} [${page.status}]`).join("\n"),
 );
 console.log("Chunk count:", chunkCount);
-console.log("Missing expected pages:", missingExpected.length ? missingExpected.join(", ") : "none");
+
+const failedPage = (pages ?? []).find((page) => page.status === "failed");
+if (failedPage) {
+  console.log("\nFailed page available for manual retry test:", failedPage.page_url);
+}
 
 const keySteps = new Set([
   "config",
   "firecrawl",
   "discover",
+  "fanout",
   "process_page",
   "finalize",
+  "master_trigger",
 ]);
 
 console.log("\n=== KEY LOGS ===");

@@ -3,6 +3,10 @@ import { handleRouteError } from "@/lib/api/request";
 import { requireAuthUser } from "@/lib/auth/dashboard";
 import { getWebsiteBuildLogs } from "@/lib/db/website-build-log";
 import {
+  getWebsitePagesBySourceId,
+  toWebsitePageStatusItem,
+} from "@/lib/db/website-page";
+import {
   getWebsiteSourceByBotId,
   toWebsiteStatusResponse,
 } from "@/lib/db/website-source";
@@ -18,9 +22,15 @@ export async function GET() {
 
     const source = await getWebsiteSourceByBotId(supabase, bot.bot_id);
     const logs = await getWebsiteBuildLogs(supabase, bot.bot_id, 40);
+    const pages = source
+      ? (await getWebsitePagesBySourceId(supabase, source.id)).map(
+          toWebsitePageStatusItem,
+        )
+      : [];
 
     return apiSuccess({
       ...toWebsiteStatusResponse(source),
+      pages,
       logs: logs.map((log) => ({
         id: log.id,
         side: log.side,

@@ -8,7 +8,7 @@ import {
 } from "@/lib/db/website-source";
 import { ensureCustomerOnboarding } from "@/lib/dashboard/onboarding";
 import { extractHostFromUrl, isHostAllowed } from "@/lib/security/domain";
-import { triggerGasIngestionStart } from "@/lib/website/ingestion";
+import { triggerGasMasterDiscover } from "@/lib/website/ingestion";
 import { normalizeWebsiteUrl } from "@/lib/website/url";
 import { ApiValidationError } from "@/lib/validation/errors";
 
@@ -137,7 +137,7 @@ export async function POST(request: Request) {
       supabase,
     );
 
-    await triggerGasIngestionStart({
+    await triggerGasMasterDiscover({
       sourceId: source.id,
       botId: bot.bot_id,
       websiteUrl,

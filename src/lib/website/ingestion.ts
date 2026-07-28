@@ -6,15 +6,61 @@ import { ApiValidationError } from "@/lib/validation/errors";
 
 const HMAC_TTL_SECONDS = 10 * 60;
 
-export type GasIngestionPayload = {
-  action: "start" | "continue";
+export type GasDiscoverPayload = {
+  action: "discover";
   sourceId: string;
   botId: string;
   websiteUrl: string;
   exp: number;
+  sig?: string;
 };
 
-export function signGasIngestionPayload(payload: Omit<GasIngestionPayload, "exp">) {
+export type GasProcessPagePayload = {
+  action: "process_page";
+  sourceId: string;
+  botId: string;
+  websiteUrl: string;
+  pageId: string;
+  exp: number;
+  sig?: string;
+};
+
+export type GasFinalizePayload = {
+  action: "finalize";
+  sourceId: string;
+  botId: string;
+  websiteUrl: string;
+  exp: number;
+  sig?: string;
+};
+
+type SignableGasPayload =
+  | Omit<GasDiscoverPayload, "exp" | "sig">
+  | Omit<GasProcessPagePayload, "exp" | "sig">
+  | Omit<GasFinalizePayload, "exp" | "sig">;
+
+function buildCanonicalPayload(payload: SignableGasPayload, exp: number) {
+  if (payload.action === "process_page") {
+    return JSON.stringify({
+      action: payload.action,
+      sourceId: payload.sourceId,
+      botId: payload.botId,
+      websiteUrl: payload.websiteUrl,
+      pageId: payload.pageId,
+      exp,
+    });
+  }
+
+  return JSON.stringify({
+    action: payload.action,
+    sourceId: payload.sourceId,
+    botId: payload.botId,
+    websiteUrl: payload.websiteUrl,
+    exp,
+  });
+}
+
+export function signGasPayload(payload: SignableGasPayload) {
   if (!serverEnv.gasIngestionHmacSecret) {
     throw new ApiValidationError(
       "INGESTION_NOT_CONFIGURED",
@@ -24,9 +70,8 @@ export function signGasIngestionPayload(payload: Omit<GasIngestionPayload, "exp"
   }
 
   const exp = Math.floor(Date.now() / 1000) + HMAC_TTL_SECONDS;
-  const body = JSON.stringify({ ...payload, exp });
   const sig = createHmac("sha256", serverEnv.gasIngestionHmacSecret)
-    .update(body)
+    .update(buildCanonicalPayload(payload, exp))
     .digest("hex");
 
   return {
@@ -36,56 +81,43 @@ export function signGasIngestionPayload(payload: Omit<GasIngestionPayload, "exp"
   };
 }
 
-export async function triggerGasIngestionStart(payload: {
-  sourceId: string;
-  botId: string;
-  websiteUrl: string;
-}) {
-  if (!serverEnv.gasIngestionWebAppUrl) {
-    throw new ApiValidationError(
-      "INGESTION_NOT_CONFIGURED",
-      "Website knowledge ingestion is not configured.",
-      500,
-    );
-  }
-
-  await appendWebsiteBuildLog({
-    sourceId: payload.sourceId,
-    botId: payload.botId,
-    step: "gas_trigger",
-    status: "started",
-    message: `Calling Google Apps Script at ${serverEnv.gasIngestionWebAppUrl}`,
-  });
-
-  const signed = signGasIngestionPayload({
-    action: "start",
-    ...payload,
-  });
-
+async function postGasWebApp(
+  url: string,
+  payload: Record<string, unknown>,
+  options: {
+    sourceId: string;
+    botId: string;
+    step: string;
+    timeoutMs?: number;
+  },
+) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10_000);
+  const timeout = setTimeout(
+    () => controller.abort(),
+    options.timeoutMs ?? 10_000,
+  );
 
   try {
-    const response = await fetch(serverEnv.gasIngestionWebAppUrl, {
+    const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(signed),
+      body: JSON.stringify(payload),
       signal: controller.signal,
     });
 
     const responseText = await response.text();
 
     await appendWebsiteBuildLog({
-      sourceId: payload.sourceId,
-      botId: payload.botId,
-      step: "gas_trigger",
+      sourceId: options.sourceId,
+      botId: options.botId,
+      step: options.step,
       status: response.ok ? "http_ok" : "http_error",
       message: `GAS HTTP ${response.status}. Body: ${responseText.slice(0, 500)}`,
     });
 
-    let result: { accepted?: boolean; sourceId?: string; error?: string };
+    let result: { accepted?: boolean; ok?: boolean; error?: string };
 
     try {
       result = JSON.parse(responseText) as typeof result;
@@ -97,29 +129,21 @@ export async function triggerGasIngestionStart(payload: {
       );
     }
 
-    if (!response.ok || !result.accepted) {
+    if (!response.ok || (!result.accepted && !result.ok)) {
       await appendWebsiteBuildLog({
-        sourceId: payload.sourceId,
-        botId: payload.botId,
-        step: "gas_trigger",
+        sourceId: options.sourceId,
+        botId: options.botId,
+        step: options.step,
         status: "rejected",
-        message: result.error ?? "GAS did not accept the build.",
+        message: result.error ?? "GAS did not accept the request.",
       });
 
       throw new ApiValidationError(
         "INGESTION_START_FAILED",
-        result.error ?? "Could not start website knowledge build.",
+        result.error ?? "Could not reach the ingestion worker.",
         502,
       );
     }
-
-    await appendWebsiteBuildLog({
-      sourceId: payload.sourceId,
-      botId: payload.botId,
-      step: "gas_trigger",
-      status: "accepted",
-      message: "GAS accepted the build. Worker should start within ~1 second.",
-    });
 
     return result;
   } catch (error) {
@@ -129,15 +153,15 @@ export async function triggerGasIngestionStart(payload: {
 
     const message =
       error instanceof Error && error.name === "AbortError"
-        ? "GAS did not respond within 10 seconds."
+        ? "GAS did not respond in time."
         : error instanceof Error
           ? error.message
           : "Could not reach the ingestion worker.";
 
     await appendWebsiteBuildLog({
-      sourceId: payload.sourceId,
-      botId: payload.botId,
-      step: "gas_trigger",
+      sourceId: options.sourceId,
+      botId: options.botId,
+      step: options.step,
       status: "error",
       message,
     });
@@ -150,4 +174,88 @@ export async function triggerGasIngestionStart(payload: {
   } finally {
     clearTimeout(timeout);
   }
+}
+
+export async function triggerGasMasterDiscover(payload: {
+  sourceId: string;
+  botId: string;
+  websiteUrl: string;
+}) {
+  if (!serverEnv.gasMasterWebAppUrl) {
+    throw new ApiValidationError(
+      "INGESTION_NOT_CONFIGURED",
+      "Website knowledge master worker is not configured.",
+      500,
+    );
+  }
+
+  await appendWebsiteBuildLog({
+    sourceId: payload.sourceId,
+    botId: payload.botId,
+    step: "master_trigger",
+    status: "started",
+    message: `Calling master worker at ${serverEnv.gasMasterWebAppUrl}`,
+  });
+
+  const signed = signGasPayload({
+    action: "discover",
+    ...payload,
+  });
+
+  const result = await postGasWebApp(
+    serverEnv.gasMasterWebAppUrl,
+    signed,
+    {
+      sourceId: payload.sourceId,
+      botId: payload.botId,
+      step: "master_trigger",
+      timeoutMs: 180_000,
+    },
+  );
+
+  await appendWebsiteBuildLog({
+    sourceId: payload.sourceId,
+    botId: payload.botId,
+    step: "master_trigger",
+    status: "accepted",
+    message: "Master worker accepted the discover request.",
+  });
+
+  return result;
+}
+
+export async function triggerGasProcessPage(payload: {
+  sourceId: string;
+  botId: string;
+  websiteUrl: string;
+  pageId: string;
+}) {
+  if (!serverEnv.gasIngestionWebAppUrl) {
+    throw new ApiValidationError(
+      "INGESTION_NOT_CONFIGURED",
+      "Website knowledge page worker is not configured.",
+      500,
+    );
+  }
+
+  const signed = signGasPayload({
+    action: "process_page",
+    ...payload,
+  });
+
+  return postGasWebApp(serverEnv.gasIngestionWebAppUrl, signed, {
+    sourceId: payload.sourceId,
+    botId: payload.botId,
+    step: "page_worker_trigger",
+    timeoutMs: 120_000,
+  });
+}
+
+/** @deprecated Use triggerGasMasterDiscover */
+export async function triggerGasIngestionStart(payload: {
+  sourceId: string;
+  botId: string;
+  websiteUrl: string;
+}) {
+  return triggerGasMasterDiscover(payload);
 }
