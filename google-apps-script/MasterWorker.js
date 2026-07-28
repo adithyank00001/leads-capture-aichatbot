@@ -36,7 +36,7 @@ function getConfig_() {
 // LOGGING
 // =============================================================================
 
-var GAS_CODE_VERSION = '2026-07-28-v2-master-logging';
+var GAS_CODE_VERSION = '2026-07-28-v3-page-select-prompt';
 var LOG_SHEET_HEADERS = ['Timestamp', 'Source ID', 'Bot ID', 'Step', 'Status', 'Message'];
 var LOG_MESSAGE_MAX_LENGTH = 2000;
 
@@ -702,11 +702,34 @@ function dedupeUrls_(urls) {
 
 function selectPagesWithAi_(sourceId, botId, websiteUrl, discoveredUrls, config) {
   var prompt = [
-    'You are helping choose the most useful public website pages for a business chatbot.',
+    'You are helping choose the most useful public website pages for a business chatbot knowledge base.',
     'Homepage: ' + websiteUrl,
-    'Choose up to ' + MAX_SELECTED_WEBSITE_PAGES + ' URLs from the discovered list.',
+    'Choose up to ' + MAX_SELECTED_WEBSITE_PAGES + ' URLs from the discovered list only.',
     'Always include the homepage.',
-    'Prefer about, services, pricing, contact, FAQ, and product pages.',
+    '',
+    'WHAT TO INCLUDE (customer-facing, stable business information):',
+    '- Pages that help answer: Who are you? What do you offer? How much does it cost? How do I contact you? Where are you? What work have you done?',
+    '- About, services overview, contact, FAQ, portfolio/projects/case studies',
+    '- Service or location landing pages (e.g. SEO services, digital marketing in Kochi, web development in Kerala)',
+    '- Pages with durable facts: services, pricing hints, process, team, locations, phone, email, testimonials',
+    '',
+    'WHAT TO EXCLUDE (not useful for customer Q&A — never select these):',
+    '- Blog index, blog posts, articles, news, press releases, insights, resources that are mainly editorial content',
+    '- Careers, jobs, hiring, internships',
+    '- Tag, category, archive, author, feed, sitemap, search result pages',
+    '- Login, signup, cart, checkout, account, admin, legal-only pages unless they contain unique business facts',
+    '- Any page that is mainly a list of links to other articles or dated posts',
+    '- Any page whose main purpose is reading content over time, not learning about the business',
+    '- Never select a URL whose main purpose is a blog, news section, or individual article/post',
+    '',
+    'DECISION RULE:',
+    'Ask: "Would a customer asking about this business get a stable, useful answer from this page six months from now?"',
+    '- If YES → include (e.g. services, contact, about, project showcase)',
+    '- If NO → exclude (e.g. blog posts, news, job listings)',
+    '',
+    'If unsure between a blog/article page and a service/business page, prefer the service/business page.',
+    'Do not select pages just to fill the quota. Fewer strong pages is better than weak ones.',
+    '',
     'Return strict JSON only: {"selected_urls":["https://..."]}',
     'Discovered URLs:',
     JSON.stringify(discoveredUrls)

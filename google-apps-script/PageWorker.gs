@@ -22,7 +22,10 @@ function getConfig_() {
     MIN_USABLE_WEBSITE_TEXT_CHARS: Number(props.getProperty('MIN_USABLE_WEBSITE_TEXT_CHARS') || '300'),
     GAS_STALE_PAGE_MINUTES: Number(props.getProperty('GAS_STALE_PAGE_MINUTES') || '8'),
     LOG_SHEET_ID: props.getProperty('LOG_SHEET_ID') || '',
-    LOG_SHEET_TAB: props.getProperty('LOG_SHEET_TAB') || 'Logs'
+    LOG_SHEET_TAB: props.getProperty('LOG_SHEET_TAB') || 'Logs',
+    OPENROUTER_PAGE_CLEANUP_MODEL: props.getProperty('OPENROUTER_PAGE_CLEANUP_MODEL') || 'deepseek/deepseek-v4-flash',
+    OPENROUTER_PAGE_CLEANUP_FALLBACK_MODEL: props.getProperty('OPENROUTER_PAGE_CLEANUP_FALLBACK_MODEL') || 'google/gemini-2.5-flash-lite',
+    OPENROUTER_PAGE_CLEANUP_MAX_INPUT_CHARS: Number(props.getProperty('OPENROUTER_PAGE_CLEANUP_MAX_INPUT_CHARS') || '12000')
   };
 }
 
@@ -30,7 +33,7 @@ function getConfig_() {
 // LOGGING
 // =============================================================================
 
-var GAS_CODE_VERSION = '2026-07-28-v2-page-worker-logging';
+var GAS_CODE_VERSION = '2026-07-28-v4-search-aliases';
 var LOG_SHEET_HEADERS = ['Timestamp', 'Source ID', 'Bot ID', 'Step', 'Status', 'Message'];
 var LOG_MESSAGE_MAX_LENGTH = 2000;
 
@@ -388,9 +391,17 @@ function handleProcessPage_(body) {
       throw new Error('Page content was too short (' + content.length + ' chars).');
     }
 
-    var chunks = chunkMarkdownContent_(content, page.page_url, jina.title || page.page_title || '');
+    var cleanedSections = cleanPageContentWithAi_(
+      content,
+      page.page_url,
+      jina.title || page.page_title || '',
+      config,
+      sourceId,
+      botId
+    );
+    var chunks = sectionsToChunks_(cleanedSections, page.page_url, jina.title || page.page_title || '');
     if (!chunks.length) {
-      throw new Error('No chunks were created from page content.');
+      throw new Error('AI cleanup produced no usable chunks.');
     }
 
     var embeddedChunks = attachEmbeddingsToChunks_(chunks, config);
@@ -503,96 +514,313 @@ function fetchPageContentWithJina_(pageUrl, config) {
 }
 
 // =============================================================================
-// CHUNKING
+// AI CONTENT CLEANUP
 // =============================================================================
 
-function chunkMarkdownContent_(markdown, pageUrl, pageTitle) {
-  var text = String(markdown || '').trim();
-  if (!text) {
-    return [];
+function truncateForAiCleanup_(text, maxChars) {
+  var value = String(text || '').trim();
+  if (!maxChars || value.length <= maxChars) {
+    return value;
   }
 
-  var sections = splitByHeadings_(text);
-  if (sections.length > 1) {
-    return sections.map(function (section, index) {
-      return {
-        source_url: pageUrl,
-        page_title: pageTitle || '',
-        heading: section.heading,
-        chunk_content: section.content,
-        chunk_order: index
-      };
-    });
-  }
-
-  return splitParagraphChunks_(text, pageUrl, pageTitle);
+  var headSize = Math.floor(maxChars * 0.7);
+  var tailSize = maxChars - headSize - 40;
+  return value.substring(0, headSize) + '\n\n[...content truncated...]\n\n' + value.substring(value.length - tailSize);
 }
 
-function splitByHeadings_(text) {
-  var lines = text.split('\n');
-  var sections = [];
-  var currentHeading = '';
-  var currentLines = [];
-
-  lines.forEach(function (line) {
-    if (/^#{2,3}\s+/.test(line)) {
-      if (currentLines.length) {
-        sections.push({
-          heading: currentHeading || 'Section',
-          content: currentLines.join('\n').trim()
-        });
-      }
-      currentHeading = line.replace(/^#{2,3}\s+/, '').trim();
-      currentLines = [];
-      return;
-    }
-    currentLines.push(line);
-  });
-
-  if (currentLines.length) {
-    sections.push({
-      heading: currentHeading || 'Section',
-      content: currentLines.join('\n').trim()
-    });
-  }
-
-  return sections.filter(function (section) {
-    return section.content && section.content.length >= 80;
-  });
+function buildAiCleanupPrompt_(rawContent, pageUrl, pageTitle) {
+  return [
+    'You are preparing scraped website text for a business chatbot knowledge base (RAG).',
+    'Goal: keep text that helps the chatbot answer real customer questions. Remove text that does not help and would confuse search or answers.',
+    '',
+    'Remove (and why):',
+    '- Site navigation and menus (not business facts; repeated on every page)',
+    '- "Skip to content" and similar UI chrome',
+    '- Image-only markdown lines with no useful text',
+    '- Link-only blocks with almost no readable sentences',
+    '- Repeated footer/header boilerplate such as menus, copyright text, and repeated link clutter',
+    '- Empty or meaningless sections',
+    '',
+    'Do not remove useful information merely because it also appears in a footer or header.',
+    'Preserve business facts such as address, phone, email, opening hours, and contact links even when they appear in footer/header areas.',
+    '',
+    'Do not invent or add facts that are not in the source. Only reorganize and clean what is already there.',
+    'Use clear section headings that describe the content. Split into multiple sections when the page covers different topics.',
+    '',
+    'For each section, also return search_aliases: short phrases customers might use when asking about the SAME information in that section.',
+    'search_aliases rules (very important):',
+    '- Same meaning only. These are alternate wordings for the same topic/fact, not related ideas.',
+    '- Do NOT add broader, narrower, or different-meaning terms.',
+    '  BAD: content says "digital products" -> alias "software products" (not the same meaning).',
+    '  BAD: content says "construction" -> alias "interior design" (different service).',
+    '  GOOD: content has an address -> aliases like "location", "where are you located", "office address".',
+    '  GOOD: content has a phone number -> aliases like "phone", "call", "contact number".',
+    '  GOOD: heading "About Us" -> aliases like "who are you", "what do you do", "about the company".',
+    '- Use only common everyday chat words real customers would type.',
+    '- Do not add rare, technical, or fancy synonyms.',
+    '- Do not repeat the heading or copy full sentences from content.',
+    '- Return 3 to 10 aliases per section. Use [] when none apply.',
+    '- search_aliases are for search matching only; keep content clean human-readable text with no bracket keyword lists.',
+    '',
+    'Return strict JSON only:',
+    '{"sections":[{"heading":"...","content":"...","search_aliases":["...","..."]}]}',
+    '',
+    'Page URL: ' + pageUrl,
+    'Page title: ' + (pageTitle || 'Unknown'),
+    '',
+    'Scraped markdown:',
+    rawContent
+  ].join('\n');
 }
 
-function splitParagraphChunks_(text, pageUrl, pageTitle) {
-  var paragraphs = text.split(/\n{2,}/).map(function (p) { return p.trim(); }).filter(Boolean);
-  var chunks = [];
-  var buffer = '';
-  var chunkOrder = 0;
+function parseJsonFromModel_(content) {
+  if (!content) {
+    return { sections: [] };
+  }
 
-  paragraphs.forEach(function (paragraph) {
-    if ((buffer + '\n\n' + paragraph).length > 800 && buffer) {
-      chunks.push({
-        source_url: pageUrl,
-        page_title: pageTitle || '',
-        heading: 'Content',
-        chunk_content: buffer.trim(),
-        chunk_order: chunkOrder++
-      });
-      buffer = paragraph;
-      return;
+  var trimmed = String(content).trim().replace(/```json/gi, '').replace(/```/g, '').trim();
+  try {
+    return JSON.parse(trimmed);
+  } catch (e) {
+    var match = trimmed.match(/\{[\s\S]*\}/);
+    if (match) {
+      return JSON.parse(match[0]);
     }
-    buffer = buffer ? buffer + '\n\n' + paragraph : paragraph;
+    throw new Error('AI cleanup returned invalid JSON.');
+  }
+}
+
+function throwAiCleanupError_(message, retryable) {
+  var err = new Error(message);
+  err.retryable = retryable !== false;
+  throw err;
+}
+
+function isHttpStatusRetryable_(status) {
+  return status === 429 || status >= 500;
+}
+
+function callAiCleanupModelOnce_(rawContent, pageUrl, pageTitle, config, model) {
+  if (!config.OPENROUTER_API_KEY) {
+    throwAiCleanupError_('OPENROUTER_API_KEY is not configured.', false);
+  }
+
+  var prompt = buildAiCleanupPrompt_(rawContent, pageUrl, pageTitle);
+  var response = UrlFetchApp.fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'post',
+    contentType: 'application/json',
+    headers: {
+      Authorization: 'Bearer ' + config.OPENROUTER_API_KEY,
+      'HTTP-Referer': pageUrl,
+      'X-Title': 'Website RAG Page Cleanup'
+    },
+    payload: JSON.stringify({
+      model: model,
+      messages: [
+        { role: 'system', content: 'Return valid JSON only.' },
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0.1
+    }),
+    muteHttpExceptions: true
   });
 
-  if (buffer.trim()) {
-    chunks.push({
+  var status = response.getResponseCode();
+  var responseText = response.getContentText() || '{}';
+  if (status >= 400) {
+    throwAiCleanupError_(
+      'AI cleanup HTTP ' + status + ': ' + responseText.slice(0, 300),
+      isHttpStatusRetryable_(status)
+    );
+  }
+
+  var json;
+  try {
+    json = JSON.parse(responseText);
+  } catch (parseErr) {
+    throwAiCleanupError_('AI cleanup returned invalid response JSON: ' + responseText.slice(0, 300), true);
+  }
+
+  var content = json.choices && json.choices[0] && json.choices[0].message
+    ? json.choices[0].message.content
+    : '';
+
+  if (!content) {
+    throwAiCleanupError_('AI cleanup returned empty content: ' + responseText.slice(0, 300), true);
+  }
+
+  var parsed;
+  try {
+    parsed = parseJsonFromModel_(content);
+  } catch (parseErr) {
+    throwAiCleanupError_(String(parseErr && parseErr.message ? parseErr.message : parseErr), true);
+  }
+
+  if (!parsed || !parsed.sections || !parsed.sections.length) {
+    throwAiCleanupError_('AI cleanup returned no sections.', true);
+  }
+
+  return parsed.sections;
+}
+
+function isMostlyLinks_(content) {
+  var text = String(content || '');
+  var compact = text.replace(/\s+/g, '');
+  if (!compact) {
+    return true;
+  }
+
+  var linkChars = 0;
+  var linkPattern = /\]\([^)]+\)|https?:\/\/|www\./gi;
+  var match;
+  while ((match = linkPattern.exec(compact)) !== null) {
+    linkChars += match[0].length;
+  }
+
+  return linkChars / compact.length > 0.7;
+}
+
+function filterAiSections_(sections) {
+  var filtered = [];
+  var seenHashes = {};
+
+  (sections || []).forEach(function (section) {
+    var heading = String(section && section.heading ? section.heading : '').trim();
+    var content = String(section && section.content ? section.content : '').trim();
+
+    if (!heading || !content || content.length < 40) {
+      return;
+    }
+
+    if (isMostlyLinks_(content)) {
+      return;
+    }
+
+    var contentHash = hashContent_(content);
+    if (seenHashes[contentHash]) {
+      return;
+    }
+
+    seenHashes[contentHash] = true;
+    filtered.push({
+      heading: heading,
+      content: content,
+      search_aliases: normalizeSearchAliases_(section.search_aliases, heading, content)
+    });
+  });
+
+  return filtered;
+}
+
+function normalizeSearchAliases_(aliases, heading, content) {
+  var values = [];
+
+  if (Array.isArray(aliases)) {
+    values = aliases;
+  } else if (typeof aliases === 'string' && aliases.trim()) {
+    values = aliases.split(',');
+  }
+
+  var seen = {};
+  var normalized = [];
+  var headingLower = String(heading || '').trim().toLowerCase();
+  var contentLower = String(content || '').trim().toLowerCase();
+
+  values.forEach(function (alias) {
+    var trimmed = String(alias || '').trim();
+    if (!trimmed || trimmed.length < 2 || trimmed.length > 80) {
+      return;
+    }
+
+    var lower = trimmed.toLowerCase();
+    if (lower === headingLower || seen[lower] || contentLower.indexOf(lower) >= 0) {
+      return;
+    }
+
+    seen[lower] = true;
+    normalized.push(trimmed);
+  });
+
+  return normalized.slice(0, 10);
+}
+
+function buildEmbeddingText_(heading, content, searchAliases) {
+  var parts = [String(heading || '').trim(), String(content || '').trim()];
+
+  if (searchAliases && searchAliases.length) {
+    parts.push('Search terms: ' + searchAliases.join(', '));
+  }
+
+  return parts.filter(Boolean).join('\n');
+}
+
+function sectionsToChunks_(sections, pageUrl, pageTitle) {
+  return (sections || []).map(function (section, index) {
+    return {
       source_url: pageUrl,
       page_title: pageTitle || '',
-      heading: 'Content',
-      chunk_content: buffer.trim(),
-      chunk_order: chunkOrder
-    });
+      heading: section.heading,
+      chunk_content: section.content,
+      search_aliases: section.search_aliases || [],
+      chunk_order: index
+    };
+  });
+}
+
+function cleanPageContentWithAi_(rawContent, pageUrl, pageTitle, config, sourceId, botId) {
+  var models = [
+    config.OPENROUTER_PAGE_CLEANUP_MODEL,
+    config.OPENROUTER_PAGE_CLEANUP_FALLBACK_MODEL
+  ].filter(function (model, index, list) {
+    return model && list.indexOf(model) === index;
+  });
+
+  if (!models.length) {
+    throw new Error('No AI cleanup models configured.');
   }
 
-  return chunks;
+  var truncated = truncateForAiCleanup_(rawContent, config.OPENROUTER_PAGE_CLEANUP_MAX_INPUT_CHARS);
+  var errors = [];
+
+  for (var i = 0; i < models.length; i++) {
+    var model = models[i];
+
+    try {
+      logBuild_(sourceId, botId, 'ai_cleanup', 'started',
+        'model=' + model + ' input_chars=' + truncated.length);
+
+      var rawSections = callAiCleanupModelOnce_(truncated, pageUrl, pageTitle, config, model);
+      var filteredSections = filterAiSections_(rawSections);
+
+      if (!filteredSections.length) {
+        throwAiCleanupError_('All AI sections were filtered out.', true);
+      }
+
+      var aliasCount = filteredSections.reduce(function (total, section) {
+        return total + ((section.search_aliases && section.search_aliases.length) || 0);
+      }, 0);
+
+      logBuild_(sourceId, botId, 'ai_cleanup', 'success',
+        'model=' + model + ' raw_sections=' + rawSections.length + ' kept=' + filteredSections.length + ' aliases=' + aliasCount);
+
+      return filteredSections;
+    } catch (err) {
+      var message = String(err && err.message ? err.message : err);
+      var retryable = !(err && err.retryable === false);
+      errors.push(model + ': ' + message);
+
+      if (i < models.length - 1 && retryable) {
+        logBuild_(sourceId, botId, 'ai_cleanup', 'retry',
+          'Failed with ' + model + ': ' + message + ' | switching to ' + models[i + 1]);
+        continue;
+      }
+
+      logBuild_(sourceId, botId, 'ai_cleanup', 'error', errors.join(' | '));
+      throw new Error('AI cleanup failed: ' + errors.join(' | '));
+    }
+  }
+
+  throw new Error('AI cleanup failed: ' + errors.join(' | '));
 }
 
 function hashContent_(text) {
@@ -647,7 +875,9 @@ function embedTexts_(texts, config) {
 }
 
 function attachEmbeddingsToChunks_(chunks, config) {
-  var vectors = embedTexts_(chunks.map(function (c) { return c.chunk_content; }), config);
+  var vectors = embedTexts_(chunks.map(function (c) {
+    return buildEmbeddingText_(c.heading, c.chunk_content, c.search_aliases);
+  }), config);
   var scrapedAt = new Date().toISOString();
 
   return chunks.map(function (chunk, index) {
@@ -671,5 +901,7 @@ function attachEmbeddingsToChunks_(chunks, config) {
  *   JINA_API_KEY, OPENROUTER_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
  *   GAS_INGESTION_HMAC_SECRET
  * Optional: OPENROUTER_EMBEDDING_MODEL, EMBEDDING_DIMENSIONS,
- *   MIN_USABLE_WEBSITE_TEXT_CHARS, GAS_STALE_PAGE_MINUTES, LOG_SHEET_ID
+ *   MIN_USABLE_WEBSITE_TEXT_CHARS, GAS_STALE_PAGE_MINUTES, LOG_SHEET_ID,
+ *   OPENROUTER_PAGE_CLEANUP_MODEL, OPENROUTER_PAGE_CLEANUP_FALLBACK_MODEL,
+ *   OPENROUTER_PAGE_CLEANUP_MAX_INPUT_CHARS
  */
