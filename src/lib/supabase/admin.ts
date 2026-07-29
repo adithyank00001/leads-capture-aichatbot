@@ -401,6 +401,7 @@ export type Database = {
         Relationships: [];
       };
     };
+    Views: Record<string, never>;
     Functions: {
       match_website_chunks: {
         Args: {

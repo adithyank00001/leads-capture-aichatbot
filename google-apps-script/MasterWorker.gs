@@ -12,7 +12,7 @@
 var RUN_DISCOVER_PROPERTY_PREFIX = 'RUN_DISCOVER_';
 var FINALIZE_DELAY_MS = 8 * 60 * 1000;
 var FIRECRAWL_MAP_MAX_ATTEMPTS = 3;
-var MAX_SELECTED_WEBSITE_PAGES = 11;
+var MAX_SELECTED_WEBSITE_PAGES = 10;
 
 function getConfig_() {
   var props = PropertiesService.getScriptProperties();
