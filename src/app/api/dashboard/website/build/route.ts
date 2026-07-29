@@ -2,6 +2,7 @@ import { apiError, apiSuccess } from "@/lib/api-response";
 import { handleRouteError, parseJsonBody } from "@/lib/api/request";
 import { requireAuthUser } from "@/lib/auth/dashboard";
 import { appendWebsiteBuildLog } from "@/lib/db/website-build-log";
+import { clearWebsiteKnowledgeForBot } from "@/lib/db/website-knowledge";
 import {
   getWebsiteSourceByBotId,
   upsertWebsiteSourceForBuild,
@@ -119,6 +120,18 @@ export async function POST(request: Request) {
         409,
       );
     }
+
+    const cleared = await clearWebsiteKnowledgeForBot(bot.bot_id);
+
+    await appendWebsiteBuildLog(
+      {
+        botId,
+        step: "clear_knowledge",
+        status: "success",
+        message: `Cleared previous website knowledge before rebuild (${cleared.deletedChunks} chunk(s), ${cleared.deletedPages} page(s)).`,
+      },
+      supabase,
+    );
 
     const source = await upsertWebsiteSourceForBuild(supabase, {
       botId: bot.bot_id,
