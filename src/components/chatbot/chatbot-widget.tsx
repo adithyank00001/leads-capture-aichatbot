@@ -6,29 +6,130 @@ import { useEffect, useState } from "react";
 import { ChatInterface } from "@/components/chatbot/chat-interface";
 import { LeadForm } from "@/components/chatbot/lead-form";
 import type { BusinessDisplay } from "@/lib/business/display";
-import { resolveParentPageUrl } from "@/lib/embed/parent-page";
+import { getApiPath } from "@/lib/config";
+import {
+  resolveParentPageUrl,
+  setParentPageUrl,
+} from "@/lib/embed/parent-page";
+import { isHostAllowed, normalizeDomain } from "@/lib/security/domain-shared";
 import {
   getOrCreateSessionId,
   hasCompletedLead,
 } from "@/lib/session/client";
+
+const PARENT_PAGE_MESSAGE_TYPE = "chatbot-parent-page";
 
 type ChatbotWidgetProps = {
   botId: string;
   business: BusinessDisplay;
 };
 
+function hostFromOrigin(origin: string) {
+  try {
+    return new URL(origin).hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
 export function ChatbotWidget({ botId, business }: ChatbotWidgetProps) {
   const searchParams = useSearchParams();
   const [sessionId, setSessionId] = useState("");
   const [showChat, setShowChat] = useState(false);
-  const [parentPageUrl, setParentPageUrl] = useState<string | null>(null);
+  const [parentPageUrl, setParentPageUrlState] = useState<string | null>(null);
+  const [allowedDomains, setAllowedDomains] = useState<string[]>([]);
 
   useEffect(() => {
     const id = getOrCreateSessionId(botId);
     setSessionId(id);
     setShowChat(hasCompletedLead(botId, id));
-    setParentPageUrl(resolveParentPageUrl(botId, searchParams.get("parentUrl")));
-  }, [botId, searchParams]);
+  }, [botId]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadAllowedDomains() {
+      try {
+        const response = await fetch(
+          `${getApiPath("embed-allowed-domains")}?botId=${encodeURIComponent(botId)}`,
+          { cache: "no-store" },
+        );
+        const payload = (await response.json()) as {
+          ok?: boolean;
+          data?: { domains?: string[] };
+        };
+
+        if (!cancelled && payload.ok && Array.isArray(payload.data?.domains)) {
+          setAllowedDomains(
+            payload.data.domains
+              .map((domain) => normalizeDomain(domain))
+              .filter((domain): domain is string => Boolean(domain)),
+          );
+        }
+      } catch {
+        if (!cancelled) {
+          setAllowedDomains([]);
+        }
+      }
+    }
+
+    void loadAllowedDomains();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [botId]);
+
+  useEffect(() => {
+    const isTopLevel = window.self === window.top;
+
+    if (isTopLevel) {
+      setParentPageUrlState(
+        resolveParentPageUrl(botId, searchParams.get("parentUrl")),
+      );
+      return;
+    }
+
+    setParentPageUrlState(null);
+
+    function handleMessage(event: MessageEvent) {
+      if (
+        !event.data ||
+        typeof event.data !== "object" ||
+        event.data.type !== PARENT_PAGE_MESSAGE_TYPE
+      ) {
+        return;
+      }
+
+      const parentHost = hostFromOrigin(event.origin);
+
+      if (!parentHost || !isHostAllowed(parentHost, allowedDomains)) {
+        return;
+      }
+
+      if (typeof event.data.url !== "string") {
+        return;
+      }
+
+      try {
+        const url = new URL(event.data.url);
+        if (url.protocol !== "http:" && url.protocol !== "https:") {
+          return;
+        }
+      } catch {
+        return;
+      }
+
+      setParentPageUrl(botId, event.data.url);
+      setParentPageUrlState(event.data.url);
+    }
+
+    window.addEventListener("message", handleMessage);
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, [allowedDomains, botId, searchParams]);
 
   if (!sessionId) {
     return (

@@ -3,6 +3,8 @@ import { DatabaseTestPanel } from "@/components/database-test";
 import { HealthCheckPanel } from "@/components/health-check";
 import { getEmbedPath, publicConfig } from "@/lib/config";
 
+const isProduction = process.env.NODE_ENV === "production";
+
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-zinc-50 px-6 py-12">
@@ -52,9 +54,13 @@ export default function HomePage() {
           </div>
         </header>
 
-        <HealthCheckPanel />
-        <ApiTestPanel />
-        <DatabaseTestPanel />
+        {!isProduction ? (
+          <>
+            <HealthCheckPanel />
+            <ApiTestPanel />
+            <DatabaseTestPanel />
+          </>
+        ) : null}
 
         <section className="rounded-2xl border border-dashed border-zinc-300 bg-white p-6 text-sm text-zinc-600">
           <h2 className="font-medium text-zinc-900">Embed script</h2>

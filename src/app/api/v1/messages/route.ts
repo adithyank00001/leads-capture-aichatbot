@@ -4,6 +4,8 @@ import { handleRouteError } from "@/lib/api/request";
 import { getChatRetentionCutoffDate } from "@/lib/chat/retention";
 import { getMessagesForDisplay } from "@/lib/db/messages";
 import { getBusinessContext } from "@/lib/business/context";
+import { assertChatRateLimits } from "@/lib/rate-limit";
+import { assertAllowedDomain } from "@/lib/security/domain";
 import { ApiValidationError } from "@/lib/validation/errors";
 
 export async function GET(request: Request) {
@@ -21,6 +23,8 @@ export async function GET(request: Request) {
     }
 
     await getBusinessContext(botId);
+    await assertChatRateLimits(request, botId, sessionId);
+    await assertAllowedDomain(request, botId, null);
     await requireLead(botId, sessionId);
 
     const messages = await getMessagesForDisplay(

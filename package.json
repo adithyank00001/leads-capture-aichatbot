@@ -9,6 +9,7 @@
     "lint": "eslint",
     "test:smoke": "node --env-file=.env.local scripts/smoke-test.mjs",
     "test:website-sweep": "node --env-file=.env.local scripts/verify-website-build-sweep.mjs",
+    "test:domain-security": "node --env-file=.env.local scripts/test-domain-security.mjs",
     "test:website-url": "node scripts/test-website-url.mjs",
     "seed:test-bot": "node --env-file=.env.local scripts/seed-test-bot.mjs"
   },

@@ -212,6 +212,30 @@ async function run() {
   console.log("\nFor cron + function existence checks, run the SQL file in Supabase:");
   console.log("  scripts/verify-website-build-sweep.sql");
   console.log("\nVerification finished.");
+
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (anonKey && supabaseUrl) {
+    const { createClient: createAnonClient } = await import("@supabase/supabase-js");
+    const anonClient = createAnonClient(supabaseUrl, anonKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+    const { error: anonRpcError } = await anonClient.rpc(
+      "sweep_stuck_website_builds",
+      { p_stale_minutes: 10 },
+    );
+
+    if (anonRpcError) {
+      pass("anon role blocked from sweep RPC", anonRpcError.message);
+    } else {
+      fail("anon role blocked from sweep RPC", "call succeeded unexpectedly");
+    }
+  } else {
+    skip(
+      "anon role blocked from sweep RPC",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY not set",
+    );
+  }
 }
 
 run().catch((error) => {

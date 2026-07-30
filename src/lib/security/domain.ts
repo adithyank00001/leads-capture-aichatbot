@@ -1,62 +1,43 @@
 import { serverEnv } from "@/lib/env.server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import {
+  extractHostFromUrl,
+  isHostAllowed,
+  normalizeDomain,
+} from "@/lib/security/domain-shared";
 import { ApiValidationError } from "@/lib/validation/errors";
 
-export function normalizeDomain(value: string) {
-  const trimmed = value.trim().toLowerCase();
-
-  if (!trimmed) {
-    return null;
-  }
-
-  try {
-    const withProtocol = trimmed.includes("://") ? trimmed : `https://${trimmed}`;
-    return new URL(withProtocol).hostname.replace(/^www\./, "");
-  } catch {
-    return trimmed.replace(/^www\./, "").split("/")[0] ?? null;
-  }
-}
-
-export function extractHostFromUrl(value: string) {
-  try {
-    return new URL(value).hostname.replace(/^www\./, "");
-  } catch {
-    return null;
-  }
-}
+export {
+  extractHostFromUrl,
+  isHostAllowed,
+  normalizeDomain,
+} from "@/lib/security/domain-shared";
 
 export function getAppHostname() {
   return normalizeDomain(serverEnv.appUrl);
 }
 
-export function extractRequestHost(request: Request, pageUrl?: string | null) {
+export function extractOriginHost(request: Request) {
   const origin = request.headers.get("origin");
-  const referer = request.headers.get("referer");
 
-  for (const candidate of [pageUrl, origin, referer]) {
-    if (!candidate) {
-      continue;
-    }
-
-    const host = extractHostFromUrl(candidate);
-    if (host) {
-      return host;
-    }
+  if (!origin) {
+    return null;
   }
 
-  return null;
+  return extractHostFromUrl(origin);
+}
+
+export function extractRefererHost(request: Request) {
+  const referer = request.headers.get("referer");
+
+  if (!referer) {
+    return null;
+  }
+
+  return extractHostFromUrl(referer);
 }
 
 const LOCAL_DEVELOPMENT_HOSTS = ["localhost", "127.0.0.1"] as const;
-
-export function isHostAllowed(host: string, allowedDomains: string[]) {
-  const normalizedHost = host.replace(/^www\./, "");
-
-  return allowedDomains.some(
-    (domain) =>
-      normalizedHost === domain || normalizedHost.endsWith(`.${domain}`),
-  );
-}
 
 function isLocalDevelopment() {
   if (process.env.NODE_ENV === "development") {
@@ -101,36 +82,44 @@ export async function assertAllowedDomain(
   botId: string,
   pageUrl?: string | null,
 ) {
-  const allowedDomains = withLocalDevelopmentHosts(
-    await getAllowedDomainsForBot(botId),
-  );
+  const configuredDomains = await getAllowedDomainsForBot(botId);
 
-  if (allowedDomains.length === 0) {
-    return;
-  }
-
-  const appHostname = getAppHostname();
-  const requestHost = extractRequestHost(request, null);
-
-  if (pageUrl) {
-    const pageHost = extractHostFromUrl(pageUrl);
-
-    if (pageHost && isHostAllowed(pageHost, allowedDomains)) {
-      return;
-    }
-
+  if (configuredDomains.length === 0) {
     throw new ApiValidationError(
-      "DOMAIN_NOT_ALLOWED",
-      "This chatbot can only be used from an approved website.",
+      "DOMAIN_NOT_CONFIGURED",
+      "Add an allowed website domain in Settings before using the chatbot.",
       403,
     );
   }
 
-  if (appHostname && requestHost === appHostname) {
+  const allowedDomains = withLocalDevelopmentHosts(configuredDomains);
+
+  const appHostname = getAppHostname();
+  const originHost = extractOriginHost(request);
+  const refererHost = extractRefererHost(request);
+  const pageHost = pageUrl ? extractHostFromUrl(pageUrl) : null;
+
+  if (appHostname && originHost === appHostname) {
+    if (pageHost) {
+      if (isHostAllowed(pageHost, allowedDomains)) {
+        return;
+      }
+
+      throw new ApiValidationError(
+        "DOMAIN_NOT_ALLOWED",
+        "This chatbot can only be used from an approved website.",
+        403,
+      );
+    }
+
     return;
   }
 
-  if (requestHost && isHostAllowed(requestHost, allowedDomains)) {
+  if (originHost && isHostAllowed(originHost, allowedDomains)) {
+    return;
+  }
+
+  if (refererHost && isHostAllowed(refererHost, allowedDomains)) {
     return;
   }
 

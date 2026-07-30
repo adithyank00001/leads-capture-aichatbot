@@ -96,6 +96,20 @@
     container.appendChild(iframe);
     document.body.appendChild(container);
 
+    iframe.addEventListener("load", function () {
+      if (!iframe.contentWindow) {
+        return;
+      }
+
+      iframe.contentWindow.postMessage(
+        {
+          type: "chatbot-parent-page",
+          url: window.location.href,
+        },
+        baseUrl,
+      );
+    });
+
     return {
       botId: botId,
       baseUrl: baseUrl,

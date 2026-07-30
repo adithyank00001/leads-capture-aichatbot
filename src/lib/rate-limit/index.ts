@@ -3,7 +3,13 @@ import { Redis } from "@upstash/redis";
 
 import { ApiValidationError } from "@/lib/validation/errors";
 
+let loggedMissingRedisInProduction = false;
+
 function isRateLimitBypassed() {
+  if (process.env.NODE_ENV === "production") {
+    return false;
+  }
+
   return process.env.SMOKE_TEST_BYPASS_RATE_LIMIT === "true";
 }
 
@@ -12,6 +18,16 @@ function getRedis() {
   const token = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
 
   if (!url || !token) {
+    if (
+      process.env.NODE_ENV === "production" &&
+      !loggedMissingRedisInProduction
+    ) {
+      loggedMissingRedisInProduction = true;
+      console.error(
+        "[rate-limit] UPSTASH_REDIS_REST_URL/TOKEN missing in production. Rate limits are disabled.",
+      );
+    }
+
     return null;
   }
 

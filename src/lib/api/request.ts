@@ -14,6 +14,7 @@ function categorizeError(error: unknown): ErrorCategory {
     if (error.code === "RATE_LIMITED") return "rate_limit";
     if (error.code === "USAGE_LIMIT_REACHED") return "usage_limit";
     if (error.code === "DOMAIN_NOT_ALLOWED") return "domain";
+    if (error.code === "DOMAIN_NOT_CONFIGURED") return "domain";
     return "validation";
   }
 

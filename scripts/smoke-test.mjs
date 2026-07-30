@@ -6,12 +6,14 @@ const demoPageUrl = `${baseUrl}/demo-site/index.html`;
 const appOrigin = new URL(baseUrl).origin;
 
 async function request(path, options = {}) {
+  const { headers: extraHeaders, ...rest } = options;
+
   const response = await fetch(`${baseUrl}${path}`, {
+    ...rest,
     headers: {
       "Content-Type": "application/json",
-      ...(options.headers ?? {}),
+      ...(extraHeaders ?? {}),
     },
-    ...options,
   });
 
   const body = await response.json();
@@ -31,8 +33,55 @@ function sessionId() {
   return `smoke-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
+function withEmbedOrigin(options = {}) {
+  return {
+    ...options,
+    headers: {
+      Origin: appOrigin,
+      ...(options.headers ?? {}),
+    },
+  };
+}
+
+async function ensureSmokeTestDomains(supabase) {
+  const demoHost = new URL(demoPageUrl).hostname.replace(/^www\./, "");
+  const desired = [demoHost];
+
+  if (demoHost !== "localhost") {
+    desired.push("localhost");
+  }
+
+  const { data: existingRows } = await supabase
+    .from("bot_allowed_domains")
+    .select("domain")
+    .eq("bot_id", botId);
+
+  const existing = new Set((existingRows ?? []).map((row) => row.domain));
+  const toInsert = desired
+    .filter((domain) => !existing.has(domain))
+    .map((domain) => ({ bot_id: botId, domain }));
+
+  if (toInsert.length > 0) {
+    const { error } = await supabase.from("bot_allowed_domains").insert(toInsert);
+
+    if (error) {
+      throw new Error(`Could not seed smoke test domains: ${error.message}`);
+    }
+  }
+}
+
 async function run() {
   console.log(`Running smoke tests against ${baseUrl}\n`);
+
+  let supabase = null;
+
+  if (supabaseUrl && serviceRoleKey) {
+    const { createClient } = await import("@supabase/supabase-js");
+    supabase = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+    await ensureSmokeTestDomains(supabase);
+  }
 
   const health = await request("/api/v1/health");
   if (health.body.ok && health.body.data?.database?.connected) {
@@ -43,16 +92,19 @@ async function run() {
 
   const sid = sessionId();
 
-  const lead = await request("/api/v1/leads", {
-    method: "POST",
-    body: JSON.stringify({
-      botId: botId,
-      sessionId: sid,
-      name: "Smoke Test Visitor",
-      phone: "+15550111222",
-      pageUrl: `${baseUrl}/demo-site/index.html`,
+  const lead = await request(
+    "/api/v1/leads",
+    withEmbedOrigin({
+      method: "POST",
+      body: JSON.stringify({
+        botId: botId,
+        sessionId: sid,
+        name: "Smoke Test Visitor",
+        phone: "+15550111222",
+        pageUrl: demoPageUrl,
+      }),
     }),
-  });
+  );
 
   if (lead.body.ok && lead.body.data?.created === true) {
     pass("lead capture");
@@ -60,15 +112,18 @@ async function run() {
     fail("lead capture", JSON.stringify(lead.body));
   }
 
-  const duplicateLead = await request("/api/v1/leads", {
-    method: "POST",
-    body: JSON.stringify({
-      botId: botId,
-      sessionId: sid,
-      name: "Smoke Test Visitor",
-      phone: "+15550111222",
+  const duplicateLead = await request(
+    "/api/v1/leads",
+    withEmbedOrigin({
+      method: "POST",
+      body: JSON.stringify({
+        botId: botId,
+        sessionId: sid,
+        name: "Smoke Test Visitor",
+        phone: "+15550111222",
+      }),
     }),
-  });
+  );
 
   if (duplicateLead.body.ok && duplicateLead.body.data?.created === false) {
     pass("duplicate lead returns existing lead");
@@ -76,14 +131,17 @@ async function run() {
     fail("duplicate lead returns existing lead", JSON.stringify(duplicateLead.body));
   }
 
-  const missingPhone = await request("/api/v1/leads", {
-    method: "POST",
-    body: JSON.stringify({
-      botId: botId,
-      sessionId: sessionId(),
-      name: "No Phone",
+  const missingPhone = await request(
+    "/api/v1/leads",
+    withEmbedOrigin({
+      method: "POST",
+      body: JSON.stringify({
+        botId: botId,
+        sessionId: sessionId(),
+        name: "No Phone",
+      }),
     }),
-  });
+  );
 
   if (!missingPhone.body.ok && missingPhone.body.error?.code === "MISSING_PHONE") {
     pass("missing phone validation");
@@ -91,14 +149,17 @@ async function run() {
     fail("missing phone validation", JSON.stringify(missingPhone.body));
   }
 
-  const chatWithoutLead = await request("/api/v1/chat", {
-    method: "POST",
-    body: JSON.stringify({
-      botId: botId,
-      sessionId: sessionId(),
-      message: "Hello",
+  const chatWithoutLead = await request(
+    "/api/v1/chat",
+    withEmbedOrigin({
+      method: "POST",
+      body: JSON.stringify({
+        botId: botId,
+        sessionId: sessionId(),
+        message: "Hello",
+      }),
     }),
-  });
+  );
 
   if (!chatWithoutLead.body.ok && chatWithoutLead.body.error?.code === "LEAD_REQUIRED") {
     pass("chat blocked without lead");
@@ -106,14 +167,17 @@ async function run() {
     fail("chat blocked without lead", JSON.stringify(chatWithoutLead.body));
   }
 
-  const chat = await request("/api/v1/chat", {
-    method: "POST",
-    body: JSON.stringify({
-      botId: botId,
-      sessionId: sid,
-      message: "What are your opening hours?",
+  const chat = await request(
+    "/api/v1/chat",
+    withEmbedOrigin({
+      method: "POST",
+      body: JSON.stringify({
+        botId: botId,
+        sessionId: sid,
+        message: "What are your opening hours?",
+      }),
     }),
-  });
+  );
 
   if (
     chat.body.ok &&
@@ -128,6 +192,7 @@ async function run() {
 
   const history = await request(
     `/api/v1/messages?botId=${encodeURIComponent(botId)}&sessionId=${encodeURIComponent(sid)}`,
+    withEmbedOrigin({ method: "GET" }),
   );
 
   if (history.body.ok && Array.isArray(history.body.data?.messages)) {
@@ -136,14 +201,17 @@ async function run() {
     fail("conversation history reload", JSON.stringify(history.body));
   }
 
-  const emptyMessage = await request("/api/v1/chat", {
-    method: "POST",
-    body: JSON.stringify({
-      botId: botId,
-      sessionId: sid,
-      message: "   ",
+  const emptyMessage = await request(
+    "/api/v1/chat",
+    withEmbedOrigin({
+      method: "POST",
+      body: JSON.stringify({
+        botId: botId,
+        sessionId: sid,
+        message: "   ",
+      }),
     }),
-  });
+  );
 
   if (!emptyMessage.body.ok && emptyMessage.body.error?.code === "MISSING_MESSAGE") {
     pass("empty message validation");
@@ -175,19 +243,41 @@ async function run() {
     fail("demo customer site served", `status ${demoSite.status}`);
   }
 
-  if (supabaseUrl && serviceRoleKey) {
-    const { createClient } = await import("@supabase/supabase-js");
-    const supabase = createClient(supabaseUrl, serviceRoleKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
+  if (supabase) {
+    await supabase.from("bot_allowed_domains").delete().eq("bot_id", botId);
+
+    const blockedLead = await request("/api/v1/leads", {
+      method: "POST",
+      body: JSON.stringify({
+        botId,
+        sessionId: sessionId(),
+        name: "No Domain Visitor",
+        phone: "+15550110000",
+      }),
     });
 
-    await supabase.from("bot_allowed_domains").delete().eq("bot_id", botId);
+    if (
+      !blockedLead.body.ok &&
+      blockedLead.body.error?.code === "DOMAIN_NOT_CONFIGURED"
+    ) {
+      pass("domain blocked when allowlist empty");
+    } else {
+      fail(
+        "domain blocked when allowlist empty",
+        JSON.stringify(blockedLead.body),
+      );
+    }
+
+    const demoHost = new URL(demoPageUrl).hostname.replace(/^www\./, "");
+    const domainsToInsert = [{ bot_id: botId, domain: demoHost }];
+
+    if (demoHost !== "localhost") {
+      domainsToInsert.push({ bot_id: botId, domain: "localhost" });
+    }
+
     const { error: insertDomainError } = await supabase
       .from("bot_allowed_domains")
-      .insert({ bot_id: botId, domain: "localhost" });
+      .insert(domainsToInsert);
 
     if (insertDomainError) {
       fail("domain setup", insertDomainError.message);
@@ -196,6 +286,9 @@ async function run() {
 
       const domainLead = await request("/api/v1/leads", {
         method: "POST",
+        headers: {
+          Origin: appOrigin,
+        },
         body: JSON.stringify({
           botId,
           sessionId: domainSid,
@@ -213,6 +306,9 @@ async function run() {
 
       const domainChat = await request("/api/v1/chat", {
         method: "POST",
+        headers: {
+          Origin: appOrigin,
+        },
         body: JSON.stringify({
           botId,
           sessionId: domainSid,
@@ -230,6 +326,9 @@ async function run() {
       const evilSid = sessionId();
       await request("/api/v1/leads", {
         method: "POST",
+        headers: {
+          Origin: appOrigin,
+        },
         body: JSON.stringify({
           botId,
           sessionId: evilSid,
@@ -241,6 +340,9 @@ async function run() {
 
       const evilChat = await request("/api/v1/chat", {
         method: "POST",
+        headers: {
+          Origin: appOrigin,
+        },
         body: JSON.stringify({
           botId,
           sessionId: evilSid,
@@ -262,28 +364,31 @@ async function run() {
       }
 
       const embedSid = sessionId();
-      await request("/api/v1/leads", {
-        method: "POST",
-        body: JSON.stringify({
-          botId,
-          sessionId: embedSid,
-          name: "Embed Test Visitor",
-          phone: "+15550117788",
-          pageUrl: demoPageUrl,
+      await request(
+        "/api/v1/leads",
+        withEmbedOrigin({
+          method: "POST",
+          body: JSON.stringify({
+            botId,
+            sessionId: embedSid,
+            name: "Embed Test Visitor",
+            phone: "+15550117788",
+            pageUrl: demoPageUrl,
+          }),
         }),
-      });
+      );
 
-      const embedChat = await request("/api/v1/chat", {
-        method: "POST",
-        headers: {
-          Origin: appOrigin,
-        },
-        body: JSON.stringify({
-          botId,
-          sessionId: embedSid,
-          message: "Direct embed test message",
+      const embedChat = await request(
+        "/api/v1/chat",
+        withEmbedOrigin({
+          method: "POST",
+          body: JSON.stringify({
+            botId,
+            sessionId: embedSid,
+            message: "Direct embed test message",
+          }),
         }),
-      });
+      );
 
       if (embedChat.body.ok && embedChat.body.data?.aiConnected === true) {
         pass("domain allowed direct embed on app host without page URL");
@@ -298,6 +403,8 @@ async function run() {
       pass("domain test cleanup");
     }
 
+    await ensureSmokeTestDomains(supabase);
+
     const { data: chunkCount, error: chunkCountError } = await supabase.rpc(
       "count_valid_website_chunks",
       { p_bot_id: botId },
@@ -309,26 +416,32 @@ async function run() {
       );
     } else if ((chunkCount ?? 0) >= 1) {
       const ragSid = sessionId();
-      await request("/api/v1/leads", {
-        method: "POST",
-        body: JSON.stringify({
-          botId,
-          sessionId: ragSid,
-          name: "RAG Test Visitor",
-          phone: "+15550119900",
-          pageUrl: demoPageUrl,
+      await request(
+        "/api/v1/leads",
+        withEmbedOrigin({
+          method: "POST",
+          body: JSON.stringify({
+            botId,
+            sessionId: ragSid,
+            name: "RAG Test Visitor",
+            phone: "+15550119900",
+            pageUrl: demoPageUrl,
+          }),
         }),
-      });
+      );
 
-      const ragChat = await request("/api/v1/chat", {
-        method: "POST",
-        body: JSON.stringify({
-          botId,
-          sessionId: ragSid,
-          message: "Tell me about your business.",
-          pageUrl: demoPageUrl,
+      const ragChat = await request(
+        "/api/v1/chat",
+        withEmbedOrigin({
+          method: "POST",
+          body: JSON.stringify({
+            botId,
+            sessionId: ragSid,
+            message: "Tell me about your business.",
+            pageUrl: demoPageUrl,
+          }),
         }),
-      });
+      );
 
       if (ragChat.body.ok && ragChat.body.data?.aiConnected === true) {
         pass("chat with website RAG knowledge");
