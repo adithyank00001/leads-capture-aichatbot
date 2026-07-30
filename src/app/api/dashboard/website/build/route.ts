@@ -5,6 +5,7 @@ import { appendWebsiteBuildLog } from "@/lib/db/website-build-log";
 import { clearWebsiteKnowledgeForBot } from "@/lib/db/website-knowledge";
 import {
   getWebsiteSourceByBotId,
+  isWebsiteBuildActive,
   upsertWebsiteSourceForBuild,
 } from "@/lib/db/website-source";
 import { ensureCustomerOnboarding } from "@/lib/dashboard/onboarding";
@@ -110,10 +111,7 @@ export async function POST(request: Request) {
 
     const existing = await getWebsiteSourceByBotId(supabase, bot.bot_id);
 
-    if (
-      existing &&
-      (existing.status === "discovering" || existing.status === "processing")
-    ) {
+    if (existing && isWebsiteBuildActive(existing.status)) {
       throw new ApiValidationError(
         "BUILD_ALREADY_RUNNING",
         "A website knowledge build is already running.",

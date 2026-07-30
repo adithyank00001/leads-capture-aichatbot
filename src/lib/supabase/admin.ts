@@ -452,6 +452,19 @@ export type Database = {
         };
         Returns: Json;
       };
+      fail_stale_pending_pages: {
+        Args: {
+          p_source_id: string;
+          p_stale_minutes?: number;
+        };
+        Returns: Json;
+      };
+      sweep_stuck_website_builds: {
+        Args: {
+          p_stale_minutes?: number;
+        };
+        Returns: Json;
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

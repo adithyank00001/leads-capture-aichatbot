@@ -40,13 +40,13 @@ export async function upsertWebsiteSourceForBuild(
 ) {
   const existing = await getWebsiteSourceByBotId(supabase, input.botId);
 
-    if (existing && isWebsiteBuildActive(existing.status)) {
-      throw new ApiValidationError(
-        "BUILD_ALREADY_RUNNING",
-        "A website knowledge build is already running.",
-        409,
-      );
-    }
+  if (existing && isWebsiteBuildActive(existing.status)) {
+    throw new ApiValidationError(
+      "BUILD_ALREADY_RUNNING",
+      "A website knowledge build is already running.",
+      409,
+    );
+  }
 
   const { data, error } = await supabase
     .from("bot_website_sources")
