@@ -1,8 +1,7 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { DashboardLogoutButton } from "@/components/dashboard/logout-button";
-import { ensureCustomerOnboarding } from "@/lib/dashboard/onboarding";
+import { DashboardMobileNav } from "@/components/dashboard/dashboard-mobile-nav";
+import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export default async function DashboardLayout({
@@ -19,31 +18,20 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  await ensureCustomerOnboarding(supabase, {
-    userId: user.id,
-    email: user.email ?? "",
-  });
-
   return (
-    <div className="min-h-screen bg-zinc-100 text-zinc-900">
-      <header className="border-b border-zinc-300 bg-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
-              Customer dashboard
-            </p>
-            <p className="text-sm text-zinc-700">{user.email}</p>
-          </div>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link href="/dashboard/settings">Settings</Link>
-            <Link href="/dashboard/website">Website Knowledge</Link>
-            <Link href="/dashboard/embed">Embed</Link>
-            <Link href="/dashboard/leads">Leads</Link>
-            <DashboardLogoutButton />
-          </nav>
+    <div className="min-h-screen bg-background">
+      <DashboardMobileNav />
+      <div className="flex min-h-[calc(100vh-57px)] md:min-h-screen">
+        <DashboardSidebar />
+        <div className="flex flex-1 flex-col">
+          <header className="hidden border-b bg-card px-6 py-4 md:block">
+            <p className="text-sm text-muted-foreground">{user.email}</p>
+          </header>
+          <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 md:px-8 md:py-8">
+            {children}
+          </main>
         </div>
-      </header>
-      <main className="mx-auto max-w-5xl px-4 py-6">{children}</main>
+      </div>
     </div>
   );
 }

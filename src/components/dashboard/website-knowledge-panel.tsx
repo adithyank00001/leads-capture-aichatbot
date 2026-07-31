@@ -1,6 +1,25 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+
+import { PageLoadingSkeleton } from "@/components/dashboard/page-loading-skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { fetchJsonWithTimeout } from "@/lib/api/fetch-client";
+import { getCustomerErrorMessage } from "@/lib/dashboard/customer-errors";
+import { getWebsiteStatusCustomerLabel } from "@/lib/dashboard/setup-status";
 
 type WebsiteBuildLog = {
   id: string;
@@ -80,29 +99,46 @@ function getPageLabel(page: WebsitePageStatus) {
   }
 }
 
-function getStatusLabel(status: WebsiteStatus) {
-  const savedCount = status.pages?.filter((p) => p.status === "completed").length
-    ?? status.completedPages;
+function getProgressLabel(status: WebsiteStatus) {
+  const savedCount =
+    status.pages?.filter((p) => p.status === "completed").length ??
+    status.completedPages;
 
-  switch (status.status) {
-    case "discovering":
-      return "Discovering pages on your website...";
-    case "processing":
-      if (status.totalPages > 0) {
-        return `${savedCount} of ${status.totalPages} pages saved...`;
-      }
-      return "Processing website pages...";
-    case "ready":
-      return "Knowledge ready";
-    case "partial":
-      if (status.totalPages > 0) {
-        return `${savedCount} of ${status.totalPages} pages saved`;
-      }
-      return "Ready with warnings";
+  if (status.status === "discovering") {
+    return "Finding pages on your website…";
+  }
+
+  if (status.status === "processing") {
+    if (status.totalPages > 0) {
+      return `${savedCount} of ${status.totalPages} pages saved…`;
+    }
+    return "Building knowledge…";
+  }
+
+  if (status.status === "ready" || status.status === "partial") {
+    if (status.totalPages > 0) {
+      return `${savedCount} of ${status.totalPages} pages saved`;
+    }
+    return getWebsiteStatusCustomerLabel(status.status);
+  }
+
+  return getWebsiteStatusCustomerLabel(status.status);
+}
+
+const showTechnicalLogs = process.env.NODE_ENV === "development";
+
+function getStatusBadgeVariant(
+  status: WebsitePageStatus["status"],
+): "default" | "secondary" | "destructive" | "outline" {
+  switch (status) {
+    case "completed":
+      return "default";
     case "failed":
-      return "Build failed";
+      return "destructive";
+    case "processing":
+      return "secondary";
     default:
-      return "Not built yet";
+      return "outline";
   }
 }
 
@@ -115,10 +151,14 @@ export function WebsiteKnowledgePanel() {
   const [retryingPageId, setRetryingPageId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const websiteUrlRef = useRef(websiteUrl);
+
+  websiteUrlRef.current = websiteUrl;
 
   const loadStatus = useCallback(async () => {
-    const response = await fetch("/api/dashboard/website/status");
-    const result = (await response.json()) as StatusResponse;
+    const { response, body: result } = await fetchJsonWithTimeout<StatusResponse>(
+      "/api/dashboard/website/status",
+    );
 
     if (!response.ok || !result.ok || !result.data) {
       throw new Error(result.error?.message ?? "Could not load website status.");
@@ -127,23 +167,19 @@ export function WebsiteKnowledgePanel() {
     setStatus(result.data);
     setLogs(result.data.logs ?? []);
 
-    if (!websiteUrl && result.data.websiteUrl) {
+    if (!websiteUrlRef.current && result.data.websiteUrl) {
       setWebsiteUrl(result.data.websiteUrl);
     }
 
     return result.data;
-  }, [websiteUrl]);
+  }, []);
 
   useEffect(() => {
     async function initialLoad() {
       try {
         await loadStatus();
       } catch (loadError) {
-        setError(
-          loadError instanceof Error
-            ? loadError.message
-            : "Could not load website status.",
-        );
+        setError(getCustomerErrorMessage(loadError));
       } finally {
         setLoading(false);
       }
@@ -200,13 +236,10 @@ export function WebsiteKnowledgePanel() {
       }
 
       setMessage("Build started. This may take a few minutes.");
+      toast.success("Knowledge build started");
       await loadStatus();
     } catch (buildError) {
-      setError(
-        buildError instanceof Error
-          ? buildError.message
-          : "Could not start build.",
-      );
+      setError(getCustomerErrorMessage(buildError));
     } finally {
       setBuilding(false);
     }
@@ -231,14 +264,11 @@ export function WebsiteKnowledgePanel() {
       }
 
       setMessage("Retry started for failed page.");
+      toast.success("Retry started");
       await loadStatus();
     } catch (retryError) {
       setRetryingPageId(null);
-      setError(
-        retryError instanceof Error
-          ? retryError.message
-          : "Could not retry page.",
-      );
+      setError(getCustomerErrorMessage(retryError));
     }
   }
 
@@ -249,124 +279,140 @@ export function WebsiteKnowledgePanel() {
   const pages = status?.pages ?? [];
 
   if (loading) {
-    return <p className="text-sm text-zinc-600">Loading website knowledge...</p>;
+    return <PageLoadingSkeleton variant="website" />;
   }
 
   return (
-    <div className="space-y-6 rounded-xl border border-zinc-300 bg-white p-6 shadow-sm">
-      <div>
-        <h1 className="text-2xl font-semibold">Website Knowledge</h1>
-        <p className="mt-2 text-sm text-zinc-600">
-          Enter your homepage URL. We will read your public website pages and use
-          that information to help the chatbot answer visitor questions.
-        </p>
-      </div>
+    <Card className="shadow-md ring-primary/5">
+      <CardHeader>
+        <CardTitle className="text-2xl">Website information</CardTitle>
+        <CardDescription>
+          We scan your website and automatically teach the chatbot about your
+          business.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-2">
+          <Label htmlFor="website-url">Homepage URL</Label>
+          <Input
+            id="website-url"
+            type="url"
+            value={websiteUrl}
+            onChange={(event) => setWebsiteUrl(event.target.value)}
+            placeholder="https://yourbusiness.com"
+            disabled={building || isActive}
+          />
+        </div>
 
-      <div className="space-y-2">
-        <label className="block text-sm font-medium" htmlFor="website-url">
-          Homepage URL
-        </label>
-        <input
-          id="website-url"
-          type="url"
-          value={websiteUrl}
-          onChange={(event) => setWebsiteUrl(event.target.value)}
-          placeholder="https://yourbusiness.com"
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
-          disabled={building || isActive}
-        />
-      </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            type="button"
+            onClick={() => void handleBuild()}
+            disabled={building || isActive || !websiteUrl.trim()}
+          >
+            {building
+              ? "Starting..."
+              : hasKnowledge
+                ? "Refresh Knowledge"
+                : "Build Knowledge"}
+          </Button>
+          {status ? (
+            <Badge variant="secondary">{getProgressLabel(status)}</Badge>
+          ) : null}
+        </div>
 
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={() => void handleBuild()}
-          disabled={building || isActive || !websiteUrl.trim()}
-          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {building
-            ? "Starting..."
-            : hasKnowledge
-              ? "Refresh Knowledge"
-              : "Build Knowledge"}
-        </button>
-        {status ? (
-          <p className="text-sm text-zinc-700">{getStatusLabel(status)}</p>
+        {status?.status === "partial" && status.refreshErrorMessage ? (
+          <Alert>
+            <AlertDescription className="text-amber-900">
+              {status.refreshErrorMessage}
+            </AlertDescription>
+          </Alert>
         ) : null}
-      </div>
 
-      {status?.status === "partial" && status.refreshErrorMessage ? (
-        <p className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-          {status.refreshErrorMessage}
-        </p>
-      ) : null}
+        {status?.errorMessage ? (
+          <Alert variant="destructive">
+            <AlertDescription>{status.errorMessage}</AlertDescription>
+          </Alert>
+        ) : null}
 
-      {status?.errorMessage ? (
-        <p className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800">
-          {status.errorMessage}
-        </p>
-      ) : null}
+        {message ? (
+          <Alert>
+            <AlertDescription className="text-emerald-700">{message}</AlertDescription>
+          </Alert>
+        ) : null}
+        {error ? (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        ) : null}
 
-      {message ? <p className="text-sm text-green-700">{message}</p> : null}
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
+        {pages.length > 0 ? (
+          <div className="rounded-lg border bg-muted/30 p-4">
+            <p className="mb-3 text-sm font-semibold">Pages</p>
+            <ul className="space-y-2">
+              {pages.map((page) => {
+                const { title, label } = getPageLabel(page);
+                const showRetry =
+                  page.status === "failed" &&
+                  !isActive &&
+                  retryingPageId !== page.id;
 
-      {pages.length > 0 ? (
-        <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-3">
-          <p className="mb-3 text-sm font-medium text-zinc-800">Pages</p>
-          <ul className="space-y-2">
-            {pages.map((page) => {
-              const { title, label } = getPageLabel(page);
-              const showRetry =
-                page.status === "failed" &&
-                !isActive &&
-                retryingPageId !== page.id;
-
-              return (
-                <li
-                  key={page.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-3 py-2 text-sm"
-                >
-                  <div>
-                    <p className="font-medium text-zinc-900">{title}</p>
-                    <p className="text-zinc-600">
-                      {label}
-                      {page.errorMessage ? ` — ${page.errorMessage}` : ""}
-                    </p>
-                  </div>
-                  {showRetry ? (
-                    <button
-                      type="button"
-                      onClick={() => void handleRetry(page.id)}
-                      className="rounded border border-zinc-300 px-3 py-1 text-xs font-medium hover:bg-zinc-50"
-                    >
-                      Retry
-                    </button>
-                  ) : null}
-                  {retryingPageId === page.id || page.status === "processing" ? (
-                    <span className="text-xs text-zinc-500">Working...</span>
-                  ) : null}
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ) : null}
-
-      {logs.length > 0 ? (
-        <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-3">
-          <p className="mb-2 text-sm font-medium text-zinc-800">Build logs</p>
-          <div className="max-h-64 space-y-2 overflow-y-auto text-xs text-zinc-700">
-            {[...logs].reverse().map((log) => (
-              <div key={log.id} className="rounded border border-zinc-200 bg-white px-2 py-1">
-                <p className="font-medium">
-                  [{log.side}] {log.step} — {log.status}
-                </p>
-                <p className="text-zinc-600">{log.message}</p>
-              </div>
-            ))}
+                return (
+                  <li
+                    key={page.id}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-card px-3 py-2 text-sm"
+                  >
+                    <div>
+                      <p className="font-medium">{title}</p>
+                      <p className="text-muted-foreground">
+                        {label}
+                        {page.errorMessage ? ` — ${page.errorMessage}` : ""}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={getStatusBadgeVariant(page.status)}>
+                        {label}
+                      </Badge>
+                      {showRetry ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => void handleRetry(page.id)}
+                        >
+                          Retry
+                        </Button>
+                      ) : null}
+                      {retryingPageId === page.id || page.status === "processing" ? (
+                        <span className="text-xs text-muted-foreground">Working...</span>
+                      ) : null}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
-        </div>
-      ) : null}
-    </div>
+        ) : null}
+
+        {logs.length > 0 && showTechnicalLogs ? (
+          <>
+            <Separator />
+            <div className="rounded-lg border bg-muted/30 p-4">
+              <p className="mb-2 text-sm font-semibold">Build logs</p>
+              <div className="max-h-64 space-y-2 overflow-y-auto text-xs text-muted-foreground">
+                {[...logs].reverse().map((log) => (
+                  <div key={log.id} className="rounded-lg border bg-card px-2 py-1">
+                    <p className="font-medium text-foreground">
+                      [{log.side}] {log.step} — {log.status}
+                    </p>
+                    <p>{log.message}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        ) : null}
+      </CardContent>
+    </Card>
   );
 }

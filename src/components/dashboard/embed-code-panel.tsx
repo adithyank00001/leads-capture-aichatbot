@@ -1,14 +1,27 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
-import { publicConfig } from "@/lib/config";
+import { EmbedTroubleshooting } from "@/components/dashboard/embed-troubleshooting";
+import { PageLoadingSkeleton } from "@/components/dashboard/page-loading-skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { getEmbedCopiedKey, publicConfig } from "@/lib/config";
+import { fetchJsonWithTimeout } from "@/lib/api/fetch-client";
+import { getCustomerErrorMessage } from "@/lib/dashboard/customer-errors";
 import {
   embedPasteGuideNote,
   embedPasteGuideSteps,
   embedSetupLoadFailed,
-  embedTroubleshootingEntries,
-  type EmbedHelpEntry,
 } from "@/lib/dashboard/embed-help";
 
 type BotResponse = {
@@ -17,52 +30,37 @@ type BotResponse = {
     bot: {
       bot_id: string;
     };
+    allowedDomains: string[];
   };
   error?: {
     message: string;
   };
 };
 
-function HelpEntryCard({ entry }: { entry: EmbedHelpEntry }) {
-  return (
-    <div className="space-y-2 border border-zinc-200 bg-zinc-50 p-3">
-      <h3 className="text-sm font-semibold">{entry.title}</h3>
-      <p className="text-sm text-zinc-700">
-        <span className="font-medium">Issue: </span>
-        {entry.issue}
-      </p>
-      <p className="text-sm text-zinc-700">
-        <span className="font-medium">What to do: </span>
-        {entry.action}
-      </p>
-      <p className="text-sm text-zinc-600">
-        <span className="font-medium">Still stuck? </span>
-        {entry.support}
-      </p>
-    </div>
-  );
-}
-
 export function EmbedCodePanel() {
   const [botId, setBotId] = useState("");
+  const [allowedDomains, setAllowedDomains] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadBot() {
       try {
-        const response = await fetch("/api/dashboard/bot");
-        const result = (await response.json()) as BotResponse;
+        const { response, body: result } = await fetchJsonWithTimeout<BotResponse>(
+          "/api/dashboard/bot",
+        );
 
         if (!response.ok || !result.ok || !result.data) {
           throw new Error(result.error?.message ?? "Could not load bot.");
         }
 
         setBotId(result.data.bot.bot_id);
+        setAllowedDomains(result.data.allowedDomains ?? []);
       } catch (loadError) {
-        setError(
-          loadError instanceof Error ? loadError.message : "Could not load bot.",
-        );
+        setError(getCustomerErrorMessage(loadError));
+      } finally {
+        setLoading(false);
       }
     }
 
@@ -75,6 +73,9 @@ export function EmbedCodePanel() {
   async
 ></script>`;
 
+  const primaryDomain = allowedDomains[0] ?? "";
+  const hasDomain = primaryDomain.length > 0;
+
   async function handleCopy() {
     if (!botId) {
       return;
@@ -82,94 +83,94 @@ export function EmbedCodePanel() {
 
     try {
       await navigator.clipboard.writeText(embedCode);
+      localStorage.setItem(getEmbedCopiedKey(botId), "1");
       setCopied(true);
+      toast.success("Script copied");
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
       setCopied(false);
+      toast.error("Could not copy script. Please copy it manually.");
     }
   }
 
+  if (loading) {
+    return <PageLoadingSkeleton variant="embed" />;
+  }
+
   return (
-    <section className="space-y-6 border border-zinc-300 bg-white p-4">
-      <div className="space-y-2">
-        <h1 className="text-xl font-semibold">Add the chatbot to your website</h1>
-        <p className="text-sm text-zinc-600">
-          Copy the script below and paste it on your website.
-        </p>
-      </div>
+    <Card className="shadow-md ring-primary/5">
+      <CardHeader>
+        <CardTitle className="text-2xl">Install your chatbot</CardTitle>
+        <CardDescription>
+          Copy the script and paste it on your website.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {!hasDomain ? (
+          <Alert>
+            <AlertTitle>Save your website domain first</AlertTitle>
+            <AlertDescription>
+              Add your website domain in Setup before installing the chatbot.{" "}
+              <Link href="/dashboard/settings" className="font-medium text-primary underline">
+                Go to Setup
+              </Link>
+            </AlertDescription>
+          </Alert>
+        ) : null}
 
-      <div className="space-y-2">
-        <h2 className="text-sm font-semibold">How to install</h2>
-        <ol className="list-decimal space-y-1 pl-5 text-sm text-zinc-700">
-          {embedPasteGuideSteps.map((step) => (
-            <li key={step}>{step}</li>
-          ))}
-        </ol>
-        <p className="text-sm text-zinc-600">{embedPasteGuideNote}</p>
-      </div>
-
-      {error ? (
-        <div className="space-y-2 border border-red-300 bg-red-50 p-3">
-          <p className="text-sm font-semibold text-red-800">
-            {embedSetupLoadFailed.title}
-          </p>
-          <p className="text-sm text-red-800">
-            <span className="font-medium">Issue: </span>
-            {embedSetupLoadFailed.issue}
-            {error ? ` (${error})` : null}
-          </p>
-          <p className="text-sm text-red-800">
-            <span className="font-medium">What to do: </span>
-            {embedSetupLoadFailed.action}
-          </p>
-          <p className="text-sm text-red-800">
-            <span className="font-medium">Still stuck? </span>
-            {embedSetupLoadFailed.support}
-          </p>
+        <div className="space-y-2">
+          <h2 className="text-sm font-semibold">How to install</h2>
+          <ol className="list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
+            <li>Copy the script below.</li>
+            <li>Paste it before &lt;/body&gt; on your website.</li>
+            <li>Open your website and test the chatbot.</li>
+          </ol>
+          <p className="text-sm text-muted-foreground">{embedPasteGuideNote}</p>
         </div>
-      ) : null}
 
-      <div className="space-y-2">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="text-sm font-semibold">Your script</h2>
-          {botId ? (
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-sm text-white"
-            >
-              {copied ? "Copied!" : "Copy"}
-            </button>
-          ) : null}
-        </div>
-        <pre className="overflow-x-auto border border-zinc-300 bg-zinc-50 p-3 text-xs">
-          {botId ? embedCode : "Loading..."}
-        </pre>
-      </div>
+        {error ? (
+          <Alert variant="destructive">
+            <AlertTitle>{embedSetupLoadFailed.title}</AlertTitle>
+            <AlertDescription>
+              {getCustomerErrorMessage(new Error(error))}
+            </AlertDescription>
+          </Alert>
+        ) : null}
 
-      <div className="space-y-3">
-        <h2 className="text-sm font-semibold">Troubleshooting</h2>
-        <p className="text-sm text-zinc-600">
-          If the chatbot is not showing on your website, check the common issues
-          below.
-        </p>
         <div className="space-y-3">
-          {embedTroubleshootingEntries.map((entry) => (
-            <HelpEntryCard key={entry.id} entry={entry} />
-          ))}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="text-sm">
+              {hasDomain ? (
+                <p>
+                  <span className="font-medium">Website domain:</span>{" "}
+                  {primaryDomain}
+                </p>
+              ) : null}
+              <p className="text-muted-foreground">
+                Status: {hasDomain ? "Ready to install" : "Add domain in Setup"}
+              </p>
+            </div>
+            {botId ? (
+              <Button type="button" onClick={handleCopy} size="sm" disabled={!hasDomain}>
+                {copied ? "Copied!" : "Copy code"}
+              </Button>
+            ) : null}
+          </div>
+          <pre className="overflow-x-auto rounded-lg border bg-sidebar p-4 text-xs text-sidebar-foreground">
+            {botId ? embedCode : "Loading..."}
+          </pre>
         </div>
-      </div>
 
-      {botId ? (
-        <a
-          href={`/embed/${botId}`}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-block text-sm underline"
-        >
-          Open chatbot test page
-        </a>
-      ) : null}
-    </section>
+        {botId ? (
+          <Button variant="outline" asChild>
+            <a href={`/embed/${botId}`} target="_blank" rel="noreferrer">
+              Open chatbot preview
+            </a>
+          </Button>
+        ) : null}
+
+        <EmbedTroubleshooting />
+      </CardContent>
+    </Card>
   );
 }

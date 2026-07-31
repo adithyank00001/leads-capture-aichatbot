@@ -1,7 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
+import { PageLoadingSkeleton } from "@/components/dashboard/page-loading-skeleton";
+import { SettingsSection } from "@/components/dashboard/settings-section";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { fetchJsonWithTimeout } from "@/lib/api/fetch-client";
+import { getCustomerErrorMessage } from "@/lib/dashboard/customer-errors";
 import {
   INVALID_DOMAIN_ERROR,
   REQUIRED_DOMAIN_ERROR,
@@ -53,14 +71,13 @@ export function BotSettingsForm() {
   const [usageText, setUsageText] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadSettings() {
       try {
-        const response = await fetch("/api/dashboard/bot");
-        const result = (await response.json()) as BotSettingsResponse;
+        const { response, body: result } =
+          await fetchJsonWithTimeout<BotSettingsResponse>("/api/dashboard/bot");
 
         if (!response.ok || !result.ok || !result.data) {
           throw new Error(result.error?.message ?? "Could not load settings.");
@@ -83,11 +100,7 @@ export function BotSettingsForm() {
           );
         }
       } catch (loadError) {
-        setError(
-          loadError instanceof Error
-            ? loadError.message
-            : "Could not load settings.",
-        );
+        setError(getCustomerErrorMessage(loadError));
       } finally {
         setLoading(false);
       }
@@ -100,7 +113,6 @@ export function BotSettingsForm() {
     event.preventDefault();
     setSaving(true);
     setError(null);
-    setMessage(null);
 
     const domains = splitAllowedDomainsInput(allowedDomains);
 
@@ -154,74 +166,150 @@ export function BotSettingsForm() {
         );
       }
 
-      setMessage("Saved.");
+      toast.success("Settings saved");
     } catch (saveError) {
-      setError(
-        saveError instanceof Error ? saveError.message : "Could not save settings.",
-      );
+      setError(getCustomerErrorMessage(saveError));
     } finally {
       setSaving(false);
     }
   }
 
   if (loading) {
-    return <p className="text-sm text-zinc-600">Loading settings...</p>;
+    return <PageLoadingSkeleton variant="settings" />;
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 border border-zinc-300 bg-white p-4">
-      <h1 className="text-xl font-semibold">Business settings</h1>
-      <p className="text-sm text-zinc-600">
-        Plain MVP form. Save your business info here. The chatbot AI will use it.
-      </p>
-      {usageText ? <p className="text-sm text-zinc-700">{usageText}</p> : null}
+    <Card className="shadow-md ring-primary/5">
+      <CardHeader>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <CardTitle className="text-2xl">Chatbot Setup</CardTitle>
+            <CardDescription className="mt-1">
+              Add the information your chatbot needs to answer customers.
+            </CardDescription>
+          </div>
+          {usageText ? <Badge variant="secondary">{usageText}</Badge> : null}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <SettingsSection title="Business details">
+            <div className="space-y-2">
+              <Label htmlFor="businessName">Business name</Label>
+              <Input
+                id="businessName"
+                value={businessName}
+                onChange={(event) => setBusinessName(event.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Short description</Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                className="min-h-20"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="location">Location</Label>
+              <Input
+                id="location"
+                value={location}
+                onChange={(event) => setLocation(event.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="openingHours">Opening hours</Label>
+              <Input
+                id="openingHours"
+                value={openingHours}
+                onChange={(event) => setOpeningHours(event.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contactMethod">Contact details</Label>
+              <Input
+                id="contactMethod"
+                value={contactMethod}
+                onChange={(event) => setContactMethod(event.target.value)}
+              />
+            </div>
+          </SettingsSection>
 
-      {[
-        ["Business name", businessName, setBusinessName],
-        ["Description", description, setDescription],
-        ["Location", location, setLocation],
-        ["Services", services, setServices],
-        ["Pricing notes", pricingNotes, setPricingNotes],
-        ["Current offer", currentOffer, setCurrentOffer],
-        ["Opening hours", openingHours, setOpeningHours],
-        ["Contact method", contactMethod, setContactMethod],
-        ["Extra notes", extraNotes, setExtraNotes],
-      ].map(([label, value, setter]) => (
-        <label key={label as string} className="block text-sm">
-          {label as string}
-          <textarea
-            value={value as string}
-            onChange={(event) => (setter as (value: string) => void)(event.target.value)}
-            className="mt-1 min-h-20 w-full border border-zinc-300 px-3 py-2"
-          />
-        </label>
-      ))}
+          <SettingsSection
+            title="What your chatbot should know"
+            description="Manual information — Add details you want the chatbot to always follow. Manual information has priority over your website."
+          >
+            <div className="space-y-2">
+              <Label htmlFor="services">Services</Label>
+              <Textarea
+                id="services"
+                value={services}
+                onChange={(event) => setServices(event.target.value)}
+                className="min-h-20"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="pricingNotes">Pricing information</Label>
+              <Textarea
+                id="pricingNotes"
+                value={pricingNotes}
+                onChange={(event) => setPricingNotes(event.target.value)}
+                className="min-h-20"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="currentOffer">Current offers</Label>
+              <Textarea
+                id="currentOffer"
+                value={currentOffer}
+                onChange={(event) => setCurrentOffer(event.target.value)}
+                className="min-h-20"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="extraNotes">Extra information</Label>
+              <Textarea
+                id="extraNotes"
+                value={extraNotes}
+                onChange={(event) => setExtraNotes(event.target.value)}
+                className="min-h-20"
+              />
+            </div>
+          </SettingsSection>
 
-      <label className="block text-sm">
-        Your website domain
-        <input
-          type="text"
-          value={allowedDomains}
-          onChange={(event) => setAllowedDomains(event.target.value)}
-          placeholder="stylette.com"
-          className="mt-1 w-full border border-zinc-300 px-3 py-2"
-        />
-      </label>
-      <p className="text-sm text-zinc-600">
-        Enter the one website where your chatbot should work. Use a real domain
-        with an ending like .com or .in (example: stylette.com).
-      </p>
+          <SettingsSection
+            title="Website connection"
+            description="Your chatbot will only work on this website."
+          >
+            <div className="space-y-2">
+              <Label htmlFor="allowed-domains">Website domain</Label>
+              <Input
+                id="allowed-domains"
+                type="text"
+                value={allowedDomains}
+                onChange={(event) => setAllowedDomains(event.target.value)}
+                placeholder="stylette.com"
+              />
+              <p className="text-sm text-muted-foreground">
+                Use a real domain with an ending like .com or .in (example:
+                stylette.com).
+              </p>
+            </div>
+          </SettingsSection>
 
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
-      {message ? <p className="text-sm text-green-700">{message}</p> : null}
+          {error ? (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : null}
 
-      <button
-        type="submit"
-        disabled={saving}
-        className="border border-zinc-900 bg-zinc-900 px-4 py-2 text-white disabled:opacity-60"
-      >
-        {saving ? "Saving..." : "Save"}
-      </button>
-    </form>
+          <Button type="submit" disabled={saving} size="lg">
+            {saving ? "Saving..." : "Save settings"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

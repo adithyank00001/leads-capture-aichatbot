@@ -3,9 +3,37 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { getCustomerErrorMessage } from "@/lib/dashboard/customer-errors";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
-export function LoginForm() {
+function getSafeDashboardPath(nextPath?: string) {
+  if (!nextPath || !nextPath.startsWith("/dashboard")) {
+    return "/dashboard";
+  }
+
+  if (nextPath.startsWith("//") || nextPath.includes(":")) {
+    return "/dashboard";
+  }
+
+  return nextPath;
+}
+
+type LoginFormProps = {
+  nextPath?: string;
+};
+
+export function LoginForm({ nextPath }: LoginFormProps) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,54 +54,52 @@ export function LoginForm() {
     setLoading(false);
 
     if (signInError) {
-      const message = signInError.message.toLowerCase();
-
-      if (message.includes("email not confirmed")) {
-        setError(
-          "Your email is not confirmed yet. Please open the confirmation email from Supabase and click the link, then try logging in again.",
-        );
-        return;
-      }
-
-      setError(signInError.message);
+      setError(getCustomerErrorMessage(signInError));
       return;
     }
 
-    router.push("/dashboard");
+    router.push(getSafeDashboardPath(nextPath));
     router.refresh();
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto max-w-md space-y-4 border border-zinc-300 bg-white p-6">
-      <h1 className="text-xl font-semibold">Login</h1>
-      <label className="block text-sm">
-        Email
-        <input
-          type="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          className="mt-1 w-full border border-zinc-300 px-3 py-2"
-          required
-        />
-      </label>
-      <label className="block text-sm">
-        Password
-        <input
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          className="mt-1 w-full border border-zinc-300 px-3 py-2"
-          required
-        />
-      </label>
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full border border-zinc-900 bg-zinc-900 px-4 py-2 text-white disabled:opacity-60"
-      >
-        {loading ? "Logging in..." : "Login"}
-      </button>
-    </form>
+    <Card className="mx-auto max-w-md shadow-lg ring-primary/10">
+      <CardHeader>
+        <CardTitle className="text-2xl">Welcome back</CardTitle>
+        <CardDescription>Sign in to manage your chatbot and leads.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="login-email">Email</Label>
+            <Input
+              id="login-email"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="login-password">Password</Label>
+            <Input
+              id="login-password"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+            />
+          </div>
+          {error ? (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : null}
+          <Button type="submit" disabled={loading} className="w-full" size="lg">
+            {loading ? "Logging in..." : "Login"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

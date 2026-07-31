@@ -2,9 +2,15 @@
 
 import { useRouter } from "next/navigation";
 
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
-export function DashboardLogoutButton() {
+type DashboardLogoutButtonProps = {
+  className?: string;
+};
+
+export function DashboardLogoutButton({ className }: DashboardLogoutButtonProps) {
   const router = useRouter();
 
   async function handleLogout() {
@@ -15,12 +21,17 @@ export function DashboardLogoutButton() {
   }
 
   return (
-    <button
+    <Button
       type="button"
+      variant="outline"
+      size="sm"
       onClick={handleLogout}
-      className="rounded border border-zinc-300 px-3 py-1"
+      className={cn(
+        "border-sidebar-border bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
+        className,
+      )}
     >
       Logout
-    </button>
+    </Button>
   );
 }

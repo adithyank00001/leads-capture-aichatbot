@@ -3,6 +3,18 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { getCustomerErrorMessage } from "@/lib/dashboard/customer-errors";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 export function SignupForm() {
@@ -28,7 +40,7 @@ export function SignupForm() {
     setLoading(false);
 
     if (signUpError) {
-      setError(signUpError.message);
+      setError(getCustomerErrorMessage(signUpError));
       return;
     }
 
@@ -44,40 +56,54 @@ export function SignupForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto max-w-md space-y-4 border border-zinc-300 bg-white p-6">
-      <h1 className="text-xl font-semibold">Sign up</h1>
-      <label className="block text-sm">
-        Email
-        <input
-          type="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          className="mt-1 w-full border border-zinc-300 px-3 py-2"
-          required
-        />
-      </label>
-      <label className="block text-sm">
-        Password
-        <input
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          className="mt-1 w-full border border-zinc-300 px-3 py-2"
-          minLength={6}
-          required
-        />
-      </label>
-      {successMessage ? (
-        <p className="text-sm text-emerald-700">{successMessage}</p>
-      ) : null}
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full border border-zinc-900 bg-zinc-900 px-4 py-2 text-white disabled:opacity-60"
-      >
-        {loading ? "Creating account..." : "Create account"}
-      </button>
-    </form>
+    <Card className="mx-auto max-w-md shadow-lg ring-primary/10">
+      <CardHeader>
+        <CardTitle className="text-2xl">Create your account</CardTitle>
+        <CardDescription>
+          Start setting up your chatbot in a few minutes.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="signup-email">Email</Label>
+            <Input
+              id="signup-email"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="signup-password">Password</Label>
+            <Input
+              id="signup-password"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              minLength={6}
+              required
+            />
+            <p className="text-xs text-muted-foreground">At least 6 characters</p>
+          </div>
+          {successMessage ? (
+            <Alert>
+              <AlertDescription className="text-emerald-700">
+                {successMessage}
+              </AlertDescription>
+            </Alert>
+          ) : null}
+          {error ? (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : null}
+          <Button type="submit" disabled={loading} className="w-full" size="lg">
+            {loading ? "Creating account..." : "Create account"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

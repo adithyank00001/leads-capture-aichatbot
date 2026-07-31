@@ -83,47 +83,52 @@ export function LeadForm({
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <header className="border-b border-zinc-200 px-4 py-4">
-        <h1 className="text-lg font-semibold text-zinc-900">{business.name}</h1>
-        <p className="mt-1 text-sm text-zinc-600">{business.welcomeMessage}</p>
+    <div className="flex h-full flex-col bg-background">
+      <header className="border-b border-border bg-card px-4 py-4 shadow-sm">
+        <h1 className="text-lg font-semibold tracking-tight text-foreground">
+          {business.name}
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {business.welcomeMessage}
+        </p>
       </header>
 
-      <form onSubmit={handleSubmit} className="flex flex-1 flex-col px-4 py-4">
+      <form onSubmit={handleSubmit} className="flex flex-1 flex-col px-4 py-5">
         <div className="space-y-4">
-          <label className="block text-sm font-medium text-zinc-700">
+          <label className="block text-sm font-medium text-foreground">
             Name
             <input
               type="text"
               value={name}
               onChange={(event) => setName(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm outline-none ring-0 focus:border-zinc-900"
+              className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
               placeholder="Your name"
               autoComplete="name"
               disabled={isSubmitting}
             />
           </label>
 
-          <label className="block text-sm font-medium text-zinc-700">
+          <label className="block text-sm font-medium text-foreground">
             Phone number
             <input
               type="tel"
               value={phone}
               onChange={(event) => setPhone(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm outline-none ring-0 focus:border-zinc-900"
+              className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
               placeholder="+1 555 123 4567"
               autoComplete="tel"
               disabled={isSubmitting}
             />
           </label>
 
-          <label className="block text-sm font-medium text-zinc-700">
-            Email <span className="font-normal text-zinc-500">(optional)</span>
+          <label className="block text-sm font-medium text-foreground">
+            Email{" "}
+            <span className="font-normal text-muted-foreground">(optional)</span>
             <input
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-zinc-300 px-3 py-2.5 text-sm outline-none ring-0 focus:border-zinc-900"
+              className="mt-1.5 w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
               placeholder="you@example.com"
               autoComplete="email"
               disabled={isSubmitting}
@@ -132,7 +137,7 @@ export function LeadForm({
         </div>
 
         {error ? (
-          <p className="mt-4 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p className="mt-4 rounded-xl border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {error}
           </p>
         ) : null}
@@ -140,9 +145,9 @@ export function LeadForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-6 rounded-full bg-zinc-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-6 rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground shadow-md transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? "Starting chat..." : "Start chat"}
+          {isSubmitting ? "Starting chat…" : "Start chat"}
         </button>
       </form>
     </div>

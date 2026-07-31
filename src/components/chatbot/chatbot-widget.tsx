@@ -133,8 +133,8 @@ export function ChatbotWidget({ botId, business }: ChatbotWidgetProps) {
 
   if (!sessionId) {
     return (
-      <div className="flex h-full items-center justify-center text-sm text-zinc-500">
-        Loading chatbot...
+      <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+        Loading chatbot…
       </div>
     );
   }
