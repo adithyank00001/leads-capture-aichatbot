@@ -23,3 +23,8 @@ export const EMBED_COPIED_STORAGE_PREFIX = "leady_embed_copied_";
 export function getEmbedCopiedKey(botId: string) {
   return `${EMBED_COPIED_STORAGE_PREFIX}${botId}`;
 }
+
+/** Public app origin without trailing slash (for embed script URLs). */
+export function getPublicAppOrigin() {
+  return publicConfig.appUrl.replace(/\/+$/, "");
+}

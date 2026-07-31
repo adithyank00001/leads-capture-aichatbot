@@ -36,7 +36,8 @@ export const serverEnv = {
   openRouterApiKey: readOptionalEnv("OPENROUTER_API_KEY"),
   openRouterModel: readOptionalEnv("OPENROUTER_MODEL") ?? "openai/gpt-4o-mini",
   openRouterEmbeddingModel:
-    readOptionalEnv("OPENROUTER_EMBEDDING_MODEL") ?? "openai/text-embedding-3-small",
+    readOptionalEnv("OPENROUTER_EMBEDDING_MODEL") ??
+    "openai/text-embedding-3-small",
   embeddingDimensions: readIntEnv("OPENROUTER_EMBEDDING_DIMENSIONS", 1536),
   ragTopK: readIntEnv("RAG_TOP_K", 3),
   ragSimilarityThreshold: readFloatEnv("RAG_SIMILARITY_THRESHOLD", 0.7),

@@ -82,15 +82,20 @@ export function ChatbotWidget({ botId, business }: ChatbotWidgetProps) {
 
   useEffect(() => {
     const isTopLevel = window.self === window.top;
+    const queryParentUrl = searchParams.get("parentUrl");
 
     if (isTopLevel) {
       setParentPageUrlState(
-        resolveParentPageUrl(botId, searchParams.get("parentUrl")),
+        resolveParentPageUrl(botId, queryParentUrl),
       );
       return;
     }
 
-    setParentPageUrlState(null);
+    // widget.js passes the customer page URL in the iframe query string.
+    const resolvedFromQuery = resolveParentPageUrl(botId, queryParentUrl);
+    if (resolvedFromQuery) {
+      setParentPageUrlState(resolvedFromQuery);
+    }
 
     function handleMessage(event: MessageEvent) {
       if (

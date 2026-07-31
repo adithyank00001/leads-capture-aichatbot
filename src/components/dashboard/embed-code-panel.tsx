@@ -15,7 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getEmbedCopiedKey, publicConfig } from "@/lib/config";
+import { getEmbedCopiedKey, getPublicAppOrigin } from "@/lib/config";
 import { fetchJsonWithTimeout } from "@/lib/api/fetch-client";
 import { getCustomerErrorMessage } from "@/lib/dashboard/customer-errors";
 import {
@@ -47,9 +47,8 @@ export function EmbedCodePanel() {
   useEffect(() => {
     async function loadBot() {
       try {
-        const { response, body: result } = await fetchJsonWithTimeout<BotResponse>(
-          "/api/dashboard/bot",
-        );
+        const { response, body: result } =
+          await fetchJsonWithTimeout<BotResponse>("/api/dashboard/bot");
 
         if (!response.ok || !result.ok || !result.data) {
           throw new Error(result.error?.message ?? "Could not load bot.");
@@ -68,7 +67,7 @@ export function EmbedCodePanel() {
   }, []);
 
   const embedCode = `<script
-  src="${publicConfig.appUrl}/widget.js"
+  src="${getPublicAppOrigin()}/widget.js"
   data-bot-id="${botId}"
   async
 ></script>`;
@@ -111,7 +110,10 @@ export function EmbedCodePanel() {
             <AlertTitle>Save your website domain first</AlertTitle>
             <AlertDescription>
               Add your website domain in Setup before installing the chatbot.{" "}
-              <Link href="/dashboard/settings" className="font-medium text-primary underline">
+              <Link
+                href="/dashboard/settings"
+                className="font-medium text-primary underline"
+              >
                 Go to Setup
               </Link>
             </AlertDescription>
@@ -151,7 +153,12 @@ export function EmbedCodePanel() {
               </p>
             </div>
             {botId ? (
-              <Button type="button" onClick={handleCopy} size="sm" disabled={!hasDomain}>
+              <Button
+                type="button"
+                onClick={handleCopy}
+                size="sm"
+                disabled={!hasDomain}
+              >
                 {copied ? "Copied!" : "Copy code"}
               </Button>
             ) : null}
