@@ -57,15 +57,26 @@ type BotSettingsResponse = {
   };
 };
 
+/** Loaded from API but not shown in the form — still sent on save so nothing is wiped. */
+type LegacyKnowledgeFields = {
+  description: string;
+  location: string;
+  services: string;
+  openingHours: string;
+  contactMethod: string;
+};
+
 export function BotSettingsForm() {
   const [businessName, setBusinessName] = useState("");
-  const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
-  const [services, setServices] = useState("");
+  const [legacyKnowledge, setLegacyKnowledge] = useState<LegacyKnowledgeFields>({
+    description: "",
+    location: "",
+    services: "",
+    openingHours: "",
+    contactMethod: "",
+  });
   const [pricingNotes, setPricingNotes] = useState("");
   const [currentOffer, setCurrentOffer] = useState("");
-  const [openingHours, setOpeningHours] = useState("");
-  const [contactMethod, setContactMethod] = useState("");
   const [extraNotes, setExtraNotes] = useState("");
   const [allowedDomains, setAllowedDomains] = useState("");
   const [usageText, setUsageText] = useState("");
@@ -84,13 +95,15 @@ export function BotSettingsForm() {
         }
 
         setBusinessName(result.data.bot.business_name ?? "");
-        setDescription(result.data.knowledge.description ?? "");
-        setLocation(result.data.knowledge.location ?? "");
-        setServices(result.data.knowledge.services ?? "");
+        setLegacyKnowledge({
+          description: result.data.knowledge.description ?? "",
+          location: result.data.knowledge.location ?? "",
+          services: result.data.knowledge.services ?? "",
+          openingHours: result.data.knowledge.opening_hours ?? "",
+          contactMethod: result.data.knowledge.contact_method ?? "",
+        });
         setPricingNotes(result.data.knowledge.pricing_notes ?? "");
         setCurrentOffer(result.data.knowledge.current_offer ?? "");
-        setOpeningHours(result.data.knowledge.opening_hours ?? "");
-        setContactMethod(result.data.knowledge.contact_method ?? "");
         setExtraNotes(result.data.knowledge.extra_notes ?? "");
         setAllowedDomains((result.data.allowedDomains ?? [])[0] ?? "");
 
@@ -142,13 +155,13 @@ export function BotSettingsForm() {
         },
         body: JSON.stringify({
           businessName,
-          description,
-          location,
-          services,
+          description: legacyKnowledge.description,
+          location: legacyKnowledge.location,
+          services: legacyKnowledge.services,
           pricingNotes,
           currentOffer,
-          openingHours,
-          contactMethod,
+          openingHours: legacyKnowledge.openingHours,
+          contactMethod: legacyKnowledge.contactMethod,
           extraNotes,
           allowedDomains,
         }),
@@ -185,7 +198,8 @@ export function BotSettingsForm() {
           <div>
             <CardTitle className="text-2xl">Chatbot Setup</CardTitle>
             <CardDescription className="mt-1">
-              Add the information your chatbot needs to answer customers.
+              We learn from your website automatically. Add only what visitors
+              usually cannot find online or rules your chatbot must follow.
             </CardDescription>
           </div>
           {usageText ? <Badge variant="secondary">{usageText}</Badge> : null}
@@ -201,81 +215,61 @@ export function BotSettingsForm() {
                 value={businessName}
                 onChange={(event) => setBusinessName(event.target.value)}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Short description</Label>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                className="min-h-20"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
-              <Input
-                id="location"
-                value={location}
-                onChange={(event) => setLocation(event.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="openingHours">Opening hours</Label>
-              <Input
-                id="openingHours"
-                value={openingHours}
-                onChange={(event) => setOpeningHours(event.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="contactMethod">Contact details</Label>
-              <Input
-                id="contactMethod"
-                value={contactMethod}
-                onChange={(event) => setContactMethod(event.target.value)}
-              />
+              <p className="text-sm text-muted-foreground">
+                Shown at the top of your chatbot.
+              </p>
             </div>
           </SettingsSection>
 
           <SettingsSection
-            title="What your chatbot should know"
-            description="Manual information — Add details you want the chatbot to always follow. Manual information has priority over your website."
+            title="Important instructions"
+            description="These answers are given priority over your website. Use them for rules and details that are often missing from websites."
           >
             <div className="space-y-2">
-              <Label htmlFor="services">Services</Label>
-              <Textarea
-                id="services"
-                value={services}
-                onChange={(event) => setServices(event.target.value)}
-                className="min-h-20"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="pricingNotes">Pricing information</Label>
+              <Label htmlFor="pricingNotes">
+                How should the chatbot handle pricing questions?
+              </Label>
               <Textarea
                 id="pricingNotes"
                 value={pricingNotes}
                 onChange={(event) => setPricingNotes(event.target.value)}
                 className="min-h-20"
+                placeholder="Example: Do not quote exact prices. Ask for their phone number and say our team will call back with a quote."
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="currentOffer">Current offers</Label>
+              <Label htmlFor="currentOffer">
+                Current promotion{" "}
+                <span className="font-normal text-muted-foreground">
+                  (optional)
+                </span>
+              </Label>
               <Textarea
                 id="currentOffer"
                 value={currentOffer}
                 onChange={(event) => setCurrentOffer(event.target.value)}
-                className="min-h-20"
+                className="min-h-16"
+                placeholder="Example: 10% off for first-time customers this month."
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="extraNotes">Extra information</Label>
+              <Label htmlFor="extraNotes">
+                Extra information{" "}
+                <span className="font-normal text-muted-foreground">
+                  (optional)
+                </span>
+              </Label>
               <Textarea
                 id="extraNotes"
                 value={extraNotes}
                 onChange={(event) => setExtraNotes(event.target.value)}
                 className="min-h-20"
+                placeholder="Example: We only serve within 30 km of the city. Never promise same-day service."
               />
+              <p className="text-sm text-muted-foreground">
+                Service area, booking rules, or anything else not on your
+                website.
+              </p>
             </div>
           </SettingsSection>
 

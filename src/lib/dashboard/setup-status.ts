@@ -39,15 +39,20 @@ export type ChatbotReadinessLabel =
 
 const DEFAULT_BUSINESS_NAME = "My Business";
 
-const KNOWLEDGE_FIELDS = [
+/** Fields customers fill in Setup today (website scan covers the rest). */
+const SETUP_MANUAL_FIELDS = [
+  "pricing_notes",
+  "current_offer",
+  "extra_notes",
+] as const;
+
+/** Legacy fields — still count toward setup if filled before the simplified form. */
+const LEGACY_KNOWLEDGE_FIELDS = [
   "description",
   "location",
   "services",
-  "pricing_notes",
-  "current_offer",
   "opening_hours",
   "contact_method",
-  "extra_notes",
 ] as const;
 
 export function hasBusinessInformation(
@@ -59,7 +64,9 @@ export function hasBusinessInformation(
     return true;
   }
 
-  return KNOWLEDGE_FIELDS.some((field) => {
+  const fieldsToCheck = [...SETUP_MANUAL_FIELDS, ...LEGACY_KNOWLEDGE_FIELDS];
+
+  return fieldsToCheck.some((field) => {
     const value = knowledge[field];
     return typeof value === "string" && value.trim().length > 0;
   });
