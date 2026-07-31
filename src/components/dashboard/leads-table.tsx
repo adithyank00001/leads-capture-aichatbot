@@ -27,6 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { fetchJsonWithTimeout } from "@/lib/api/fetch-client";
+import { formatLeadCustomFields } from "@/lib/dashboard/lead-custom-fields";
 import {
   getLeadsDeleteErrorMessage,
   getLeadsLoadErrorMessage,
@@ -35,9 +36,10 @@ import { CHAT_RETENTION_NOTICE } from "@/lib/chat/retention";
 
 type Lead = {
   id: string;
-  name: string;
-  phone: string;
+  name: string | null;
+  phone: string | null;
   email: string | null;
+  custom_fields: Record<string, string> | null;
   page_url: string | null;
   session_id: string;
   created_at: string;
@@ -48,6 +50,7 @@ type LeadsResponse = {
   data?: {
     leads: Lead[];
     botId: string;
+    fieldLabels: Record<string, string>;
   };
   error?: {
     message: string;
@@ -56,6 +59,7 @@ type LeadsResponse = {
 
 export function LeadsTable() {
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [fieldLabels, setFieldLabels] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
@@ -76,6 +80,7 @@ export function LeadsTable() {
       }
 
       setLeads(result.data.leads);
+      setFieldLabels(result.data.fieldLabels ?? {});
     } catch (loadError) {
       setError(getLeadsLoadErrorMessage(loadError));
     } finally {
@@ -167,14 +172,26 @@ export function LeadsTable() {
                   <TableBody>
                     {leads.map((lead) => (
                       <TableRow key={lead.id}>
-                        <TableCell className="font-medium">{lead.name}</TableCell>
+                        <TableCell className="font-medium">
+                          {lead.name ?? "—"}
+                        </TableCell>
                         <TableCell>
-                          <div className="text-sm">{lead.phone}</div>
+                          <div className="text-sm">{lead.phone ?? "—"}</div>
                           {lead.email ? (
                             <div className="text-sm text-muted-foreground">
                               {lead.email}
                             </div>
                           ) : null}
+                          {formatLeadCustomFields(lead.custom_fields, fieldLabels).map(
+                            (field) => (
+                              <div
+                                key={field.label}
+                                className="text-sm text-muted-foreground"
+                              >
+                                {field.label}: {field.value}
+                              </div>
+                            ),
+                          )}
                         </TableCell>
                         <TableCell className="max-w-[200px] truncate">
                           {lead.page_url ?? "—"}
@@ -214,6 +231,7 @@ export function LeadsTable() {
                   <LeadsMobileCard
                     key={lead.id}
                     lead={lead}
+                    fieldLabels={fieldLabels}
                     onViewChat={setSelectedLeadId}
                     onDelete={openDeleteDialog}
                     isDeleting={deletingLeadId === lead.id}
@@ -227,7 +245,7 @@ export function LeadsTable() {
 
       <DeleteLeadDialog
         leadId={pendingDeleteLeadId}
-        leadName={pendingDeleteLead?.name}
+        leadName={pendingDeleteLead?.name ?? undefined}
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         onConfirm={handleDeleteLead}

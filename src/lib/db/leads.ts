@@ -7,9 +7,10 @@ type Client = SupabaseClient<Database>;
 
 export type CreateLeadInput = {
   botId: string;
-  name: string;
-  phone: string;
+  name: string | null;
+  phone: string | null;
   email?: string | null;
+  customFields?: Record<string, string>;
   sessionId: string;
   pageUrl?: string | null;
 };
@@ -24,10 +25,13 @@ export async function createLead(input: CreateLeadInput) {
       name: input.name,
       phone: input.phone,
       email: input.email ?? null,
+      custom_fields: input.customFields ?? {},
       session_id: input.sessionId,
       page_url: input.pageUrl ?? null,
     })
-    .select("id, bot_id, name, phone, email, session_id, page_url, created_at")
+    .select(
+      "id, bot_id, name, phone, email, custom_fields, session_id, page_url, created_at",
+    )
     .single();
 
   if (error) {
@@ -42,7 +46,9 @@ export async function getLeadBySession(botId: string, sessionId: string) {
 
   const { data, error } = await supabase
     .from("chatbot_leads")
-    .select("id, bot_id, name, phone, email, session_id, page_url, created_at")
+    .select(
+      "id, bot_id, name, phone, email, custom_fields, session_id, page_url, created_at",
+    )
     .eq("bot_id", botId)
     .eq("session_id", sessionId)
     .maybeSingle();
@@ -61,7 +67,9 @@ export async function getLeadByIdForBot(
 ) {
   const { data, error } = await supabase
     .from("chatbot_leads")
-    .select("id, bot_id, name, phone, email, session_id, page_url, created_at")
+    .select(
+      "id, bot_id, name, phone, email, custom_fields, session_id, page_url, created_at",
+    )
     .eq("bot_id", botId)
     .eq("id", leadId)
     .maybeSingle();

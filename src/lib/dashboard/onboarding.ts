@@ -1,5 +1,6 @@
 import { createBotForCustomer, getBotByCustomerId } from "@/lib/db/bots";
 import { createEmptyBotKnowledge } from "@/lib/db/bot-knowledge";
+import { ensureWidgetSettingsForBot } from "@/lib/db/bot-widget-settings";
 import { createCustomer, getCustomerByUserId } from "@/lib/db/customers";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -35,6 +36,8 @@ export async function ensureCustomerOnboarding(
   if (!existingKnowledge.data) {
     await createEmptyBotKnowledge(client, bot.bot_id);
   }
+
+  await ensureWidgetSettingsForBot(client, bot.bot_id);
 
   return {
     customer,

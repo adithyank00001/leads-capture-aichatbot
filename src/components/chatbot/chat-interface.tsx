@@ -1,29 +1,90 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Paperclip, Send, Smile } from "lucide-react";
 
-import { fetchMessages, sendChatMessage, type ChatMessage } from "@/lib/api/client";
+import { BusinessAvatar } from "@/components/chatbot/business-avatar";
+import { ChatWidgetShell } from "@/components/chatbot/chat-widget-shell";
+import { LeadCaptureStrip } from "@/components/chatbot/lead-capture-strip";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  fetchMessages,
+  sendChatMessage,
+  type ChatMessage,
+} from "@/lib/api/client";
 import type { BusinessDisplay } from "@/lib/business/display";
+import { formatChatTimestamp } from "@/lib/chat/format";
+import type { WidgetSettings } from "@/lib/widget/types";
+import {
+  hasCompletedLead,
+  markLeadCompleted,
+} from "@/lib/session/client";
+
+const PENDING_MESSAGE_ID = "pending-user-message";
 
 type ChatInterfaceProps = {
   botId: string;
   sessionId: string;
   business: BusinessDisplay;
+  widgetSettings: WidgetSettings;
   parentPageUrl?: string | null;
+  onClose: () => void;
 };
+
+function TypingIndicator({ businessName }: { businessName: string }) {
+  return (
+    <div className="flex items-start gap-2">
+      <BusinessAvatar name={businessName} size="sm" className="mt-1" />
+      <div className="rounded-2xl bg-blue-50 px-4 py-3">
+        <div className="flex items-center gap-1">
+          <span
+            className="size-1.5 animate-bounce rounded-full bg-zinc-400 [animation-delay:0ms]"
+          />
+          <span
+            className="size-1.5 animate-bounce rounded-full bg-zinc-400 [animation-delay:150ms]"
+          />
+          <span
+            className="size-1.5 animate-bounce rounded-full bg-zinc-400 [animation-delay:300ms]"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function ChatInterface({
   botId,
   sessionId,
   business,
+  widgetSettings,
   parentPageUrl,
+  onClose,
 }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [leadCompleted, setLeadCompleted] = useState(false);
+  const [showLeadStrip, setShowLeadStrip] = useState(false);
+  const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  const assistantLabel = `${business.name} assistant`;
+  const pageUrl =
+    parentPageUrl ??
+    (typeof window !== "undefined" ? window.location.href : undefined);
+  const leadFormEnabled = widgetSettings.leadFormEnabled;
+
+  useEffect(() => {
+    if (!leadFormEnabled) {
+      setLeadCompleted(true);
+      return;
+    }
+
+    setLeadCompleted(hasCompletedLead(botId, sessionId));
+  }, [botId, sessionId, leadFormEnabled]);
 
   useEffect(() => {
     let isMounted = true;
@@ -34,6 +95,10 @@ export function ChatInterface({
 
         if (isMounted) {
           setMessages(history);
+          if (leadFormEnabled) {
+            markLeadCompleted(botId, sessionId);
+            setLeadCompleted(true);
+          }
         }
       } catch {
         if (isMounted) {
@@ -51,11 +116,37 @@ export function ChatInterface({
     return () => {
       isMounted = false;
     };
-  }, [botId, sessionId]);
+  }, [botId, sessionId, leadFormEnabled]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isSending]);
+  }, [messages, isSending, showLeadStrip]);
+
+  async function sendMessageToApi(message: string) {
+    setIsSending(true);
+    setError(null);
+
+    try {
+      const result = await sendChatMessage({
+        botId,
+        sessionId,
+        message,
+        pageUrl,
+      });
+
+      setMessages(result.messages);
+      setPendingMessage(null);
+    } catch (sendError) {
+      setError(
+        sendError instanceof Error
+          ? sendError.message
+          : "Could not send your message.",
+      );
+      throw sendError;
+    } finally {
+      setIsSending(false);
+    }
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -67,112 +158,188 @@ export function ChatInterface({
       return;
     }
 
-    setIsSending(true);
+    if (!leadCompleted && leadFormEnabled) {
+      if (showLeadStrip) {
+        setError("Please add your details below so we can reply.");
+        return;
+      }
+
+      const optimisticMessage: ChatMessage = {
+        id: PENDING_MESSAGE_ID,
+        role: "user",
+        content: trimmedMessage,
+        created_at: new Date().toISOString(),
+      };
+
+      setMessages([optimisticMessage]);
+      setPendingMessage(trimmedMessage);
+      setShowLeadStrip(true);
+      setInput("");
+      return;
+    }
+
     setInput("");
 
     try {
-      const result = await sendChatMessage({
-        botId,
-        sessionId,
-        message: trimmedMessage,
-        pageUrl:
-          parentPageUrl ??
-          (typeof window !== "undefined" ? window.location.href : undefined),
-      });
-
-      setMessages(result.messages);
-    } catch (sendError) {
+      await sendMessageToApi(trimmedMessage);
+    } catch {
       setInput(trimmedMessage);
-      setError(
-        sendError instanceof Error
-          ? sendError.message
-          : "Could not send your message.",
-      );
-    } finally {
-      setIsSending(false);
     }
   }
 
+  async function handleLeadSuccess() {
+    markLeadCompleted(botId, sessionId);
+    setLeadCompleted(true);
+    setShowLeadStrip(false);
+
+    if (!pendingMessage) {
+      return;
+    }
+
+    try {
+      await sendMessageToApi(pendingMessage);
+    } catch {
+      setInput(pendingMessage);
+      setPendingMessage(null);
+      setError(
+        "Your details were saved. Tap send again if the reply did not appear.",
+      );
+    }
+  }
+
+  const displayMessages = messages;
+  const showWelcome =
+    !isLoadingHistory &&
+    displayMessages.length === 0 &&
+    !isSending &&
+    !showLeadStrip;
+  const timestampLabel = formatChatTimestamp(new Date());
+
   return (
-    <div className="flex h-full flex-col bg-background">
-      <header className="border-b border-border bg-card px-4 py-4 shadow-sm">
-        <h1 className="text-lg font-semibold tracking-tight text-foreground">
-          {business.name}
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {business.chatWelcomeMessage}
-        </p>
-      </header>
+    <ChatWidgetShell businessName={business.name} onClose={onClose}>
+      <ScrollArea className="min-h-0 flex-1 bg-white">
+        <div className="space-y-4 px-4 py-4">
+          <p className="text-center text-xs text-zinc-400">{timestampLabel}</p>
 
-      <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
-        {isLoadingHistory ? (
-          <p className="rounded-2xl bg-muted px-4 py-3 text-sm text-muted-foreground shadow-sm">
-            Loading conversation…
-          </p>
-        ) : null}
+          {isLoadingHistory ? (
+            <p className="text-center text-sm text-zinc-500">
+              Loading conversation…
+            </p>
+          ) : null}
 
-        {!isLoadingHistory && messages.length === 0 ? (
-          <p className="rounded-2xl bg-muted px-4 py-3 text-sm text-foreground shadow-sm">
-            {business.chatWelcomeMessage}
-          </p>
-        ) : null}
-
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${
-              message.role === "user" ? "justify-end" : "justify-start"
-            }`}
-          >
-            <div
-              className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm ${
-                message.role === "user"
-                  ? "bg-primary text-primary-foreground"
-                  : "border border-border bg-card text-foreground"
-              }`}
-            >
-              {message.content}
+          {showWelcome ? (
+            <div className="space-y-1">
+              <p className="text-xs text-zinc-400">{assistantLabel}</p>
+              <div className="flex items-start gap-2">
+                <BusinessAvatar name={business.name} size="sm" className="mt-1" />
+                <div className="max-w-[85%] rounded-2xl bg-blue-50 px-4 py-3 text-sm leading-6 text-zinc-800">
+                  {business.chatWelcomeMessage}
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          ) : null}
 
-        {isSending ? (
-          <div className="flex justify-start">
-            <div className="rounded-2xl border border-border bg-muted px-4 py-3 text-sm text-muted-foreground shadow-sm">
-              Thinking…
-            </div>
-          </div>
-        ) : null}
+          {displayMessages.map((message) => {
+            const isUser = message.role === "user";
 
-        <div ref={bottomRef} />
-      </div>
+            return (
+              <div key={message.id} className="space-y-1">
+                <p
+                  className={`text-xs text-zinc-400 ${
+                    isUser ? "text-right" : "text-left"
+                  }`}
+                >
+                  {isUser ? "You" : assistantLabel}
+                </p>
+                <div
+                  className={`flex items-start gap-2 ${
+                    isUser ? "flex-row-reverse" : "flex-row"
+                  }`}
+                >
+                  {!isUser ? (
+                    <BusinessAvatar
+                      name={business.name}
+                      size="sm"
+                      className="mt-1"
+                    />
+                  ) : null}
+                  <div
+                    className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-6 text-zinc-800 ${
+                      isUser ? "bg-amber-50" : "bg-blue-50"
+                    }`}
+                  >
+                    {message.content}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {isSending ? <TypingIndicator businessName={business.name} /> : null}
+
+          <div ref={bottomRef} />
+        </div>
+      </ScrollArea>
 
       {error ? (
-        <p className="px-4 pb-2 text-sm text-destructive">{error}</p>
+        <p className="px-4 pb-2 text-sm text-red-600">{error}</p>
+      ) : null}
+
+      {showLeadStrip && leadFormEnabled && !leadCompleted ? (
+        <LeadCaptureStrip
+          botId={botId}
+          sessionId={sessionId}
+          leadFields={widgetSettings.leadFields}
+          parentPageUrl={parentPageUrl}
+          onSuccess={() => {
+            void handleLeadSuccess();
+          }}
+        />
       ) : null}
 
       <form
         onSubmit={handleSubmit}
-        className="border-t border-border bg-card px-4 py-4 shadow-[0_-4px_12px_rgba(0,0,0,0.04)]"
+        className="border-t border-zinc-100 bg-zinc-50 px-4 py-3"
       >
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <input
             type="text"
             value={input}
             onChange={(event) => setInput(event.target.value)}
-            placeholder="Type your question…"
-            className="flex-1 rounded-full border border-input bg-background px-4 py-2.5 text-sm shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+            placeholder="Type here..."
+            className="min-w-0 flex-1 bg-transparent text-sm text-zinc-800 outline-none placeholder:text-zinc-400"
             disabled={isSending}
           />
-          <button
+          <Button
             type="submit"
+            variant="widgetAccent"
+            size="icon-sm"
             disabled={isSending || !input.trim()}
-            className="rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-md transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-full"
+            aria-label="Send message"
           >
-            Send
+            <Send className="size-3.5" />
+          </Button>
+        </div>
+        <div className="mt-2 flex items-center gap-3 text-zinc-400">
+          <button
+            type="button"
+            className="hover:text-zinc-600"
+            aria-label="Add emoji"
+            tabIndex={-1}
+          >
+            <Smile className="size-4" />
+          </button>
+          <button
+            type="button"
+            className="hover:text-zinc-600"
+            aria-label="Attach file"
+            tabIndex={-1}
+          >
+            <Paperclip className="size-4" />
           </button>
         </div>
       </form>
-    </div>
+    </ChatWidgetShell>
   );
 }

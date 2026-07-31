@@ -3,6 +3,8 @@
 
   var WIDGET_ROOT_ID = "chatbot-mvp-root";
   var GLOBAL_NAME = "ChatbotMvp";
+  var RESIZE_MESSAGE_TYPE = "chatbot-widget-resize";
+  var LAUNCHER_SIZE = 56;
 
   if (window[GLOBAL_NAME] && window[GLOBAL_NAME].loaded) {
     return;
@@ -47,6 +49,26 @@
     return null;
   }
 
+  function applyLauncherStyles(container, iframe) {
+    container.style.width = LAUNCHER_SIZE + "px";
+    container.style.height = LAUNCHER_SIZE + "px";
+    container.style.maxWidth = LAUNCHER_SIZE + "px";
+    container.style.maxHeight = LAUNCHER_SIZE + "px";
+    iframe.style.borderRadius = "9999px";
+    iframe.style.boxShadow = "none";
+    iframe.style.background = "transparent";
+  }
+
+  function applyPanelStyles(container, iframe) {
+    container.style.width = "min(100vw - 32px, 380px)";
+    container.style.height = "min(100vh - 32px, 620px)";
+    container.style.maxWidth = "380px";
+    container.style.maxHeight = "620px";
+    iframe.style.borderRadius = "16px";
+    iframe.style.boxShadow = "0 12px 40px rgba(0, 0, 0, 0.18)";
+    iframe.style.background = "#ffffff";
+  }
+
   function createWidget(script) {
     var botId = resolveBotId(script);
     var baseUrl = getBaseUrl(script);
@@ -66,10 +88,6 @@
       "position: fixed",
       "right: 16px",
       "bottom: 16px",
-      "width: min(100vw - 32px, 380px)",
-      "height: min(100vh - 32px, 620px)",
-      "max-width: 380px",
-      "max-height: 620px",
       "z-index: 2147483000",
       "pointer-events: auto",
     ].join(";");
@@ -88,13 +106,12 @@
       "width: 100%",
       "height: 100%",
       "border: 0",
-      "border-radius: 16px",
-      "box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18)",
-      "background: #ffffff",
     ].join(";");
 
     container.appendChild(iframe);
     document.body.appendChild(container);
+
+    applyLauncherStyles(container, iframe);
 
     iframe.addEventListener("load", function () {
       if (!iframe.contentWindow) {
@@ -110,11 +127,52 @@
       );
     });
 
+    window.addEventListener("message", function (event) {
+      if (event.origin !== baseUrl) {
+        return;
+      }
+
+      if (
+        !event.data ||
+        typeof event.data !== "object" ||
+        event.data.type !== RESIZE_MESSAGE_TYPE
+      ) {
+        return;
+      }
+
+      if (event.data.mode === "launcher") {
+        applyLauncherStyles(container, iframe);
+        return;
+      }
+
+      if (event.data.mode === "panel") {
+        applyPanelStyles(container, iframe);
+      }
+    });
+
     return {
       botId: botId,
       baseUrl: baseUrl,
       container: container,
       iframe: iframe,
+      open: function () {
+        applyPanelStyles(container, iframe);
+        if (iframe.contentWindow) {
+          iframe.contentWindow.postMessage(
+            { type: RESIZE_MESSAGE_TYPE, mode: "panel" },
+            baseUrl,
+          );
+        }
+      },
+      close: function () {
+        applyLauncherStyles(container, iframe);
+        if (iframe.contentWindow) {
+          iframe.contentWindow.postMessage(
+            { type: RESIZE_MESSAGE_TYPE, mode: "launcher" },
+            baseUrl,
+          );
+        }
+      },
     };
   }
 
@@ -137,12 +195,8 @@
         loaded: true,
         status: "ready",
         botId: widget.botId,
-        open: function () {
-          widget.container.style.display = "block";
-        },
-        close: function () {
-          widget.container.style.display = "none";
-        },
+        open: widget.open,
+        close: widget.close,
       };
     } catch (error) {
       if (window[GLOBAL_NAME]) {

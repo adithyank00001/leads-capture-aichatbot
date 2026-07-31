@@ -19,6 +19,7 @@ import { publicConfig } from "@/lib/config";
 const navItems = [
   { href: "/dashboard", label: "Overview", exact: true },
   { href: "/dashboard/settings", label: "Setup", exact: false },
+  { href: "/dashboard/customize", label: "Customize chatbot", exact: false },
   { href: "/dashboard/website", label: "Website Knowledge", exact: false },
   { href: "/dashboard/embed", label: "Install Chatbot", exact: false },
   { href: "/dashboard/leads", label: "Leads", exact: false },

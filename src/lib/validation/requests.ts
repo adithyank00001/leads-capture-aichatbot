@@ -97,22 +97,62 @@ export function parseLeadPayload(body: unknown) {
     "sessionId",
     MAX_SESSION_ID_LENGTH,
   );
-  const name = requireNonEmptyString(payload.name, "name", MAX_NAME_LENGTH);
-  const phone = requireNonEmptyString(payload.phone, "phone", MAX_PHONE_LENGTH);
-  const email = optionalString(payload.email, "email", MAX_EMAIL_LENGTH);
   const pageUrl = optionalString(payload.pageUrl, "pageUrl", MAX_PAGE_URL_LENGTH);
 
-  if (email && !EMAIL_PATTERN.test(email)) {
-    throw new ApiValidationError("INVALID_EMAIL", "Email format is invalid.");
+  function optionalLeadValue(value: unknown, fieldName: string) {
+    if (value === undefined || value === null) {
+      return null;
+    }
+
+    if (typeof value !== "string") {
+      throw new ApiValidationError(
+        `INVALID_${fieldName.toUpperCase()}`,
+        `${fieldName} must be a text value.`,
+      );
+    }
+
+    const trimmed = value.trim();
+    return trimmed ? trimmed : null;
+  }
+
+  function parseCustomFields(value: unknown): Record<string, string> | undefined {
+    if (value === undefined || value === null) {
+      return undefined;
+    }
+
+    if (typeof value !== "object" || Array.isArray(value)) {
+      throw new ApiValidationError(
+        "INVALID_CUSTOM_FIELDS",
+        "customFields must be an object.",
+        400,
+      );
+    }
+
+    const result: Record<string, string> = {};
+
+    for (const [key, fieldValue] of Object.entries(value)) {
+      if (typeof fieldValue !== "string") {
+        throw new ApiValidationError(
+          "INVALID_CUSTOM_FIELDS",
+          "Each custom field value must be text.",
+          400,
+        );
+      }
+
+      result[key] = fieldValue;
+    }
+
+    return result;
   }
 
   return {
     botId,
     sessionId,
-    name,
-    phone,
-    email: email ?? null,
     pageUrl: pageUrl ?? null,
+    name: optionalLeadValue(payload.name, "name"),
+    phone: optionalLeadValue(payload.phone, "phone"),
+    email: optionalLeadValue(payload.email, "email"),
+    customFields: parseCustomFields(payload.customFields),
   };
 }
 

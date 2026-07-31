@@ -142,13 +142,41 @@ export type Database = {
         };
         Relationships: [];
       };
+      bot_widget_settings: {
+        Row: {
+          bot_id: string;
+          header_color: string;
+          accent_color: string;
+          lead_form_enabled: boolean;
+          lead_fields: Json;
+          updated_at: string;
+        };
+        Insert: {
+          bot_id: string;
+          header_color?: string;
+          accent_color?: string;
+          lead_form_enabled?: boolean;
+          lead_fields?: Json;
+          updated_at?: string;
+        };
+        Update: {
+          bot_id?: string;
+          header_color?: string;
+          accent_color?: string;
+          lead_form_enabled?: boolean;
+          lead_fields?: Json;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       chatbot_leads: {
         Row: {
           id: string;
           bot_id: string;
-          name: string;
-          phone: string;
+          name: string | null;
+          phone: string | null;
           email: string | null;
+          custom_fields: Record<string, string>;
           session_id: string;
           page_url: string | null;
           created_at: string;
@@ -156,9 +184,10 @@ export type Database = {
         Insert: {
           id?: string;
           bot_id: string;
-          name: string;
-          phone: string;
+          name?: string | null;
+          phone?: string | null;
           email?: string | null;
+          custom_fields?: Record<string, string>;
           session_id: string;
           page_url?: string | null;
           created_at?: string;
@@ -166,9 +195,10 @@ export type Database = {
         Update: {
           id?: string;
           bot_id?: string;
-          name?: string;
-          phone?: string;
+          name?: string | null;
+          phone?: string | null;
           email?: string | null;
+          custom_fields?: Record<string, string>;
           session_id?: string;
           page_url?: string | null;
           created_at?: string;

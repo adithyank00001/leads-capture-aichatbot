@@ -46,26 +46,29 @@ async function postJson<T>(path: string, body: Record<string, unknown>) {
 export async function submitLead(input: {
   botId: string;
   sessionId: string;
-  name: string;
-  phone: string;
-  email?: string;
+  name?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  customFields?: Record<string, string>;
   pageUrl?: string;
 }) {
   return postJson<{
     lead: {
       id: string;
-      name: string;
-      phone: string;
+      name: string | null;
+      phone: string | null;
       email: string | null;
+      custom_fields: Record<string, string>;
       session_id: string;
     };
     created: boolean;
   }>("leads", {
     botId: input.botId,
     sessionId: input.sessionId,
-    name: input.name,
-    phone: input.phone,
-    email: input.email,
+    name: input.name ?? null,
+    phone: input.phone ?? null,
+    email: input.email ?? null,
+    customFields: input.customFields ?? {},
     pageUrl: input.pageUrl,
   });
 }

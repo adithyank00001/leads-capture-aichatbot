@@ -4,24 +4,25 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { ChatInterface } from "@/components/chatbot/chat-interface";
-import { LeadForm } from "@/components/chatbot/lead-form";
+import { ChatLauncher } from "@/components/chatbot/chat-launcher";
+import { WidgetThemeProvider } from "@/components/chatbot/widget-theme-provider";
 import type { BusinessDisplay } from "@/lib/business/display";
 import { getApiPath } from "@/lib/config";
 import {
   resolveParentPageUrl,
   setParentPageUrl,
 } from "@/lib/embed/parent-page";
+import { postWidgetResize } from "@/lib/embed/widget-messages";
 import { isHostAllowed, normalizeDomain } from "@/lib/security/domain-shared";
-import {
-  getOrCreateSessionId,
-  hasCompletedLead,
-} from "@/lib/session/client";
+import { getOrCreateSessionId } from "@/lib/session/client";
+import type { WidgetSettings } from "@/lib/widget/types";
 
 const PARENT_PAGE_MESSAGE_TYPE = "chatbot-parent-page";
 
 type ChatbotWidgetProps = {
   botId: string;
   business: BusinessDisplay;
+  widgetSettings: WidgetSettings;
 };
 
 function hostFromOrigin(origin: string) {
@@ -32,18 +33,35 @@ function hostFromOrigin(origin: string) {
   }
 }
 
-export function ChatbotWidget({ botId, business }: ChatbotWidgetProps) {
+export function ChatbotWidget({
+  botId,
+  business,
+  widgetSettings,
+}: ChatbotWidgetProps) {
   const searchParams = useSearchParams();
+
   const [sessionId, setSessionId] = useState("");
-  const [showChat, setShowChat] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isTopLevel, setIsTopLevel] = useState(false);
   const [parentPageUrl, setParentPageUrlState] = useState<string | null>(null);
   const [allowedDomains, setAllowedDomains] = useState<string[]>([]);
 
   useEffect(() => {
+    const topLevel = window.self === window.top;
+    setIsTopLevel(topLevel);
+    if (topLevel) {
+      setIsOpen(true);
+    }
+  }, []);
+
+  useEffect(() => {
     const id = getOrCreateSessionId(botId);
     setSessionId(id);
-    setShowChat(hasCompletedLead(botId, id));
   }, [botId]);
+
+  useEffect(() => {
+    postWidgetResize(isOpen ? "panel" : "launcher");
+  }, [isOpen]);
 
   useEffect(() => {
     let cancelled = false;
@@ -81,7 +99,6 @@ export function ChatbotWidget({ botId, business }: ChatbotWidgetProps) {
   }, [botId]);
 
   useEffect(() => {
-    const isTopLevel = window.self === window.top;
     const queryParentUrl = searchParams.get("parentUrl");
 
     if (isTopLevel) {
@@ -91,7 +108,6 @@ export function ChatbotWidget({ botId, business }: ChatbotWidgetProps) {
       return;
     }
 
-    // widget.js passes the customer page URL in the iframe query string.
     const resolvedFromQuery = resolveParentPageUrl(botId, queryParentUrl);
     if (resolvedFromQuery) {
       setParentPageUrlState(resolvedFromQuery);
@@ -134,34 +150,38 @@ export function ChatbotWidget({ botId, business }: ChatbotWidgetProps) {
     return () => {
       window.removeEventListener("message", handleMessage);
     };
-  }, [allowedDomains, botId, searchParams]);
+  }, [allowedDomains, botId, isTopLevel, searchParams]);
+
+  function handleClose() {
+    setIsOpen(false);
+  }
+
+  function handleOpen() {
+    setIsOpen(true);
+  }
 
   if (!sessionId) {
     return (
-      <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+      <div className="flex h-full items-center justify-center text-sm text-zinc-500">
         Loading chatbot…
       </div>
     );
   }
 
-  if (!showChat) {
-    return (
-      <LeadForm
-        botId={botId}
-        sessionId={sessionId}
-        business={business}
-        parentPageUrl={parentPageUrl}
-        onSuccess={() => setShowChat(true)}
-      />
-    );
-  }
-
   return (
-    <ChatInterface
-      botId={botId}
-      sessionId={sessionId}
-      business={business}
-      parentPageUrl={parentPageUrl}
-    />
+    <WidgetThemeProvider settings={widgetSettings}>
+      {!isOpen ? (
+        <ChatLauncher onOpen={handleOpen} />
+      ) : (
+        <ChatInterface
+          botId={botId}
+          sessionId={sessionId}
+          business={business}
+          widgetSettings={widgetSettings}
+          parentPageUrl={parentPageUrl}
+          onClose={handleClose}
+        />
+      )}
+    </WidgetThemeProvider>
   );
 }

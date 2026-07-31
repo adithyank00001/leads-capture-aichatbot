@@ -143,7 +143,11 @@ async function run() {
     }),
   );
 
-  if (!missingPhone.body.ok && missingPhone.body.error?.code === "MISSING_PHONE") {
+  if (
+    !missingPhone.body.ok &&
+    (missingPhone.body.error?.code === "MISSING_PHONE" ||
+      missingPhone.body.error?.code === "MISSING_LEAD_FIELD")
+  ) {
     pass("missing phone validation");
   } else {
     fail("missing phone validation", JSON.stringify(missingPhone.body));
