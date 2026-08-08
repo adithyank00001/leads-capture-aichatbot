@@ -1,7 +1,9 @@
+import { cache } from "react";
+
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { ApiValidationError } from "@/lib/validation/errors";
 
-export async function requireAuthUser() {
+export const requireAuthUser = cache(async () => {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -13,4 +15,4 @@ export async function requireAuthUser() {
   }
 
   return { supabase, user };
-}
+});

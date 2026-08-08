@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { FormattedPrice } from "@/components/ui/formatted-price";
 import { publicConfig } from "@/lib/config";
 
 export function LandingHero() {
@@ -25,7 +26,10 @@ export function LandingHero() {
       </div>
       <div className="flex flex-wrap gap-3">
         <Button asChild size="lg">
-          <Link href="/signup">Start free</Link>
+          <Link href="/signup" className="inline-flex items-center gap-1">
+            Get lifetime access —{" "}
+            <FormattedPrice amount={publicConfig.lifetimeAccessPriceUsd} />
+          </Link>
         </Button>
         <Button asChild variant="outline" size="lg">
           <Link href="/login">Login</Link>

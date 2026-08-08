@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { fetchJsonWithTimeout } from "@/lib/api/fetch-client";
 import { getCustomerErrorMessage } from "@/lib/dashboard/customer-errors";
+import type { BotSettingsInitialData } from "@/lib/dashboard/overview-data";
 import {
   INVALID_DOMAIN_ERROR,
   REQUIRED_DOMAIN_ERROR,
@@ -66,25 +67,62 @@ type LegacyKnowledgeFields = {
   contactMethod: string;
 };
 
-export function BotSettingsForm() {
-  const [businessName, setBusinessName] = useState("");
-  const [legacyKnowledge, setLegacyKnowledge] = useState<LegacyKnowledgeFields>({
-    description: "",
-    location: "",
-    services: "",
-    openingHours: "",
-    contactMethod: "",
-  });
-  const [pricingNotes, setPricingNotes] = useState("");
-  const [currentOffer, setCurrentOffer] = useState("");
-  const [extraNotes, setExtraNotes] = useState("");
-  const [allowedDomains, setAllowedDomains] = useState("");
-  const [usageText, setUsageText] = useState("");
-  const [loading, setLoading] = useState(true);
+function usageLabel(usage: BotSettingsInitialData["usage"]) {
+  if (!usage) {
+    return "";
+  }
+
+  return `${usage.messagesUsedThisPeriod} / ${usage.monthlyMessageLimit} messages used this month`;
+}
+
+function applyInitialData(data: BotSettingsInitialData) {
+  return {
+    businessName: data.businessName,
+    legacyKnowledge: {
+      description: data.knowledge.description,
+      location: data.knowledge.location,
+      services: data.knowledge.services,
+      openingHours: data.knowledge.opening_hours,
+      contactMethod: data.knowledge.contact_method,
+    },
+    pricingNotes: data.knowledge.pricing_notes,
+    currentOffer: data.knowledge.current_offer,
+    extraNotes: data.knowledge.extra_notes,
+    allowedDomains: data.allowedDomains[0] ?? "",
+    usageText: usageLabel(data.usage),
+  };
+}
+
+type BotSettingsFormProps = {
+  initialData?: BotSettingsInitialData;
+};
+
+export function BotSettingsForm({ initialData }: BotSettingsFormProps) {
+  const seeded = initialData ? applyInitialData(initialData) : null;
+  const [businessName, setBusinessName] = useState(seeded?.businessName ?? "");
+  const [legacyKnowledge, setLegacyKnowledge] = useState<LegacyKnowledgeFields>(
+    seeded?.legacyKnowledge ?? {
+      description: "",
+      location: "",
+      services: "",
+      openingHours: "",
+      contactMethod: "",
+    },
+  );
+  const [pricingNotes, setPricingNotes] = useState(seeded?.pricingNotes ?? "");
+  const [currentOffer, setCurrentOffer] = useState(seeded?.currentOffer ?? "");
+  const [extraNotes, setExtraNotes] = useState(seeded?.extraNotes ?? "");
+  const [allowedDomains, setAllowedDomains] = useState(seeded?.allowedDomains ?? "");
+  const [usageText, setUsageText] = useState(seeded?.usageText ?? "");
+  const [loading, setLoading] = useState(!initialData);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (initialData) {
+      return;
+    }
+
     async function loadSettings() {
       try {
         const { response, body: result } =
@@ -120,7 +158,7 @@ export function BotSettingsForm() {
     }
 
     loadSettings();
-  }, []);
+  }, [initialData]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -284,11 +322,11 @@ export function BotSettingsForm() {
                 type="text"
                 value={allowedDomains}
                 onChange={(event) => setAllowedDomains(event.target.value)}
-                placeholder="stylette.com"
+                placeholder="yourdomain.com"
               />
               <p className="text-sm text-muted-foreground">
                 Use a real domain with an ending like .com or .in (example:
-                stylette.com).
+                yourdomain.com).
               </p>
             </div>
           </SettingsSection>

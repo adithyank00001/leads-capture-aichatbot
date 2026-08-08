@@ -14,8 +14,10 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { GoogleSignInButton } from "@/components/dashboard/google-sign-in-button";
 import { getCustomerErrorMessage } from "@/lib/dashboard/customer-errors";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
+import { Separator } from "@/components/ui/separator";
 
 export function SignupForm() {
   const router = useRouter();
@@ -45,7 +47,7 @@ export function SignupForm() {
     }
 
     if (data.session) {
-      router.push("/dashboard");
+      router.push("/checkout");
       router.refresh();
       return;
     }
@@ -56,14 +58,21 @@ export function SignupForm() {
   }
 
   return (
-    <Card className="mx-auto max-w-md shadow-lg ring-primary/10">
+    <Card className="w-full shadow-lg ring-primary/10">
       <CardHeader>
         <CardTitle className="text-2xl">Create your account</CardTitle>
         <CardDescription>
-          Start setting up your chatbot in a few minutes.
+          Create your account, then unlock lifetime access for your chatbot
+          dashboard.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        <GoogleSignInButton nextPath="/checkout" onError={setError} />
+        <div className="flex items-center gap-3">
+          <Separator className="flex-1" />
+          <span className="text-xs text-muted-foreground">or sign up with email</span>
+          <Separator className="flex-1" />
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="signup-email">Email</Label>

@@ -1,6 +1,6 @@
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { handleRouteError, parseJsonBody } from "@/lib/api/request";
-import { requireAuthUser } from "@/lib/auth/dashboard";
+import { requireDashboardApiUser } from "@/lib/auth/dashboard-session";
 import { appendWebsiteBuildLog } from "@/lib/db/website-build-log";
 import { clearWebsiteKnowledgeForBot } from "@/lib/db/website-knowledge";
 import {
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   let sourceId: string | null = null;
 
   try {
-    const { supabase, user } = await requireAuthUser();
+    const { supabase, user } = await requireDashboardApiUser();
     const body = (await parseJsonBody(request)) as BuildPayload;
     const websiteUrl = normalizeWebsiteUrl(body.websiteUrl ?? "");
 

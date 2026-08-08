@@ -1,5 +1,5 @@
 import { apiError, apiSuccess } from "@/lib/api-response";
-import { requireAuthUser } from "@/lib/auth/dashboard";
+import { requireDashboardApiUser } from "@/lib/auth/dashboard-session";
 import {
   ensureWidgetSettingsForBot,
   upsertWidgetSettingsForBot,
@@ -11,7 +11,7 @@ import { parseWidgetSettingsPayload } from "@/lib/validation/widget-settings";
 
 export async function GET() {
   try {
-    const { supabase, user } = await requireAuthUser();
+    const { supabase, user } = await requireDashboardApiUser();
     const customer = await getCustomerByUserId(supabase, user.id);
 
     if (!customer) {
@@ -35,7 +35,7 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
-    const { supabase, user } = await requireAuthUser();
+    const { supabase, user } = await requireDashboardApiUser();
     const body = await parseJsonBody(request);
     const input = parseWidgetSettingsPayload(body);
 

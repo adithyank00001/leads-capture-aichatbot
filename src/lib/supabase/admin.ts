@@ -19,18 +19,30 @@ export type Database = {
           user_id: string;
           email: string;
           created_at: string;
+          has_lifetime_access: boolean;
+          lifetime_access_granted_at: string | null;
+          dodo_payment_id: string | null;
+          dodo_customer_id: string | null;
         };
         Insert: {
           id?: string;
           user_id: string;
           email: string;
           created_at?: string;
+          has_lifetime_access?: boolean;
+          lifetime_access_granted_at?: string | null;
+          dodo_payment_id?: string | null;
+          dodo_customer_id?: string | null;
         };
         Update: {
           id?: string;
           user_id?: string;
           email?: string;
           created_at?: string;
+          has_lifetime_access?: boolean;
+          lifetime_access_granted_at?: string | null;
+          dodo_payment_id?: string | null;
+          dodo_customer_id?: string | null;
         };
         Relationships: [];
       };

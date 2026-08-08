@@ -46,6 +46,12 @@ export const serverEnv = {
   gasIngestionHmacSecret: readOptionalEnv("GAS_INGESTION_HMAC_SECRET"),
   minUsableWebsiteTextChars: readIntEnv("MIN_USABLE_WEBSITE_TEXT_CHARS", 300),
   appUrl: readOptionalEnv("NEXT_PUBLIC_APP_URL") ?? "http://localhost:3000",
+  dodoPaymentsApiKey: readOptionalEnv("DODO_PAYMENTS_API_KEY"),
+  dodoPaymentsWebhookKey: readOptionalEnv("DODO_PAYMENTS_WEBHOOK_KEY"),
+  dodoPaymentsEnvironment:
+    readOptionalEnv("DODO_PAYMENTS_ENVIRONMENT") ?? "test_mode",
+  dodoLtdProductId: readOptionalEnv("DODO_LTD_PRODUCT_ID"),
+  dodoPaymentsReturnUrl: readOptionalEnv("DODO_PAYMENTS_RETURN_URL"),
 } as const;
 
 export function getServiceStatus(): {

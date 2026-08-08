@@ -1,11 +1,26 @@
+import { Suspense } from "react";
+
 import { DashboardOverview } from "@/components/dashboard/dashboard-overview";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { PageLoadingSkeleton } from "@/components/dashboard/page-loading-skeleton";
+import { requireDashboardBundle } from "@/lib/auth/dashboard-session";
+import { loadDashboardOverviewData } from "@/lib/dashboard/overview-data";
 
-export default async function DashboardPage() {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+async function DashboardOverviewContent() {
+  const bundle = await requireDashboardBundle();
+  const initialData = await loadDashboardOverviewData(bundle);
 
-  return <DashboardOverview userEmail={user?.email ?? ""} />;
+  return (
+    <DashboardOverview
+      userEmail={bundle.user.email ?? ""}
+      initialData={initialData}
+    />
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<PageLoadingSkeleton variant="overview" />}>
+      <DashboardOverviewContent />
+    </Suspense>
+  );
 }

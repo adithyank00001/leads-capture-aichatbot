@@ -1,5 +1,5 @@
 import { apiError, apiSuccess } from "@/lib/api-response";
-import { requireAuthUser } from "@/lib/auth/dashboard";
+import { requireDashboardApiUser } from "@/lib/auth/dashboard-session";
 import { getBotKnowledge, upsertBotKnowledge } from "@/lib/db/bot-knowledge";
 import { getBotByCustomerId, updateBotBusinessName } from "@/lib/db/bots";
 import { getCustomerByUserId } from "@/lib/db/customers";
@@ -14,7 +14,7 @@ import { parseBotSettingsPayload } from "@/lib/validation/bot-settings";
 
 export async function GET() {
   try {
-    const { supabase, user } = await requireAuthUser();
+    const { supabase, user } = await requireDashboardApiUser();
     const { bot } = await ensureCustomerOnboarding(supabase, {
       userId: user.id,
       email: user.email ?? "",
@@ -41,7 +41,7 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
-    const { supabase, user } = await requireAuthUser();
+    const { supabase, user } = await requireDashboardApiUser();
     const body = await parseJsonBody(request);
     const input = parseBotSettingsPayload(body);
 

@@ -4,9 +4,9 @@ import { SignupForm } from "@/components/dashboard/signup-form";
 
 export default function SignupPage() {
   return (
-    <div className="relative min-h-screen bg-background">
+    <div className="relative flex min-h-screen w-full flex-1 bg-background">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,oklch(0.52_0.19_252/0.12),transparent_55%)]" />
-      <div className="relative mx-auto flex min-h-screen max-w-lg flex-col justify-center px-4 py-10">
+      <div className="relative mx-auto flex w-full min-h-screen max-w-md flex-col justify-center px-4 py-10 sm:px-6">
         <SignupForm />
         <p className="mt-4 text-center text-sm text-muted-foreground">
           Already have an account?{" "}

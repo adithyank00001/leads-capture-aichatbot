@@ -1,6 +1,8 @@
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { handleRouteError } from "@/lib/api/request";
-import { requireAuthUser } from "@/lib/auth/dashboard";
+import { requireDashboardApiUser } from "@/lib/auth/dashboard-session";
+import { getBotByCustomerId } from "@/lib/db/bots";
+import { getCustomerByUserId } from "@/lib/db/customers";
 import { getWebsiteBuildLogs } from "@/lib/db/website-build-log";
 import {
   getWebsitePagesBySourceId,
@@ -12,9 +14,24 @@ import {
 } from "@/lib/db/website-source";
 import { ensureCustomerOnboarding } from "@/lib/dashboard/onboarding";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const { supabase, user } = await requireAuthUser();
+    const { supabase, user } = await requireDashboardApiUser();
+    const summaryOnly =
+      new URL(request.url).searchParams.get("summary") === "1";
+
+    if (summaryOnly) {
+      const customer = await getCustomerByUserId(supabase, user.id);
+      const bot = customer
+        ? await getBotByCustomerId(supabase, customer.id)
+        : null;
+      const source = bot
+        ? await getWebsiteSourceByBotId(supabase, bot.bot_id)
+        : null;
+
+      return apiSuccess(toWebsiteStatusResponse(source));
+    }
+
     const { bot } = await ensureCustomerOnboarding(supabase, {
       userId: user.id,
       email: user.email ?? "",

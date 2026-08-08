@@ -14,30 +14,28 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { GoogleSignInButton } from "@/components/dashboard/google-sign-in-button";
 import { getCustomerErrorMessage } from "@/lib/dashboard/customer-errors";
+import { getSafeOAuthNextPath } from "@/lib/auth/oauth";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
-
-function getSafeDashboardPath(nextPath?: string) {
-  if (!nextPath || !nextPath.startsWith("/dashboard")) {
-    return "/dashboard";
-  }
-
-  if (nextPath.startsWith("//") || nextPath.includes(":")) {
-    return "/dashboard";
-  }
-
-  return nextPath;
-}
+import { Separator } from "@/components/ui/separator";
 
 type LoginFormProps = {
   nextPath?: string;
+  authError?: string;
 };
 
-export function LoginForm({ nextPath }: LoginFormProps) {
+export function LoginForm({ nextPath, authError }: LoginFormProps) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    authError === "auth_callback_failed"
+      ? "Google sign-in could not be completed. Please try again."
+      : authError === "google_oauth_failed"
+        ? "Could not start Google sign-in. Please try again or use email instead."
+        : null,
+  );
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -58,17 +56,23 @@ export function LoginForm({ nextPath }: LoginFormProps) {
       return;
     }
 
-    router.push(getSafeDashboardPath(nextPath));
+    router.push(getSafeOAuthNextPath(nextPath));
     router.refresh();
   }
 
   return (
-    <Card className="mx-auto max-w-md shadow-lg ring-primary/10">
+    <Card className="w-full shadow-lg ring-primary/10">
       <CardHeader>
         <CardTitle className="text-2xl">Welcome back</CardTitle>
         <CardDescription>Sign in to manage your chatbot and leads.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        <GoogleSignInButton nextPath={nextPath} onError={setError} />
+        <div className="flex items-center gap-3">
+          <Separator className="flex-1" />
+          <span className="text-xs text-muted-foreground">or sign in with email</span>
+          <Separator className="flex-1" />
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="login-email">Email</Label>

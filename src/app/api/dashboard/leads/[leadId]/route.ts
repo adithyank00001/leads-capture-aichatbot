@@ -1,5 +1,5 @@
 import { apiError, apiSuccess } from "@/lib/api-response";
-import { requireAuthUser } from "@/lib/auth/dashboard";
+import { requireDashboardApiUser } from "@/lib/auth/dashboard-session";
 import { getBotByCustomerId } from "@/lib/db/bots";
 import { getCustomerByUserId } from "@/lib/db/customers";
 import { deleteLeadByIdForBot } from "@/lib/db/leads";
@@ -21,7 +21,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
       throw new ApiValidationError("MISSING_LEAD_ID", "Lead id is required.");
     }
 
-    const { supabase, user } = await requireAuthUser();
+    const { supabase, user } = await requireDashboardApiUser();
     const customer = await getCustomerByUserId(supabase, user.id);
 
     if (!customer) {

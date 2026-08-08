@@ -1,6 +1,6 @@
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { handleRouteError } from "@/lib/api/request";
-import { requireAuthUser } from "@/lib/auth/dashboard";
+import { requireDashboardApiUser } from "@/lib/auth/dashboard-session";
 import { appendWebsiteBuildLog } from "@/lib/db/website-build-log";
 import {
   countPendingPagesForSource,
@@ -23,7 +23,7 @@ type RouteContext = {
 export async function POST(_request: Request, context: RouteContext) {
   try {
     const { pageId } = await context.params;
-    const { supabase, user } = await requireAuthUser();
+    const { supabase, user } = await requireDashboardApiUser();
     const { bot } = await ensureCustomerOnboarding(supabase, {
       userId: user.id,
       email: user.email ?? "",

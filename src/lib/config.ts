@@ -8,6 +8,8 @@ export const publicConfig = {
   apiVersion: "v1",
   defaultBotId: process.env.NEXT_PUBLIC_DEFAULT_BOT_ID ?? "test-business-1",
   appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+  lifetimeAccessPriceUsd: 369,
+  lifetimeAccessOriginalPrice: 1849,
 } as const;
 
 export function getEmbedPath(botId: string) {

@@ -1,7 +1,24 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import {
+  isCheckoutLandingPath,
+  isCheckoutPath,
+} from "@/lib/auth/access-paths";
 import { publicSupabaseConfig } from "@/lib/supabase/config";
+
+async function getHasLifetimeAccess(
+  supabase: ReturnType<typeof createServerClient>,
+  userId: string,
+) {
+  const { data } = await supabase
+    .from("customers")
+    .select("has_lifetime_access")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  return data?.has_lifetime_access ?? false;
+}
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -31,30 +48,35 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
+  const pathname = request.nextUrl.pathname;
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user ?? null;
 
-  if (
-    !user &&
-    (request.nextUrl.pathname.startsWith("/dashboard") ||
-      request.nextUrl.pathname.startsWith("/api/dashboard"))
-  ) {
+  if (!user && isCheckoutPath(pathname)) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
-    redirectUrl.searchParams.set("next", request.nextUrl.pathname);
+    redirectUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (
-    user &&
-    (request.nextUrl.pathname === "/login" ||
-      request.nextUrl.pathname === "/signup")
-  ) {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/dashboard";
-    redirectUrl.search = "";
-    return NextResponse.redirect(redirectUrl);
+  if (user) {
+    const hasLifetimeAccess = await getHasLifetimeAccess(supabase, user.id);
+
+    if (hasLifetimeAccess && isCheckoutLandingPath(pathname)) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/dashboard";
+      redirectUrl.search = "";
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    if (pathname === "/login" || pathname === "/signup") {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = hasLifetimeAccess ? "/dashboard" : "/checkout";
+      redirectUrl.search = "";
+      return NextResponse.redirect(redirectUrl);
+    }
   }
 
   return supabaseResponse;

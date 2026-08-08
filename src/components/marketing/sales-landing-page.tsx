@@ -1,0 +1,804 @@
+import Link from "next/link";
+import {
+  ArrowDown,
+  Building2,
+  Check,
+  Heart,
+  MessageCircle,
+  MessageSquare,
+  Phone,
+  Sparkles,
+  Star,
+  StarHalf,
+  UserCheck,
+  Users,
+  X,
+} from "lucide-react";
+
+import { CtaButton } from "@/components/marketing/cta-button";
+import { RecentPurchasesSocialProof } from "@/components/marketing/recent-purchases-social-proof";
+import { StickyMobileCta } from "@/components/marketing/sticky-mobile-cta";
+import { Card, CardContent } from "@/components/ui/card";
+import { FormattedPrice } from "@/components/ui/formatted-price";
+import { Separator } from "@/components/ui/separator";
+import { publicConfig } from "@/lib/config";
+import { cn } from "@/lib/utils";
+
+const captureFeatures = [
+  {
+    icon: UserCheck,
+    text: "Capture Name, Phone & Email First",
+  },
+  {
+    icon: Users,
+    text: "Turn anonymous visitors into contactable leads",
+  },
+  {
+    icon: Sparkles,
+    text: "Understand what they're looking for",
+  },
+  {
+    icon: MessageSquare,
+    text: "Handle their questions and objections",
+  },
+  {
+    icon: Phone,
+    text: "Send the lead and conversation to your sales team",
+  },
+] as const;
+
+const steps = [
+  {
+    number: "1",
+    title: "Connect Your Website in Minutes",
+  },
+  {
+    number: "2",
+    title: "Your AI Sales Assistant Goes Live",
+  },
+  {
+    number: "3",
+    title: "Start Capturing Leads",
+  },
+] as const;
+
+const comparisonRows = [
+  {
+    without: "Interested visitors leave anonymous",
+    with: "Turn interested visitors into contactable leads",
+  },
+  {
+    without: "No contact details = Lost Revenue",
+    with: "Get their contact details = Revenue Potential",
+    withPrefix: "Get their contact details =",
+    withSuffixStack: ["Revenue", "Potential"],
+  },
+  {
+    without: "Opportunities disappear when visitors leave",
+    with: "Capture prospects while their interest is fresh",
+  },
+  {
+    without: "Your team has little or no context",
+    with: "Know what prospects want before following up",
+  },
+  {
+    without: "Leads can be missed outside working hours",
+    with: "Capture leads 24/7",
+  },
+  {
+    without: "Recurring software costs add up",
+    withPrefix: "Pay",
+    withPrice: true,
+    withSuffix: "once. Use it for life.",
+  },
+] as const;
+
+const pricingFeatures = [
+  "Turn More Visitors Into Leads",
+  "Collect Contact Details First",
+  "Capture Leads 24/7",
+  "Understand Buyer Intent",
+  "Handle Questions & Objections",
+  "Send Leads + Context to Your Sales Team",
+] as const;
+
+const testimonials = [
+  {
+    quote:
+      "I was a bit skeptical at first because we already had ways for people to contact us, but surprisingly, we started getting more leads than before. For the price, it\u2019s really worth it. Highly recommend.",
+    highlights: ["more leads than before", "Highly recommend."],
+    name: "Zain Khan",
+    role: "VERIFIED CUSTOMER",
+    rating: 5,
+  },
+  {
+    quote:
+      "I thought it would be just another chatbot, but the useful part is getting the potential client\u2019s contact details first. We can also see what they were looking for from their chat with the AI, so our sales team can follow up with better context.",
+    highlights: [
+      "getting the potential client\u2019s contact details first.",
+      "follow up with better context.",
+    ],
+    name: "Sara Zaabi",
+    role: "VERIFIED CUSTOMER",
+    rating: 4.5,
+  },
+  {
+    quote:
+      "I expected the setup to be complicated, but it was actually very straightforward. Once it was live, we started getting more contactable prospects from the website. That alone made it worth it.",
+    highlights: ["setup", "actually very straightforward.", "worth it"],
+    name: "Hamad Shamsi",
+    role: "VERIFIED CUSTOMER",
+    rating: 5,
+  },
+] as const;
+
+function AccentBullet({ className }: { className?: string }) {
+  return (
+    <span
+      className={cn(
+        "relative mt-1.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--landing-orange)]",
+        className,
+      )}
+    >
+      <span className="size-2 rounded-full bg-[var(--landing-navy)]" />
+    </span>
+  );
+}
+
+function LogoMark({
+  className,
+  onDark = false,
+}: {
+  className?: string;
+  onDark?: boolean;
+}) {
+  return (
+    <div className={cn("flex items-center gap-2", className)}>
+      <div className="flex size-8 items-center justify-center rounded-lg bg-[var(--landing-navy)] text-[13px] font-bold text-white shadow-sm">
+        LA
+      </div>
+      <span
+        className={cn(
+          "text-[15px] font-semibold tracking-tight",
+          onDark ? "text-white" : "text-[var(--landing-navy)]",
+        )}
+      >
+        {publicConfig.appName}
+      </span>
+    </div>
+  );
+}
+
+function HeroPoint({
+  type,
+  children,
+}: {
+  type: "good" | "bad";
+  children: React.ReactNode;
+}) {
+  const isGood = type === "good";
+
+  return (
+    <li className="flex items-start gap-3 text-left">
+      {isGood ? (
+        <Check className="mt-1 size-5 shrink-0 stroke-[2.5] text-[#16A34A]" />
+      ) : (
+        <X className="mt-1 size-5 shrink-0 stroke-[2.5] text-[#DC2626]" />
+      )}
+      <span
+        className={cn(
+          "text-[18px] font-medium leading-relaxed text-[var(--landing-navy)]",
+        )}
+      >
+        {children}
+      </span>
+    </li>
+  );
+}
+
+function GuaranteeShield({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden
+      className={cn("size-7 shrink-0 sm:size-8", className)}
+    >
+      <path
+        fill="#16A34A"
+        d="M12 1.5 4 5v5.5c0 5.25 3.5 10 8 11.5 4.5-1.5 8-6.25 8-11.5V5l-8-3.5z"
+      />
+      <path
+        d="M8.5 12.5 11 15l4.5-5"
+        fill="none"
+        stroke="white"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function MoneyBackGuarantee({
+  className,
+  centered = false,
+}: {
+  className?: string;
+  centered?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "relative w-full rounded-xl border border-[#86EFAC] bg-[#F0FDF4] px-1.5 pb-3 pt-5 sm:px-2",
+        className,
+      )}
+    >
+      <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 bg-[#F0FDF4] px-1.5">
+        <GuaranteeShield />
+      </div>
+
+      <div
+        className={cn(
+          "flex flex-col gap-0.5",
+          centered ? "text-center" : "text-left",
+        )}
+      >
+        <p className="whitespace-nowrap text-[17px] font-bold uppercase leading-tight text-[#16A34A]">
+          100% Money-Back Guarantee
+        </p>
+        <p className="whitespace-nowrap text-[15px] font-medium leading-snug text-[#16A34A]">
+          No lead in 30 days? Get full refund.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function HalfStar({ className }: { className?: string }) {
+  return (
+    <span className={cn("relative inline-flex", className)}>
+      <Star className={cn("size-full fill-[#D1D5DB] text-[#D1D5DB]")} />
+      <StarHalf className="absolute inset-0 size-full fill-[var(--landing-orange)] text-[var(--landing-orange)]" />
+    </span>
+  );
+}
+
+function AverageRatingSummary({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3",
+        className,
+      )}
+    >
+      <div className="flex items-center gap-0.5">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <Star
+            key={index}
+            className="size-5 fill-[var(--landing-orange)] text-[var(--landing-orange)]"
+          />
+        ))}
+        <HalfStar className="size-5" />
+      </div>
+      <p className="text-[15px] text-white/75 sm:text-[17px]">
+        <span className="font-bold text-white">4.5 / 5</span> Average Rating.
+      </p>
+    </div>
+  );
+}
+
+function QuoteWithHighlights({
+  quote,
+  highlights,
+}: {
+  quote: string;
+  highlights?: readonly string[];
+}) {
+  if (!highlights?.length) {
+    return <>&ldquo;{quote}&rdquo;</>;
+  }
+
+  const orderedHighlights = [...highlights].sort(
+    (a, b) => quote.indexOf(a) - quote.indexOf(b),
+  );
+
+  const nodes: React.ReactNode[] = [];
+  let cursor = 0;
+
+  for (const phrase of orderedHighlights) {
+    const start = quote.indexOf(phrase, cursor);
+    if (start === -1) continue;
+
+    if (start > cursor) {
+      nodes.push(quote.slice(cursor, start));
+    }
+
+    nodes.push(
+      <span
+        key={`${phrase}-${start}`}
+        className="text-[18px] font-semibold text-[var(--landing-orange)] sm:text-[21px]"
+      >
+        {phrase}
+      </span>,
+    );
+    cursor = start + phrase.length;
+  }
+
+  if (cursor < quote.length) {
+    nodes.push(quote.slice(cursor));
+  }
+
+  return <>&ldquo;{nodes}&rdquo;</>;
+}
+
+function FiveStarRating({
+  className,
+  rating = 5,
+}: {
+  className?: string;
+  rating?: number;
+}) {
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
+  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+  return (
+    <div className={cn("flex items-center gap-0.5", className)}>
+      {Array.from({ length: fullStars }).map((_, index) => (
+        <Star
+          key={`full-${index}`}
+          className="size-4 fill-[var(--landing-orange)] text-[var(--landing-orange)]"
+        />
+      ))}
+      {hasHalfStar ? <HalfStar className="size-4" /> : null}
+      {Array.from({ length: emptyStars }).map((_, index) => (
+        <Star
+          key={`empty-${index}`}
+          className="size-4 fill-[#D1D5DB] text-[#D1D5DB]"
+        />
+      ))}
+    </div>
+  );
+}
+
+function ProblemPoint({
+  icon: Icon,
+  children,
+}: {
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
+  children: React.ReactNode;
+}) {
+  return (
+    <p className="flex items-start gap-3 text-[17px] font-normal leading-relaxed text-white">
+      <Icon
+        className="mt-0.5 size-[18px] shrink-0 text-white/35"
+        strokeWidth={1.5}
+      />
+      <span>{children}</span>
+    </p>
+  );
+}
+
+function SectionLabel({
+  children,
+  className,
+  light = false,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  light?: boolean;
+}) {
+  return (
+    <span
+      className={cn(
+        "inline-flex rounded-full border px-4 py-1.5 text-[15px] font-medium",
+        light
+          ? "border-[var(--landing-navy)]/15 bg-[var(--landing-navy)]/5 text-[var(--landing-navy)]"
+          : "border-white/15 bg-white/5 text-white",
+        className,
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+function SectionHeading({
+  children,
+  className,
+  onDark = false,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  onDark?: boolean;
+}) {
+  return (
+    <h2
+      className={cn(
+        "text-balance text-[25px] font-bold uppercase tracking-tight sm:text-[31px] lg:text-[37px]",
+        onDark ? "text-white" : "text-[var(--landing-navy)]",
+        className,
+      )}
+    >
+      {children}
+    </h2>
+  );
+}
+
+export function SalesLandingPage() {
+  return (
+    <>
+      <div className="relative overflow-x-hidden bg-white [--landing-navy:#112437] [--landing-orange:#FC7B02] [--landing-orange-hover:#E36F02]">
+        {/* Hero — ice blue secondary (30%) */}
+        <section id="landing-hero" className="relative z-50 bg-white">
+          <div className="relative mx-auto grid min-h-svh max-w-6xl grid-rows-[auto_1fr] px-4 pb-12 pt-2 sm:px-6 sm:pb-16 sm:pt-3 lg:px-8">
+            <header className="shrink-0">
+              <LogoMark />
+            </header>
+
+            <div className="flex flex-col justify-center">
+              <div className="mx-auto mt-8 w-full max-w-3xl text-center sm:mt-10">
+                <RecentPurchasesSocialProof className="mb-2 sm:mb-3" />
+
+                <h1 className="mb-4 text-balance text-[31px] font-bold leading-[1.1] tracking-tight text-[var(--landing-navy)] sm:mb-5 sm:text-[37px] sm:leading-[1.1] lg:text-[49px] lg:leading-[1.1]">
+                  Turn Anonymous Website Visitors Into{" "}
+                  <span className="text-[var(--landing-orange)]">
+                    Real Estate Leads
+                  </span>
+                </h1>
+
+                <ul className="mx-auto mt-8 flex max-w-2xl flex-col gap-2.5 sm:mt-10 sm:gap-3">
+                  <HeroPoint type="good">
+                    High-intent prospects are already visiting your website.
+                  </HeroPoint>
+                  <HeroPoint type="bad">
+                    The problem? Around{" "}
+                    <span className="font-medium text-[#DC2626]/70">95%</span>{" "}
+                    leave without contacting you.
+                  </HeroPoint>
+                  <HeroPoint type="good">
+                    Our AI sales assistant captures their details before they
+                    leave — 24/7.
+                  </HeroPoint>
+                </ul>
+
+                <div className="mt-10 flex flex-col items-center sm:mt-12">
+                  <div className="inline-grid grid-cols-1 gap-5 sm:gap-6">
+                    <CtaButton className="w-full" />
+                    <div className="flex flex-col items-center gap-1">
+                      <MoneyBackGuarantee centered className="pt-4" />
+                      <p className="text-center text-[15px] font-bold uppercase tracking-wide text-[#16A34A] sm:text-[16px]">
+                        Try It Risk-Free
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Problem — navy dominant (60%) */}
+        <section id="landing-problem" className="bg-[var(--landing-navy)]">
+          <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+            <div className="mx-auto max-w-3xl text-left">
+              <SectionLabel className="mb-5 text-[14px] uppercase tracking-wider">
+                The Problem
+              </SectionLabel>
+
+              <h2 className="text-[32px] font-bold leading-[1.12] tracking-tight sm:text-[53px] sm:leading-[1.1] lg:text-[61px]">
+                <span className="block text-white">Interest Doesn&apos;t</span>
+                <span className="block text-white">Always Turn Into</span>
+                <span className="block text-[var(--landing-orange)]">
+                  An Enquiry
+                </span>
+              </h2>
+
+              <div className="mt-7 flex flex-col gap-4">
+                <ProblemPoint icon={Building2}>
+                  They may like your properties.
+                </ProblemPoint>
+                <ProblemPoint icon={MessageCircle}>
+                  They may have questions.
+                </ProblemPoint>
+                <ProblemPoint icon={Heart}>
+                  They may be seriously considering one.
+                </ProblemPoint>
+              </div>
+
+              <p className="mt-6 text-[16px] font-medium leading-relaxed text-white/85 sm:text-[17px]">
+                But they can still leave without contacting you.
+              </p>
+
+              <p className="mt-5 border-l-4 border-[var(--landing-orange)] pl-4 text-[17px] font-bold leading-snug text-white sm:pl-5 sm:text-[19px]">
+                And once they leave, your sales team may never get another
+                chance to follow up.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Solution — ice blue secondary (30%) */}
+        <section className="bg-white">
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+            <div className="mx-auto max-w-3xl text-center">
+              <SectionLabel light className="mb-6 text-[14px]">
+                The Solution
+              </SectionLabel>
+
+              <h2 className="text-balance text-[28px] font-bold uppercase tracking-tight text-[var(--landing-navy)] sm:text-[31px] lg:text-[37px]">
+                <span className="text-[var(--landing-orange)]">
+                  Capture Their Details{" "}
+                </span>
+                Before They Leave
+              </h2>
+              <p className="mt-4 text-[17px] font-medium text-[var(--landing-navy)] sm:text-[19px]">
+                Our AI sales assistant works 24/7 to:
+              </p>
+            </div>
+
+            <div className="mx-auto mt-10 grid max-w-4xl gap-3 sm:mt-12 sm:grid-cols-2 sm:gap-4 lg:gap-5">
+              {captureFeatures.map((feature, index) => (
+                <Card
+                  key={feature.text}
+                  className="border-[#D8E2EC] bg-white py-0 shadow-sm transition-shadow hover:shadow-md"
+                >
+                  <CardContent className="flex items-center gap-2.5 px-3.5 py-2.5 sm:px-4 sm:py-3">
+                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--landing-orange)]/10 text-[var(--landing-orange)]">
+                      <feature.icon className="size-[18px]" />
+                    </div>
+                    <p
+                      className={cn(
+                        "text-[16px] leading-snug text-[var(--landing-navy)] sm:text-[17px]",
+                        index === 0 ? "font-bold" : "font-medium",
+                      )}
+                    >
+                      {feature.text}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <p className="mx-auto mt-10 max-w-2xl text-center text-[17px] font-semibold text-[var(--landing-navy)] sm:mt-12 sm:text-[19px]">
+              So your team can follow up while the interest is still there.
+            </p>
+          </div>
+        </section>
+
+        {/* Testimonials — navy dominant (60%) */}
+        <section className="bg-[var(--landing-navy)]">
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+            <div className="mx-auto max-w-3xl text-center">
+              <SectionHeading onDark className="text-[28px]">
+                <span className="text-[var(--landing-orange)]">
+                  Real Feedback
+                </span>{" "}
+                From
+                <br />
+                Real Estate Pros
+              </SectionHeading>
+
+              <AverageRatingSummary className="mt-6 sm:mt-8" />
+            </div>
+
+            <div className="mx-auto mt-8 grid max-w-5xl gap-4 sm:mt-10 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
+              {testimonials.map((testimonial) => (
+                <Card
+                  key={testimonial.quote}
+                  className="border-2 border-[var(--landing-orange)] bg-white shadow-md shadow-[var(--landing-navy)]/5"
+                >
+                  <CardContent className="space-y-4 p-5 sm:p-6">
+                    <FiveStarRating rating={testimonial.rating} />
+                    <p className="text-[18px] leading-[27px] text-[#3F4F5F] sm:text-[21px] sm:leading-8">
+                      <QuoteWithHighlights
+                        quote={testimonial.quote}
+                        highlights={
+                          "highlights" in testimonial
+                            ? testimonial.highlights
+                            : undefined
+                        }
+                      />
+                    </p>
+                    <div>
+                      <p className="font-semibold text-[var(--landing-navy)]">
+                        {testimonial.name}
+                      </p>
+                      <p className="mt-1 text-[13px] font-bold uppercase tracking-wide text-[#3B82F6] sm:text-[15px]">
+                        {testimonial.role}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <div className="mx-auto mt-10 max-w-3xl text-left sm:mt-12">
+              <p className="border-l-4 border-[var(--landing-orange)] pl-4 text-[17px] font-bold leading-snug text-white sm:pl-5 sm:text-[19px]">
+                Now imagine this working on your website.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Steps — ice blue secondary (30%) */}
+        <section className="bg-white">
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+            <div className="mx-auto max-w-3xl text-center">
+              <SectionHeading>
+                Start Capturing Leads in{" "}
+                <span className="text-[var(--landing-orange)]">
+                  3 Simple Steps
+                </span>
+              </SectionHeading>
+            </div>
+
+            <div className="mx-auto mt-10 flex max-w-2xl flex-col items-center gap-2 sm:mt-12">
+              {steps.map((step, index) => (
+                <div
+                  key={step.number}
+                  className="flex w-full flex-col items-center"
+                >
+                  <Card className="w-full border-[#D8E2EC] bg-white shadow-sm">
+                    <CardContent className="flex items-center gap-4 p-5 sm:p-6">
+                      <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--landing-orange)] text-[19px] font-bold text-white">
+                        {step.number}
+                      </div>
+                      <h3 className="text-[17px] font-semibold text-[var(--landing-navy)] sm:text-[19px]">
+                        {step.title}
+                      </h3>
+                    </CardContent>
+                  </Card>
+                  {index < steps.length - 1 ? (
+                    <ArrowDown className="my-1 size-5 text-[#8B9AAB]" />
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Comparison */}
+        <section>
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+            <div className="mx-auto max-w-3xl text-center">
+              <SectionHeading className="text-[28px]">
+                <span className="text-[var(--landing-orange)]">Without</span>{" "}
+                vs. <span className="text-[var(--landing-orange)]">With</span>
+                <br />
+                Our AI Sales Assistant
+              </SectionHeading>
+            </div>
+
+            <div className="mx-auto mt-10 flex max-w-3xl flex-col gap-[14px] sm:mt-12 sm:gap-5">
+              {comparisonRows.map((row) => (
+                <div
+                  key={row.without}
+                  className="overflow-hidden rounded-2xl border border-[#D8E2EC]"
+                >
+                  <div className="flex items-center gap-3 bg-[#FEF2F2] px-4 py-4 sm:px-5 sm:py-5">
+                    <X
+                      className="size-5 shrink-0 text-[#F87171]"
+                      strokeWidth={2.5}
+                    />
+                    <p className="text-[15px] leading-snug text-[#6B7280] sm:text-[17px]">
+                      {row.without}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3 bg-[#EFF6FF] px-4 py-4 sm:px-5 sm:py-5">
+                    <Check
+                      className="size-5 shrink-0 text-[#3B82F6]"
+                      strokeWidth={2.5}
+                    />
+                    {"withSuffixStack" in row && row.withSuffixStack ? (
+                      <div className="flex min-w-0 flex-1 items-center gap-2">
+                        <span className="text-[15px] font-bold leading-snug text-[var(--landing-navy)] sm:text-[17px]">
+                          {row.withPrefix}
+                        </span>
+                        <span className="shrink-0 text-[15px] font-bold leading-tight text-[var(--landing-navy)] sm:text-[17px]">
+                          <span className="block">
+                            {row.withSuffixStack[0]}
+                          </span>
+                          <span className="block">
+                            {row.withSuffixStack[1]}
+                          </span>
+                        </span>
+                      </div>
+                    ) : "withPrice" in row && row.withPrice ? (
+                      <p className="text-[15px] font-bold leading-snug text-[var(--landing-navy)] sm:text-[17px]">
+                        {row.withPrefix}{" "}
+                        <FormattedPrice
+                          amount={publicConfig.lifetimeAccessPriceUsd}
+                        />{" "}
+                        {row.withSuffix}
+                      </p>
+                    ) : "with" in row ? (
+                      <p className="text-[15px] font-bold leading-snug text-[var(--landing-navy)] sm:text-[17px]">
+                        {row.with}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing — navy dominant (60%); z-50 hides floating CTA while this section is in view */}
+        <section
+          id="landing-pricing"
+          className="relative z-50 bg-[var(--landing-navy)]"
+        >
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+            <div className="mx-auto max-w-3xl text-center">
+              <SectionHeading onDark className="text-[28px]">
+                Stop Losing Potential Leads for Just{" "}
+                <span className="text-[#FC9018]">
+                  <FormattedPrice amount={publicConfig.lifetimeAccessPriceUsd} />
+                </span>
+              </SectionHeading>
+            </div>
+
+            <Card className="mx-auto mt-10 max-w-2xl overflow-hidden border-white/10 bg-white py-0 shadow-xl sm:mt-12">
+              <CardContent className="space-y-5 px-6 pb-4 pt-6 sm:space-y-6 sm:px-8 sm:pb-5 sm:pt-7">
+                <p className="text-center text-[21px] font-bold uppercase tracking-wide text-[var(--landing-orange)] sm:text-[25px]">
+                  Pay Once. Use Forever.
+                </p>
+
+                <ul className="grid gap-3 sm:grid-cols-2">
+                  {pricingFeatures.map((feature) => (
+                    <li
+                      key={feature}
+                      className="flex items-start gap-2.5 text-[16px] text-[var(--landing-navy)] sm:text-[17px]"
+                    >
+                      <Check
+                        className="mt-0.5 size-5 shrink-0 text-[#3B82F6]"
+                        strokeWidth={2.5}
+                      />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+
+                <Separator className="bg-[#D8E2EC]" />
+
+                <div className="flex flex-col items-center gap-2 text-center sm:gap-3">
+                  <p className="text-[17px] font-semibold text-[var(--landing-navy)] sm:text-[19px]">
+                    Capture More Leads Without Another Monthly Bill.
+                  </p>
+                  <div className="flex flex-col items-center gap-3">
+                    <RecentPurchasesSocialProof />
+                    <CtaButton
+                      className="w-full sm:w-auto"
+                      showDiscountBadge
+                      size="large"
+                      priceBelow
+                    />
+                  </div>
+                  <p className="mb-1 pt-1 text-[13px] font-bold uppercase tracking-wide text-[#16A34A]">
+                    Try It Risk-Free
+                  </p>
+                  <MoneyBackGuarantee centered />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        {/* Footer */}
+        <section className="bg-white pb-8">
+          <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+            <footer className="flex flex-col items-center gap-3 border-t border-[#D8E2EC] pt-8 text-center">
+              <LogoMark />
+              <p className="text-[13px] text-[#8B9AAB]">
+                © {new Date().getFullYear()} {publicConfig.appName}. All rights
+                reserved.
+              </p>
+            </footer>
+          </div>
+        </section>
+        <StickyMobileCta />
+      </div>
+    </>
+  );
+}

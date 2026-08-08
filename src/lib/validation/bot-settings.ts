@@ -3,7 +3,7 @@ import { ApiValidationError } from "@/lib/validation/errors";
 export const SINGLE_DOMAIN_ERROR = "Only one domain is allowed.";
 export const REQUIRED_DOMAIN_ERROR = "Website domain is required.";
 export const INVALID_DOMAIN_ERROR =
-  "Enter a valid website domain (example: stylette.com).";
+  "Enter a valid website domain (example: yourdomain.com).";
 
 export type BotSettingsInput = {
   businessName: string;
