@@ -971,10 +971,10 @@ export function SalesLandingPage() {
           </div>
         </section>
 
-        {/* Pricing — z-[110] hides demo chat launcher; sticky CTA (z-[120]) stays visible */}
+        {/* Pricing — z-[130] hides sticky mobile CTA (z-[120]) and demo chat launcher (z-[100]) */}
         <section
           id="landing-pricing"
-          className="relative z-[110] mt-10 bg-[var(--landing-navy)] sm:mt-12 lg:mt-16"
+          className="relative z-[130] mt-10 bg-[var(--landing-navy)] sm:mt-12 lg:mt-16"
         >
           <div
             className={cn(
@@ -1051,8 +1051,8 @@ export function SalesLandingPage() {
         </section>
 
         {/* Footer */}
-        {/* Footer — z-[110] keeps demo chat launcher hidden */}
-        <section className="relative z-[110] bg-white pb-8 lg:pb-12">
+        {/* Footer — z-[130] hides sticky mobile CTA and demo chat launcher */}
+        <section className="relative z-[130] bg-white pb-8 lg:pb-12">
           <div
             className={cn(
               "mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12",
