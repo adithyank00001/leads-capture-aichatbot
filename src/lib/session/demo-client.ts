@@ -11,6 +11,33 @@ export type DemoChatMessage = {
   created_at: string;
 };
 
+let memorySessionId: string | null = null;
+let memoryLeadComplete = false;
+const memoryMessages = new Map<string, DemoChatMessage[]>();
+
+function createSessionId() {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `demo-session-${Date.now()}`;
+}
+
+function readSessionStorage(key: string) {
+  try {
+    return window.sessionStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeSessionStorage(key: string, value: string) {
+  try {
+    window.sessionStorage.setItem(key, value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function getLeadStorageKey(sessionId: string) {
   return `${DEMO_LEAD_PREFIX}${sessionId}`;
 }
@@ -21,21 +48,21 @@ function getMessagesStorageKey(sessionId: string) {
 
 export function getOrCreateDemoSessionId() {
   if (typeof window === "undefined") {
-    return "";
+    return "demo-static";
   }
 
-  const existing = window.sessionStorage.getItem(DEMO_SESSION_KEY);
+  const existing = readSessionStorage(DEMO_SESSION_KEY);
 
   if (existing) {
+    memorySessionId = existing;
     return existing;
   }
 
-  const sessionId =
-    typeof crypto !== "undefined" && "randomUUID" in crypto
-      ? crypto.randomUUID()
-      : `demo-session-${Date.now()}`;
+  const sessionId = memorySessionId ?? createSessionId();
+  memorySessionId = sessionId;
 
-  window.sessionStorage.setItem(DEMO_SESSION_KEY, sessionId);
+  writeSessionStorage(DEMO_SESSION_KEY, sessionId);
+
   return sessionId;
 }
 
@@ -44,9 +71,11 @@ export function hasCompletedDemoLead(sessionId: string) {
     return false;
   }
 
-  return (
-    window.sessionStorage.getItem(getLeadStorageKey(sessionId)) === "true"
-  );
+  if (readSessionStorage(getLeadStorageKey(sessionId)) === "true") {
+    return true;
+  }
+
+  return memoryLeadComplete;
 }
 
 export function markDemoLeadCompleted(sessionId: string) {
@@ -54,7 +83,8 @@ export function markDemoLeadCompleted(sessionId: string) {
     return;
   }
 
-  window.sessionStorage.setItem(getLeadStorageKey(sessionId), "true");
+  memoryLeadComplete = true;
+  writeSessionStorage(getLeadStorageKey(sessionId), "true");
 }
 
 export function loadDemoMessages(sessionId: string): DemoChatMessage[] {
@@ -62,20 +92,20 @@ export function loadDemoMessages(sessionId: string): DemoChatMessage[] {
     return [];
   }
 
-  const raw = window.sessionStorage.getItem(getMessagesStorageKey(sessionId));
+  const raw = readSessionStorage(getMessagesStorageKey(sessionId));
 
   if (!raw) {
-    return [];
+    return memoryMessages.get(sessionId) ?? [];
   }
 
   try {
     const parsed = JSON.parse(raw) as unknown;
 
     if (!Array.isArray(parsed)) {
-      return [];
+      return memoryMessages.get(sessionId) ?? [];
     }
 
-    return parsed.filter(
+    const messages = parsed.filter(
       (item): item is DemoChatMessage =>
         typeof item === "object" &&
         item !== null &&
@@ -85,8 +115,11 @@ export function loadDemoMessages(sessionId: string): DemoChatMessage[] {
         typeof (item as DemoChatMessage).content === "string" &&
         typeof (item as DemoChatMessage).created_at === "string",
     );
+
+    memoryMessages.set(sessionId, messages);
+    return messages;
   } catch {
-    return [];
+    return memoryMessages.get(sessionId) ?? [];
   }
 }
 
@@ -98,7 +131,8 @@ export function saveDemoMessages(
     return;
   }
 
-  window.sessionStorage.setItem(
+  memoryMessages.set(sessionId, messages);
+  writeSessionStorage(
     getMessagesStorageKey(sessionId),
     JSON.stringify(messages),
   );

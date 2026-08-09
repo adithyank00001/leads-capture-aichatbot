@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 
 type ChatWidgetShellProps = {
   businessName: string;
-  onClose: () => void;
+  onClose?: () => void;
   children: React.ReactNode;
 };
 
@@ -29,17 +29,19 @@ export function ChatWidgetShell({
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-sm font-medium">{businessName}</h1>
         </div>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          onClick={onClose}
-          className="hover:bg-white/10 hover:text-[var(--widget-header-text)] focus-visible:ring-[var(--widget-header-text)]/40"
-          style={{ color: "var(--widget-header-text)" }}
-          aria-label="Close chat"
-        >
-          <X className="size-4" />
-        </Button>
+        {onClose ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={onClose}
+            className="hover:bg-white/10 hover:text-[var(--widget-header-text)] focus-visible:ring-[var(--widget-header-text)]/40"
+            style={{ color: "var(--widget-header-text)" }}
+            aria-label="Close chat"
+          >
+            <X className="size-4" />
+          </Button>
+        ) : null}
       </header>
       <div className="flex min-h-0 flex-1 flex-col">{children}</div>
     </div>

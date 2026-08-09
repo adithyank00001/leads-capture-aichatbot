@@ -32,7 +32,7 @@ type DemoChatInterfaceProps = {
   sessionId: string;
   business: BusinessDisplay;
   widgetSettings: WidgetSettings;
-  onClose: () => void;
+  onClose?: () => void;
 };
 
 function WaitingIndicator({
@@ -266,7 +266,8 @@ export function DemoChatInterface({
   const timestampLabel = formatChatTimestamp(new Date());
 
   return (
-    <ChatWidgetShell businessName={business.name} onClose={onClose}>
+    <div className="flex h-full min-h-0 flex-col">
+      <ChatWidgetShell businessName={business.name} onClose={onClose}>
       <ScrollArea className="min-h-0 flex-1 bg-white">
         <div className="space-y-4 px-4 py-4">
           <p className="text-center text-xs text-zinc-400">{timestampLabel}</p>
@@ -384,6 +385,7 @@ export function DemoChatInterface({
           </Button>
         </div>
       </form>
-    </ChatWidgetShell>
+      </ChatWidgetShell>
+    </div>
   );
 }

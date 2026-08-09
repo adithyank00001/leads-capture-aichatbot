@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { CtaButton } from "@/components/marketing/cta-button";
+import { DemoChatSection } from "@/components/marketing/demo-chat/demo-chat-section";
 import { RecentPurchasesSocialProof } from "@/components/marketing/recent-purchases-social-proof";
 import { StickyDesktopCta } from "@/components/marketing/sticky-desktop-cta";
 import { StickyMobileCta } from "@/components/marketing/sticky-mobile-cta";
@@ -724,6 +725,36 @@ export function SalesLandingPage() {
               <p className="border-l-4 border-[var(--landing-orange)] pl-4 text-[17px] font-bold leading-snug text-white sm:pl-5 sm:text-[19px] lg:mx-auto lg:max-w-2xl lg:border-l-0 lg:pl-0 lg:text-[19px]">
                 Now imagine this working on your website.
               </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Live demo — inline chat section */}
+        <section id="landing-demo" className="bg-white">
+          <div
+            className={cn(
+              "mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20",
+              DESKTOP_CONTAINER,
+              DESKTOP_SECTION,
+            )}
+          >
+            <div className="mx-auto max-w-3xl text-center lg:max-w-[960px]">
+              <SectionLabel className="mb-5 text-[14px] uppercase tracking-wider lg:mx-auto" light>
+                Live Demo
+              </SectionLabel>
+              <SectionHeading className="mb-4 normal-case">
+                See How the AI Sales Assistant Captures a Lead
+              </SectionHeading>
+              <p className="mx-auto mb-8 max-w-2xl text-[17px] font-medium leading-relaxed text-[var(--landing-navy)] sm:mb-10 sm:text-[19px]">
+                Experience a guided demo of what your website visitors will see
+                — from first enquiry to captured contact details.
+              </p>
+              <p className="mx-auto mb-6 max-w-2xl text-[14px] font-medium text-[var(--landing-navy)]/70 sm:text-[15px]">
+                20 seconds · Uses sample details · No signup needed
+              </p>
+            </div>
+            <div className="mx-auto max-w-2xl">
+              <DemoChatSection />
             </div>
           </div>
         </section>
