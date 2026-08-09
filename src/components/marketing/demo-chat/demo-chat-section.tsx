@@ -30,11 +30,79 @@ function getServerSessionId() {
 
 const STICKY_CTA_ID = "sticky-mobile-cta";
 const LAUNCHER_GAP_PX = 16;
+const DEMO_SECTION_ID = "landing-demo";
+
+function useDemoSectionReached() {
+  const [hasReachedDemoSection, setHasReachedDemoSection] = useState(false);
+
+  useEffect(() => {
+    const demoSection = document.getElementById(DEMO_SECTION_ID);
+
+    if (!demoSection) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry) {
+          return;
+        }
+
+        if (entry.isIntersecting) {
+          setHasReachedDemoSection(true);
+          return;
+        }
+
+        const { top, bottom } = entry.boundingClientRect;
+
+        if (bottom < 0) {
+          setHasReachedDemoSection(true);
+          return;
+        }
+
+        if (top > window.innerHeight) {
+          setHasReachedDemoSection(false);
+        }
+      },
+      { threshold: 0 },
+    );
+
+    observer.observe(demoSection);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  return hasReachedDemoSection;
+}
+
+type DemoChatPanelProps = {
+  sessionId: string;
+  onClose: () => void;
+  className?: string;
+};
+
+function DemoChatPanel({ sessionId, onClose, className }: DemoChatPanelProps) {
+  return (
+    <div className={cn("flex flex-col overflow-hidden", className)}>
+      <WidgetThemeProvider settings={demoWidgetSettings}>
+        <DemoChatInterface
+          sessionId={sessionId}
+          business={demoBusiness}
+          widgetSettings={demoWidgetSettings}
+          onClose={onClose}
+        />
+      </WidgetThemeProvider>
+    </div>
+  );
+}
 
 export function DemoChatSection() {
   const [isOpen, setIsOpen] = useState(false);
   const [canCloseBackdrop, setCanCloseBackdrop] = useState(false);
   const [launcherBottomPx, setLauncherBottomPx] = useState<number | null>(null);
+  const hasReachedDemoSection = useDemoSectionReached();
   const justOpenedRef = useRef(false);
   const sessionId = useSyncExternalStore(
     subscribe,
@@ -101,6 +169,12 @@ export function DemoChatSection() {
       return;
     }
 
+    const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+
+    if (isDesktop) {
+      return;
+    }
+
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
@@ -123,11 +197,11 @@ export function DemoChatSection() {
   }, [canCloseBackdrop, closeChat]);
 
   const launcher =
-    !isOpen && typeof document !== "undefined"
+    !isOpen && hasReachedDemoSection && typeof document !== "undefined"
       ? createPortal(
           <div
             className={cn(
-              "fixed right-4 z-[100] size-14 touch-manipulation sm:right-6",
+              "fixed right-4 z-[100] size-14 touch-manipulation transition-opacity duration-300 sm:right-6",
               "lg:bottom-6",
               launcherBottomPx === null && "bottom-36",
             )}
@@ -147,11 +221,11 @@ export function DemoChatSection() {
         )
       : null;
 
-  const modal =
+  const mobileModal =
     isOpen && typeof document !== "undefined"
       ? createPortal(
           <div
-            className="fixed inset-0 z-[9999]"
+            className="fixed inset-0 z-[9999] lg:hidden"
             role="dialog"
             aria-modal="true"
             aria-label="Live demo chat"
@@ -167,22 +241,38 @@ export function DemoChatSection() {
               tabIndex={-1}
             />
             <div className="absolute inset-5 flex items-center justify-center sm:inset-8">
-              <div
+              <DemoChatPanel
+                sessionId={sessionId}
+                onClose={closeChat}
                 className={cn(
-                  "relative z-10 flex h-full w-full max-w-[380px] flex-col overflow-hidden",
+                  "relative z-10 h-full w-full max-w-[380px]",
                   "max-h-[620px] rounded-2xl shadow-xl",
                 )}
-              >
-                <WidgetThemeProvider settings={demoWidgetSettings}>
-                  <DemoChatInterface
-                    sessionId={sessionId}
-                    business={demoBusiness}
-                    widgetSettings={demoWidgetSettings}
-                    onClose={closeChat}
-                  />
-                </WidgetThemeProvider>
-              </div>
+              />
             </div>
+          </div>,
+          document.body,
+        )
+      : null;
+
+  const desktopPanel =
+    isOpen && typeof document !== "undefined"
+      ? createPortal(
+          <div
+            className={cn(
+              "fixed right-6 bottom-6 z-[9999] hidden lg:block",
+              "h-[min(620px,calc(100vh-3rem))] w-[min(380px,calc(100vw-3rem))]",
+              "max-h-[620px] max-w-[380px]",
+            )}
+            role="dialog"
+            aria-modal="false"
+            aria-label="Live demo chat"
+          >
+            <DemoChatPanel
+              sessionId={sessionId}
+              onClose={closeChat}
+              className="h-full w-full rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.18)]"
+            />
           </div>,
           document.body,
         )
@@ -194,7 +284,8 @@ export function DemoChatSection() {
         Tap the chat icon in the corner to start the demo
       </p>
       {launcher}
-      {modal}
+      {mobileModal}
+      {desktopPanel}
     </>
   );
 }
