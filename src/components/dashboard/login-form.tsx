@@ -23,11 +23,26 @@ import { Separator } from "@/components/ui/separator";
 type LoginFormProps = {
   nextPath?: string;
   authError?: string;
+  isPostPayment?: boolean;
+  defaultEmail?: string;
 };
 
-export function LoginForm({ nextPath, authError }: LoginFormProps) {
+async function claimPurchaseIfNeeded() {
+  try {
+    await fetch("/api/auth/claim-purchase", { method: "POST" });
+  } catch {
+    // Claim is retried on dashboard load if webhook is still processing.
+  }
+}
+
+export function LoginForm({
+  nextPath,
+  authError,
+  isPostPayment = false,
+  defaultEmail,
+}: LoginFormProps) {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(defaultEmail ?? "");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(
     authError === "auth_callback_failed"
@@ -49,12 +64,14 @@ export function LoginForm({ nextPath, authError }: LoginFormProps) {
       password,
     });
 
-    setLoading(false);
-
     if (signInError) {
+      setLoading(false);
       setError(getCustomerErrorMessage(signInError));
       return;
     }
+
+    await claimPurchaseIfNeeded();
+    setLoading(false);
 
     router.push(getSafeOAuthNextPath(nextPath));
     router.refresh();
@@ -67,6 +84,13 @@ export function LoginForm({ nextPath, authError }: LoginFormProps) {
         <CardDescription>Sign in to manage your chatbot and leads.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {isPostPayment ? (
+          <Alert>
+            <AlertDescription className="text-emerald-700">
+              Payment successful. Log in with the same email you used to pay.
+            </AlertDescription>
+          </Alert>
+        ) : null}
         <GoogleSignInButton nextPath={nextPath} onError={setError} />
         <div className="flex items-center gap-3">
           <Separator className="flex-1" />

@@ -43,9 +43,14 @@ const CHECKOUT_ERROR_MESSAGES: Record<string, string> = {
 
 type CheckoutCardProps = {
   errorCode?: string | null;
+  mode?: "guest" | "authenticated";
 };
 
-export function CheckoutCard({ errorCode }: CheckoutCardProps) {
+export function CheckoutCard({
+  errorCode,
+  mode = "authenticated",
+}: CheckoutCardProps) {
+  const isGuest = mode === "guest";
   const [error, setError] = useState<string | null>(
     errorCode
       ? (CHECKOUT_ERROR_MESSAGES[errorCode] ??
@@ -59,9 +64,12 @@ export function CheckoutCard({ errorCode }: CheckoutCardProps) {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/checkout", {
-        method: "POST",
-      });
+      const response = await fetch(
+        isGuest ? "/api/checkout/guest" : "/api/checkout",
+        {
+          method: "POST",
+        },
+      );
       const body = (await response.json()) as CheckoutResponse;
 
       if (!body.ok) {
@@ -109,6 +117,13 @@ export function CheckoutCard({ errorCode }: CheckoutCardProps) {
           <li>Website knowledge import</li>
           <li>Lifetime updates included</li>
         </ul>
+
+        {isGuest ? (
+          <p className="text-sm text-muted-foreground">
+            No account needed to pay. You&apos;ll log in after checkout with the
+            same email.
+          </p>
+        ) : null}
 
         {error ? (
           <Alert variant="destructive">

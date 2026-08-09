@@ -67,7 +67,7 @@ export function CtaButton({
       )}
     >
       <Link
-        href="/signup"
+        href="/checkout"
         className={cn(
           "relative z-10 flex w-full items-center justify-center gap-2 overflow-hidden font-medium text-white transition-all will-change-transform before:absolute before:inset-0 before:z-0 before:bg-gradient-to-b before:opacity-0 before:transition-opacity before:duration-200",
           isSecondary

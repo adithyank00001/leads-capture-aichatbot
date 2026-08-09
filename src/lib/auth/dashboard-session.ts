@@ -6,11 +6,26 @@ import type { SupabaseClient, User } from "@supabase/supabase-js";
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/admin";
+import { claimPendingLifetimePurchase } from "@/lib/billing/claim-pending-purchase";
 import { ensureCustomerOnboarding } from "@/lib/dashboard/onboarding";
 import { ApiValidationError } from "@/lib/validation/errors";
 import type { WebsiteBuildStatus } from "@/lib/dashboard/setup-status";
 
 type Client = SupabaseClient<Database>;
+
+async function loadCustomerAccess(supabase: Client, userId: string) {
+  const { data, error } = await supabase
+    .from("customers")
+    .select("id, has_lifetime_access")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
 
 type BotBundle = {
   bot_id: string;
@@ -100,14 +115,14 @@ export const getDashboardAuth = cache(async () => {
     return null;
   }
 
-  const { data: customer, error } = await supabase
-    .from("customers")
-    .select("id, has_lifetime_access")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  let customer = await loadCustomerAccess(supabase as Client, user.id);
 
-  if (error) {
-    throw new Error(error.message);
+  if (!customer?.has_lifetime_access && user.email) {
+    await claimPendingLifetimePurchase({
+      userId: user.id,
+      email: user.email,
+    });
+    customer = await loadCustomerAccess(supabase as Client, user.id);
   }
 
   return {

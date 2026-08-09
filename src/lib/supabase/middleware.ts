@@ -2,8 +2,10 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 import {
+  isCheckoutApiPath,
   isCheckoutLandingPath,
   isCheckoutPath,
+  isGuestAllowedCheckoutPath,
 } from "@/lib/auth/access-paths";
 import { publicSupabaseConfig } from "@/lib/supabase/config";
 
@@ -55,6 +57,14 @@ export async function updateSession(request: NextRequest) {
   const user = session?.user ?? null;
 
   if (!user && isCheckoutPath(pathname)) {
+    if (isGuestAllowedCheckoutPath(pathname)) {
+      return supabaseResponse;
+    }
+
+    if (isCheckoutApiPath(pathname)) {
+      return supabaseResponse;
+    }
+
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
     redirectUrl.searchParams.set("next", pathname);
@@ -62,6 +72,10 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user) {
+    const isPostPaymentLogin =
+      pathname === "/login" &&
+      request.nextUrl.searchParams.get("paid") === "1";
+
     const hasLifetimeAccess = await getHasLifetimeAccess(supabase, user.id);
 
     if (hasLifetimeAccess && isCheckoutLandingPath(pathname)) {
@@ -71,7 +85,10 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(redirectUrl);
     }
 
-    if (pathname === "/login" || pathname === "/signup") {
+    if (
+      !isPostPaymentLogin &&
+      (pathname === "/login" || pathname === "/signup")
+    ) {
       const redirectUrl = request.nextUrl.clone();
       redirectUrl.pathname = hasLifetimeAccess ? "/dashboard" : "/checkout";
       redirectUrl.search = "";

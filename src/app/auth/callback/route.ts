@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getRequestOrigin, getSafeOAuthNextPath } from "@/lib/auth/oauth";
+import { claimPendingLifetimePurchase } from "@/lib/billing/claim-pending-purchase";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
@@ -11,9 +12,13 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createServerSupabaseClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (!error) {
+    if (!error && data.user?.email) {
+      await claimPendingLifetimePurchase({
+        userId: data.user.id,
+        email: data.user.email,
+      });
       return NextResponse.redirect(`${siteOrigin}${next}`);
     }
   }

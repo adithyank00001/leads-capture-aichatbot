@@ -47,6 +47,11 @@ export function SignupForm() {
     }
 
     if (data.session) {
+      try {
+        await fetch("/api/auth/claim-purchase", { method: "POST" });
+      } catch {
+        // Claim is retried on dashboard load if webhook is still processing.
+      }
       router.push("/checkout");
       router.refresh();
       return;

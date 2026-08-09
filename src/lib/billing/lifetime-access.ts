@@ -1,6 +1,8 @@
 import "server-only";
 
 import { getDodoConfig } from "@/lib/billing/dodo-config";
+import { normalizeEmail } from "@/lib/billing/normalize-email";
+import { insertPendingLifetimePurchase } from "@/lib/billing/pending-purchase";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
 type PaymentWebhookData = {
@@ -37,13 +39,10 @@ function paymentIncludesLtdProduct(
   return productCart.some((item) => item.product_id === expectedProductId);
 }
 
-export async function grantLifetimeAccessFromPayment(payment: PaymentWebhookData) {
-  const userId = getUserIdFromMetadata(payment.metadata);
-
-  if (!userId) {
-    return;
-  }
-
+async function grantLifetimeAccessForAuthenticatedUser(
+  payment: PaymentWebhookData,
+  userId: string,
+) {
   const { productId } = getDodoConfig();
 
   if (!paymentIncludesLtdProduct(payment.product_cart, productId)) {
@@ -111,4 +110,35 @@ export async function grantLifetimeAccessFromPayment(payment: PaymentWebhookData
   if (insertError) {
     throw new Error(insertError.message);
   }
+}
+
+async function storeGuestLifetimePurchase(payment: PaymentWebhookData) {
+  const { productId } = getDodoConfig();
+
+  if (!paymentIncludesLtdProduct(payment.product_cart, productId)) {
+    return;
+  }
+
+  const email = normalizeEmail(payment.customer.email);
+
+  if (!email) {
+    return;
+  }
+
+  await insertPendingLifetimePurchase({
+    email,
+    dodoPaymentId: payment.payment_id,
+    dodoCustomerId: payment.customer.customer_id,
+  });
+}
+
+export async function grantLifetimeAccessFromPayment(payment: PaymentWebhookData) {
+  const userId = getUserIdFromMetadata(payment.metadata);
+
+  if (userId) {
+    await grantLifetimeAccessForAuthenticatedUser(payment, userId);
+    return;
+  }
+
+  await storeGuestLifetimePurchase(payment);
 }

@@ -4,7 +4,7 @@ import { apiError, apiSuccess } from "@/lib/api-response";
 import { handleRouteError } from "@/lib/api/request";
 import { getCustomerAccess } from "@/lib/auth/access";
 import { requireAuthUser } from "@/lib/auth/dashboard";
-import { createLifetimeCheckoutSession } from "@/lib/billing/create-checkout-session";
+import { createAuthenticatedCheckoutSession } from "@/lib/billing/create-checkout-session";
 import { getRequestOrigin } from "@/lib/auth/oauth";
 import type { Database } from "@/lib/supabase/admin";
 
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const session = await createLifetimeCheckoutSession({
+    const session = await createAuthenticatedCheckoutSession({
       userId: user.id,
       email: user.email,
       origin,

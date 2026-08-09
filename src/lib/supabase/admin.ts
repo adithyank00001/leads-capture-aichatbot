@@ -46,6 +46,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      pending_lifetime_purchases: {
+        Row: {
+          id: string;
+          email: string;
+          dodo_payment_id: string;
+          dodo_customer_id: string | null;
+          paid_at: string;
+          claimed_at: string | null;
+          claimed_user_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          dodo_payment_id: string;
+          dodo_customer_id?: string | null;
+          paid_at?: string;
+          claimed_at?: string | null;
+          claimed_user_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          dodo_payment_id?: string;
+          dodo_customer_id?: string | null;
+          paid_at?: string;
+          claimed_at?: string | null;
+          claimed_user_id?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       bots: {
         Row: {
           id: string;

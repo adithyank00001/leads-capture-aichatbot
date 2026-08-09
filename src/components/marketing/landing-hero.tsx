@@ -26,7 +26,7 @@ export function LandingHero() {
       </div>
       <div className="flex flex-wrap gap-3">
         <Button asChild size="lg">
-          <Link href="/signup" className="inline-flex items-center gap-1">
+          <Link href="/checkout" className="inline-flex items-center gap-1">
             Get lifetime access —{" "}
             <FormattedPrice amount={publicConfig.lifetimeAccessPriceUsd} />
           </Link>
