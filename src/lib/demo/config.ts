@@ -1,14 +1,16 @@
 import type { BusinessDisplay } from "@/lib/business/display";
 import type { WidgetSettings } from "@/lib/widget/types";
-import { publicConfig } from "@/lib/config";
 
 export const demoBusiness: BusinessDisplay = {
-  name: publicConfig.appName,
+  name: "GrowscaleX Properties",
   welcomeMessage:
     "Demo only — these details are not saved. Enter your details below to try the assistant.",
   chatWelcomeMessage:
-    "Hi! I'm a demo AI sales assistant. Ask me anything about how Leady AI helps capture real estate leads from your website.",
+    "Hi, I'm the AI sales assistant from GrowscaleX Demo Properties. Looking for the right property? Tell me what you have in mind — I'll help you narrow down the best options.",
 };
+
+export const demoStarterQuestion =
+  "What properties do you have available right now?";
 
 export const demoWidgetSettings: WidgetSettings = {
   botId: "landing-demo",

@@ -438,7 +438,8 @@ export function SalesLandingPage() {
     <>
       <div className="relative overflow-x-hidden bg-white [--landing-navy:#112437] [--landing-orange:#FC7B02] [--landing-orange-hover:#E36F02]">
         {/* Hero — ice blue secondary (30%) */}
-        <section id="landing-hero" className="relative z-50 bg-white">
+        {/* Hero — z-[130] hides sticky CTA (z-[120]) and demo chat launcher (z-[100]) */}
+        <section id="landing-hero" className="relative z-[130] bg-white">
           <div
             className={cn(
               "relative mx-auto grid min-h-svh max-w-6xl grid-rows-[auto_1fr] px-4 pb-12 pt-2 sm:px-6 sm:pb-16 sm:pt-3 lg:min-h-svh lg:grid-rows-[auto_1fr] lg:pb-12 lg:pt-6",
@@ -481,10 +482,13 @@ export function SalesLandingPage() {
                   id="landing-hero-cta"
                   className="mt-10 flex flex-col items-center sm:mt-12 lg:mt-4 lg:items-stretch lg:self-start"
                 >
-                  <div className="inline-grid w-full grid-cols-1 gap-5 sm:gap-6 lg:hidden">
-                    <CtaButton className="w-full" />
-                    <div className="flex w-full flex-col items-center gap-1">
-                      <MoneyBackGuarantee centered className="pt-4" />
+                  <div className="mx-auto inline-flex flex-col items-stretch gap-5 sm:gap-6 lg:hidden">
+                    <CtaButton variant="secondary" />
+                    <div className="flex w-full flex-col items-stretch gap-1">
+                      <MoneyBackGuarantee
+                        centered
+                        className="pt-4 [&_p]:whitespace-normal"
+                      />
                       <p className="text-center text-[15px] font-bold uppercase tracking-wide text-[#16A34A] sm:text-[16px]">
                         Try It Risk-Free
                       </p>
@@ -494,7 +498,10 @@ export function SalesLandingPage() {
                   <div className="hidden lg:flex lg:flex-col lg:rounded-2xl lg:border lg:border-[#D8E2EC] lg:bg-white lg:p-8 lg:shadow-[0_6px_28px_rgba(17,36,55,0.1)] xl:p-9">
                     <CtaButton className="w-full" size="large" />
                     <div className="mt-6 flex flex-col gap-1.5">
-                      <MoneyBackGuarantee centered className="pt-4 lg:[&_p:first-child]:text-[18px]" />
+                      <MoneyBackGuarantee
+                        centered
+                        className="pt-4 lg:[&_p:first-child]:text-[18px]"
+                      />
                       <p className="text-center text-[16px] font-bold uppercase tracking-wide text-[#16A34A]">
                         Try It Risk-Free
                       </p>
@@ -507,7 +514,11 @@ export function SalesLandingPage() {
         </section>
 
         {/* Problem — navy dominant (60%) */}
-        <section id="landing-problem" className="bg-[var(--landing-navy)]">
+        {/* Problem — z-[110] hides demo chat launcher; sticky CTA (z-[120]) stays on top */}
+        <section
+          id="landing-problem"
+          className="relative z-[110] bg-[var(--landing-navy)]"
+        >
           <div
             className={cn(
               "mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20",
@@ -521,8 +532,12 @@ export function SalesLandingPage() {
               </SectionLabel>
 
               <h2 className="text-[32px] font-bold leading-[1.12] tracking-tight sm:text-[53px] sm:leading-[1.1] lg:mx-auto lg:max-w-[900px] lg:text-[48px] lg:leading-[1.08] xl:text-[50px]">
-                <span className="block text-white lg:inline">Interest Doesn&apos;t </span>
-                <span className="block text-white lg:inline">Always Turn Into </span>
+                <span className="block text-white lg:inline">
+                  Interest Doesn&apos;t{" "}
+                </span>
+                <span className="block text-white lg:inline">
+                  Always Turn Into{" "}
+                </span>
                 <span className="block text-[var(--landing-orange)] lg:inline">
                   An Enquiry
                 </span>
@@ -564,8 +579,8 @@ export function SalesLandingPage() {
           </div>
         </section>
 
-        {/* Solution — ice blue secondary (30%) */}
-        <section className="bg-white">
+        {/* Solution — z-[110] hides demo chat launcher */}
+        <section className="relative z-[110] bg-white">
           <div
             className={cn(
               "mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20",
@@ -619,8 +634,7 @@ export function SalesLandingPage() {
                     key={feature.text}
                     className={cn(
                       "min-h-[88px] border-[#D8E2EC] bg-white py-0 shadow-md",
-                      index === 0 &&
-                        "ring-1 ring-[var(--landing-orange)]/25",
+                      index === 0 && "ring-1 ring-[var(--landing-orange)]/25",
                     )}
                   >
                     <CardContent className="flex h-full items-center gap-3 px-5 py-4">
@@ -664,8 +678,8 @@ export function SalesLandingPage() {
           </div>
         </section>
 
-        {/* Testimonials — navy dominant (60%) */}
-        <section className="bg-[var(--landing-navy)]">
+        {/* Testimonials — z-[110] hides demo chat launcher */}
+        <section className="relative z-[110] bg-[var(--landing-navy)]">
           <div
             className={cn(
               "mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20",
@@ -674,10 +688,7 @@ export function SalesLandingPage() {
             )}
           >
             <div className="mx-auto max-w-3xl text-center">
-              <SectionHeading
-                onDark
-                className="text-[28px] lg:text-[38px]"
-              >
+              <SectionHeading onDark className="text-[28px] lg:text-[38px]">
                 <span className="text-[var(--landing-orange)]">
                   Real Feedback
                 </span>{" "}
@@ -729,8 +740,8 @@ export function SalesLandingPage() {
           </div>
         </section>
 
-        {/* Live demo — inline chat section */}
-        <section id="landing-demo" className="bg-white">
+        {/* Live demo — z-[95] lets demo chat launcher (z-[100]) show above this section */}
+        <section id="landing-demo" className="relative z-[95] bg-white">
           <div
             className={cn(
               "mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20",
@@ -739,19 +750,15 @@ export function SalesLandingPage() {
             )}
           >
             <div className="mx-auto max-w-3xl text-center lg:max-w-[960px]">
-              <SectionLabel className="mb-5 text-[14px] uppercase tracking-wider lg:mx-auto" light>
+              <SectionLabel
+                className="mb-5 text-[14px] uppercase tracking-wider lg:mx-auto"
+                light
+              >
                 Live Demo
               </SectionLabel>
-              <SectionHeading className="mb-4 normal-case">
-                See How the AI Sales Assistant Captures a Lead
+              <SectionHeading className="mb-6 normal-case sm:mb-8">
+                See How a Visitor Becomes a Lead
               </SectionHeading>
-              <p className="mx-auto mb-8 max-w-2xl text-[17px] font-medium leading-relaxed text-[var(--landing-navy)] sm:mb-10 sm:text-[19px]">
-                Experience a guided demo of what your website visitors will see
-                — from first enquiry to captured contact details.
-              </p>
-              <p className="mx-auto mb-6 max-w-2xl text-[14px] font-medium text-[var(--landing-navy)]/70 sm:text-[15px]">
-                20 seconds · Uses sample details · No signup needed
-              </p>
             </div>
             <div className="mx-auto max-w-2xl">
               <DemoChatSection />
@@ -759,11 +766,11 @@ export function SalesLandingPage() {
           </div>
         </section>
 
-        {/* Steps — ice blue secondary (30%) */}
-        <section className="bg-white">
+        {/* Steps — z-[110] hides demo chat launcher when scrolled past */}
+        <section className="relative z-[110] bg-white">
           <div
             className={cn(
-              "mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20",
+              "mx-auto max-w-6xl px-4 pt-0 pb-16 sm:px-6 sm:pb-20 lg:pt-0",
               DESKTOP_CONTAINER,
               DESKTOP_SECTION,
             )}
@@ -805,8 +812,8 @@ export function SalesLandingPage() {
           </div>
         </section>
 
-        {/* Comparison */}
-        <section>
+        {/* Comparison — z-[110] hides demo chat launcher */}
+        <section className="relative z-[110] bg-white">
           <div
             className={cn(
               "mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20",
@@ -849,8 +856,7 @@ export function SalesLandingPage() {
                     />
                     {"withSuffixStack" in row && row.withSuffixStack ? (
                       <p className="text-[17px] font-bold leading-snug text-[var(--landing-navy)]">
-                        {row.withPrefix}{" "}
-                        {row.withSuffixStack[0]}{" "}
+                        {row.withPrefix} {row.withSuffixStack[0]}{" "}
                         {row.withSuffixStack[1]}
                       </p>
                     ) : "withPrice" in row && row.withPrice ? (
@@ -925,10 +931,10 @@ export function SalesLandingPage() {
           </div>
         </section>
 
-        {/* Pricing — navy dominant (60%); z-50 hides mobile floating CTA while this section is in view */}
+        {/* Pricing — sticky CTA (z-[120]) stays visible above this section */}
         <section
           id="landing-pricing"
-          className="relative z-50 bg-[var(--landing-navy)]"
+          className="relative z-[110] bg-[var(--landing-navy)]"
         >
           <div
             className={cn(
@@ -941,7 +947,9 @@ export function SalesLandingPage() {
               <SectionHeading onDark className="text-[28px] lg:text-[40px]">
                 Stop Losing Potential Leads for Just{" "}
                 <span className="text-[#FC9018]">
-                  <FormattedPrice amount={publicConfig.lifetimeAccessPriceUsd} />
+                  <FormattedPrice
+                    amount={publicConfig.lifetimeAccessPriceUsd}
+                  />
                 </span>
               </SectionHeading>
             </div>
@@ -991,7 +999,10 @@ export function SalesLandingPage() {
                     <p className="mb-1 pt-1 text-[13px] font-bold uppercase tracking-wide text-[#16A34A] lg:text-[14px]">
                       Try It Risk-Free
                     </p>
-                    <MoneyBackGuarantee centered className="lg:[&_p:first-child]:text-[18px]" />
+                    <MoneyBackGuarantee
+                      centered
+                      className="lg:[&_p:first-child]:text-[18px]"
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -1000,7 +1011,7 @@ export function SalesLandingPage() {
         </section>
 
         {/* Footer */}
-        <section className="bg-white pb-8 lg:pb-12">
+        <section className="relative z-[110] bg-white pb-8 lg:pb-12">
           <div
             className={cn(
               "mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12",

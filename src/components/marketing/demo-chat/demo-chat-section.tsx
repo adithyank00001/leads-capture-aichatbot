@@ -13,7 +13,7 @@ import { ChatLauncher } from "@/components/chatbot/chat-launcher";
 import { WidgetThemeProvider } from "@/components/chatbot/widget-theme-provider";
 import { DemoChatInterface } from "@/components/marketing/demo-chat/demo-chat-interface";
 import { demoBusiness, demoWidgetSettings } from "@/lib/demo/config";
-import { getOrCreateDemoSessionId } from "@/lib/session/demo-client";
+import { getOrCreateDemoSessionId, hasCompletedDemoLead, loadDemoMessages } from "@/lib/session/demo-client";
 import { cn } from "@/lib/utils";
 
 function subscribe() {
@@ -30,52 +30,6 @@ function getServerSessionId() {
 
 const STICKY_CTA_ID = "sticky-mobile-cta";
 const LAUNCHER_GAP_PX = 16;
-const DEMO_SECTION_ID = "landing-demo";
-
-function useDemoSectionReached() {
-  const [hasReachedDemoSection, setHasReachedDemoSection] = useState(false);
-
-  useEffect(() => {
-    const demoSection = document.getElementById(DEMO_SECTION_ID);
-
-    if (!demoSection) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry) {
-          return;
-        }
-
-        if (entry.isIntersecting) {
-          setHasReachedDemoSection(true);
-          return;
-        }
-
-        const { top, bottom } = entry.boundingClientRect;
-
-        if (bottom < 0) {
-          setHasReachedDemoSection(true);
-          return;
-        }
-
-        if (top > window.innerHeight) {
-          setHasReachedDemoSection(false);
-        }
-      },
-      { threshold: 0 },
-    );
-
-    observer.observe(demoSection);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
-  return hasReachedDemoSection;
-}
 
 type DemoChatPanelProps = {
   sessionId: string;
@@ -98,11 +52,23 @@ function DemoChatPanel({ sessionId, onClose, className }: DemoChatPanelProps) {
   );
 }
 
+function hasExistingDemoSession() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const sessionId = getOrCreateDemoSessionId();
+
+  return (
+    loadDemoMessages(sessionId).length > 0 || hasCompletedDemoLead(sessionId)
+  );
+}
+
 export function DemoChatSection() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isChatMounted, setIsChatMounted] = useState(false);
   const [canCloseBackdrop, setCanCloseBackdrop] = useState(false);
   const [launcherBottomPx, setLauncherBottomPx] = useState<number | null>(null);
-  const hasReachedDemoSection = useDemoSectionReached();
   const justOpenedRef = useRef(false);
   const sessionId = useSyncExternalStore(
     subscribe,
@@ -112,6 +78,7 @@ export function DemoChatSection() {
 
   const openChat = useCallback(() => {
     justOpenedRef.current = true;
+    setIsChatMounted(true);
     setIsOpen(true);
 
     window.setTimeout(() => {
@@ -121,6 +88,12 @@ export function DemoChatSection() {
 
   const closeChat = useCallback(() => {
     setIsOpen(false);
+  }, []);
+
+  useEffect(() => {
+    if (hasExistingDemoSession()) {
+      setIsChatMounted(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -197,11 +170,11 @@ export function DemoChatSection() {
   }, [canCloseBackdrop, closeChat]);
 
   const launcher =
-    !isOpen && hasReachedDemoSection && typeof document !== "undefined"
+    !isOpen && typeof document !== "undefined"
       ? createPortal(
           <div
             className={cn(
-              "fixed right-4 z-[100] size-14 touch-manipulation transition-opacity duration-300 sm:right-6",
+              "fixed right-4 z-[100] size-14 touch-manipulation sm:right-6",
               "lg:bottom-6",
               launcherBottomPx === null && "bottom-36",
             )}
@@ -222,12 +195,16 @@ export function DemoChatSection() {
       : null;
 
   const mobileModal =
-    isOpen && typeof document !== "undefined"
+    isChatMounted && typeof document !== "undefined"
       ? createPortal(
           <div
-            className="fixed inset-0 z-[9999] lg:hidden"
+            className={cn(
+              "fixed inset-0 z-[9999] lg:hidden",
+              !isOpen && "hidden",
+            )}
             role="dialog"
-            aria-modal="true"
+            aria-modal={isOpen}
+            aria-hidden={!isOpen}
             aria-label="Live demo chat"
           >
             <button
@@ -256,16 +233,18 @@ export function DemoChatSection() {
       : null;
 
   const desktopPanel =
-    isOpen && typeof document !== "undefined"
+    isChatMounted && typeof document !== "undefined"
       ? createPortal(
           <div
             className={cn(
               "fixed right-6 bottom-6 z-[9999] hidden lg:block",
               "h-[min(620px,calc(100vh-3rem))] w-[min(380px,calc(100vw-3rem))]",
               "max-h-[620px] max-w-[380px]",
+              !isOpen && "pointer-events-none invisible",
             )}
             role="dialog"
-            aria-modal="false"
+            aria-modal={false}
+            aria-hidden={!isOpen}
             aria-label="Live demo chat"
           >
             <DemoChatPanel

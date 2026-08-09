@@ -1,4 +1,5 @@
 import {
+  DEMO_FLOATING_CTA_SHOWN_PREFIX,
   DEMO_LEAD_PREFIX,
   DEMO_MESSAGES_PREFIX,
   DEMO_SESSION_KEY,
@@ -44,6 +45,10 @@ function getLeadStorageKey(sessionId: string) {
 
 function getMessagesStorageKey(sessionId: string) {
   return `${DEMO_MESSAGES_PREFIX}${sessionId}`;
+}
+
+function getFloatingCtaStorageKey(sessionId: string) {
+  return `${DEMO_FLOATING_CTA_SHOWN_PREFIX}${sessionId}`;
 }
 
 export function getOrCreateDemoSessionId() {
@@ -136,6 +141,22 @@ export function saveDemoMessages(
     getMessagesStorageKey(sessionId),
     JSON.stringify(messages),
   );
+}
+
+export function hasShownDemoFloatingCta(sessionId: string) {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return readSessionStorage(getFloatingCtaStorageKey(sessionId)) === "true";
+}
+
+export function markDemoFloatingCtaShown(sessionId: string) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  writeSessionStorage(getFloatingCtaStorageKey(sessionId), "true");
 }
 
 export function createDemoMessageId() {

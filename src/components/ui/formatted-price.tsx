@@ -24,7 +24,11 @@ export function FormattedPrice({
       locale="en-AE"
       symbolSize={symbolSize}
       weight={weight}
-      className={cn("leading-none", lineThrough && "line-through opacity-70", className)}
+      className={cn(
+        "leading-none",
+        lineThrough && "line-through opacity-70",
+        className,
+      )}
     />
   );
 }

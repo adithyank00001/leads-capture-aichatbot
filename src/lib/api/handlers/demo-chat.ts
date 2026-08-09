@@ -49,7 +49,12 @@ export async function sendDemoChatMessage(body: unknown, request: Request) {
   ];
 
   const answer = await withTimeout(
-    generateChatCompletion(aiMessages),
+    generateChatCompletion(aiMessages, {
+      models: [
+        serverEnv.demoOpenRouterModel,
+        serverEnv.demoOpenRouterFallbackModel,
+      ],
+    }),
     serverEnv.demoAiTimeoutMs,
   );
 

@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
-import { InlineCtaPrice, StackedCtaPrice } from "@/components/ui/formatted-price";
+import {
+  InlineCtaPrice,
+  StackedCtaPrice,
+} from "@/components/ui/formatted-price";
 import { publicConfig } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
@@ -23,14 +26,22 @@ export function CtaButton({
   showDiscountBadge = false,
   size = "default",
   priceBelow = false,
+  variant = "primary",
+  label = "Get Lifetime Access",
+  showPrice = true,
 }: {
   className?: string;
   showDiscountBadge?: boolean;
-  size?: "default" | "large";
+  size?: "default" | "large" | "compact";
   /** Stack prices on a horizontal row under the label (pricing section). */
   priceBelow?: boolean;
+  variant?: "primary" | "secondary";
+  label?: string;
+  showPrice?: boolean;
 }) {
   const isLarge = size === "large";
+  const isCompact = size === "compact";
+  const isSecondary = variant === "secondary";
 
   const prices = priceBelow ? (
     <InlineCtaPrice
@@ -47,7 +58,10 @@ export function CtaButton({
   const button = (
     <div
       className={cn(
-        "w-fit rounded-[14px] bg-gradient-to-b from-[#FDA85A] to-[#FC7B02] p-[1px] transition-all duration-200 will-change-transform hover:scale-[1.04] hover:from-[#FC7B02] hover:to-[#E36F02]",
+        "w-fit rounded-[14px] p-[1px] transition-all duration-200 will-change-transform hover:scale-[1.04]",
+        isSecondary
+          ? "bg-gradient-to-b from-[#1a334d] to-[#112437] hover:from-[#112437] hover:to-[#0d1c2b]"
+          : "bg-gradient-to-b from-[#FDA85A] to-[#FC7B02] hover:from-[#FC7B02] hover:to-[#E36F02]",
         isLarge && "rounded-[16px]",
         className,
       )}
@@ -55,10 +69,15 @@ export function CtaButton({
       <Link
         href="/signup"
         className={cn(
-          "relative z-10 flex w-full items-center justify-center gap-2 overflow-hidden bg-gradient-to-b from-[#E36F02] to-[#FDA85A] font-medium text-white shadow-[0px_2px_10.1px_0px_#FC7B0233] transition-all will-change-transform before:absolute before:inset-0 before:z-0 before:bg-gradient-to-b before:from-[#D96800] before:to-[#FC7B02] before:opacity-0 before:transition-opacity before:duration-200 hover:shadow-[0px_2px_10.1px_0px_#FC7B0244] hover:before:opacity-100",
+          "relative z-10 flex w-full items-center justify-center gap-2 overflow-hidden font-medium text-white transition-all will-change-transform before:absolute before:inset-0 before:z-0 before:bg-gradient-to-b before:opacity-0 before:transition-opacity before:duration-200",
+          isSecondary
+            ? "bg-gradient-to-b from-[#112437] to-[#1a334d] shadow-[0px_2px_10.1px_0px_#11243733] before:from-[#0d1c2b] before:to-[#1a334d] hover:shadow-[0px_2px_10.1px_0px_#11243744] hover:before:opacity-100"
+            : "bg-gradient-to-b from-[#E36F02] to-[#FDA85A] shadow-[0px_2px_10.1px_0px_#FC7B0233] before:from-[#D96800] before:to-[#FC7B02] hover:shadow-[0px_2px_10.1px_0px_#FC7B0244] hover:before:opacity-100",
           isLarge
             ? "rounded-[15px] px-6 py-3.5 text-[19px]"
-            : "rounded-[13px] px-4 py-2 text-[17px]",
+            : isCompact
+              ? "rounded-[13px] px-3 py-2 text-[13px]"
+              : "rounded-[13px] px-4 py-2 text-[17px]",
         )}
       >
         <span
@@ -67,23 +86,40 @@ export function CtaButton({
             priceBelow ? "flex-col gap-1" : isLarge ? "gap-2.5" : "gap-2",
           )}
         >
-          <span className="inline-flex items-center gap-2">
-            <span className="whitespace-nowrap">Get Lifetime Access</span>
-            {priceBelow ? (
-              <ChevronRight
-                className={cn("shrink-0", isLarge ? "size-6" : "size-5")}
-              />
-            ) : null}
-          </span>
-          {priceBelow ? prices : null}
-          {!priceBelow ? (
+          {showPrice ? (
             <>
-              {prices}
+              <span className="inline-flex items-center gap-2">
+                <span className="whitespace-nowrap">{label}</span>
+                {priceBelow ? (
+                  <ChevronRight
+                    className={cn("shrink-0", isLarge ? "size-6" : "size-5")}
+                  />
+                ) : null}
+              </span>
+              {priceBelow ? prices : null}
+              {!priceBelow ? (
+                <>
+                  {prices}
+                  <ChevronRight
+                    className={cn(
+                      "shrink-0",
+                      isLarge ? "size-6" : isCompact ? "size-4" : "size-5",
+                    )}
+                  />
+                </>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <span className="whitespace-nowrap">{label}</span>
               <ChevronRight
-                className={cn("shrink-0", isLarge ? "size-6" : "size-5")}
+                className={cn(
+                  "shrink-0",
+                  isLarge ? "size-6" : isCompact ? "size-4" : "size-5",
+                )}
               />
             </>
-          ) : null}
+          )}
         </span>
       </Link>
     </div>

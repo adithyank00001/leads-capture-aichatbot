@@ -20,15 +20,32 @@ type OpenRouterResponse = {
   };
 };
 
-export async function generateChatCompletion(messages: AiChatMessage[]) {
-  if (!serverEnv.openRouterApiKey) {
-    throw new ApiValidationError(
-      "AI_NOT_CONFIGURED",
-      "AI provider is not configured on the server.",
-      500,
-    );
+function getChatModelChain(models?: string[]) {
+  const chain =
+    models ??
+    [serverEnv.openRouterModel, serverEnv.openRouterFallbackModel];
+
+  return chain.filter(
+    (model, index, modelList) => modelList.indexOf(model) === index,
+  );
+}
+
+function shouldTryFallbackModel(error: unknown) {
+  if (!(error instanceof ApiValidationError)) {
+    return false;
   }
 
+  return (
+    error.code === "AI_PROVIDER_ERROR" ||
+    error.code === "AI_INVALID_RESPONSE" ||
+    error.code === "AI_EMPTY_RESPONSE"
+  );
+}
+
+async function requestChatCompletion(
+  model: string,
+  messages: AiChatMessage[],
+) {
   const response = await fetch(OPENROUTER_URL, {
     method: "POST",
     headers: {
@@ -38,7 +55,7 @@ export async function generateChatCompletion(messages: AiChatMessage[]) {
       "X-Title": publicConfig.appName,
     },
     body: JSON.stringify({
-      model: serverEnv.openRouterModel,
+      model,
       messages,
       temperature: 0.3,
       max_tokens: 500,
@@ -76,4 +93,56 @@ export async function generateChatCompletion(messages: AiChatMessage[]) {
   }
 
   return answer;
+}
+
+export type GenerateChatCompletionOptions = {
+  models?: string[];
+};
+
+export async function generateChatCompletion(
+  messages: AiChatMessage[],
+  options?: GenerateChatCompletionOptions,
+) {
+  if (!serverEnv.openRouterApiKey) {
+    throw new ApiValidationError(
+      "AI_NOT_CONFIGURED",
+      "AI provider is not configured on the server.",
+      500,
+    );
+  }
+
+  const models = getChatModelChain(options?.models);
+  let lastError: ApiValidationError | null = null;
+
+  for (let index = 0; index < models.length; index += 1) {
+    const model = models[index];
+    const isLastModel = index === models.length - 1;
+
+    try {
+      return await requestChatCompletion(model, messages);
+    } catch (error) {
+      if (!isLastModel && shouldTryFallbackModel(error)) {
+        lastError =
+          error instanceof ApiValidationError
+            ? error
+            : new ApiValidationError(
+                "AI_PROVIDER_ERROR",
+                "AI provider request failed.",
+                502,
+              );
+        continue;
+      }
+
+      throw error;
+    }
+  }
+
+  throw (
+    lastError ??
+    new ApiValidationError(
+      "AI_PROVIDER_ERROR",
+      "AI provider request failed.",
+      502,
+    )
+  );
 }

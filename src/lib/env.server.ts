@@ -34,7 +34,10 @@ export const serverEnv = {
   supabaseUrl: readOptionalEnv("SUPABASE_URL"),
   supabaseServiceRoleKey: readOptionalEnv("SUPABASE_SERVICE_ROLE_KEY"),
   openRouterApiKey: readOptionalEnv("OPENROUTER_API_KEY"),
-  openRouterModel: readOptionalEnv("OPENROUTER_MODEL") ?? "openai/gpt-4o-mini",
+  openRouterModel:
+    readOptionalEnv("OPENROUTER_MODEL") ?? "deepseek/deepseek-v4-flash",
+  openRouterFallbackModel:
+    readOptionalEnv("OPENROUTER_FALLBACK_MODEL") ?? "google/gemini-2.5-flash",
   openRouterEmbeddingModel:
     readOptionalEnv("OPENROUTER_EMBEDDING_MODEL") ??
     "openai/text-embedding-3-small",
@@ -55,7 +58,12 @@ export const serverEnv = {
   demoSystemPrompt: readOptionalEnv("DEMO_SYSTEM_PROMPT"),
   demoRateLimitSessionPerMin: readIntEnv("DEMO_RATE_LIMIT_SESSION_PER_MIN", 10),
   demoRateLimitIpPerMin: readIntEnv("DEMO_RATE_LIMIT_IP_PER_MIN", 40),
-  demoAiTimeoutMs: readIntEnv("DEMO_AI_TIMEOUT_MS", 30_000),
+  demoAiTimeoutMs: readIntEnv("DEMO_AI_TIMEOUT_MS", 60_000),
+  demoOpenRouterModel:
+    readOptionalEnv("DEMO_OPENROUTER_MODEL") ?? "google/gemini-2.5-flash",
+  demoOpenRouterFallbackModel:
+    readOptionalEnv("DEMO_OPENROUTER_FALLBACK_MODEL") ??
+    "deepseek/deepseek-v4-flash",
 } as const;
 
 export function getServiceStatus(): {

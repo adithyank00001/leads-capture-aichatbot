@@ -5,6 +5,8 @@ import { Send } from "lucide-react";
 
 import { BusinessAvatar } from "@/components/chatbot/business-avatar";
 import { ChatWidgetShell } from "@/components/chatbot/chat-widget-shell";
+import { DemoAssistantMessage } from "@/components/marketing/demo-chat/demo-assistant-message";
+import { DemoChatFloatingCta } from "@/components/marketing/demo-chat/demo-chat-floating-cta";
 import { DemoLeadCaptureStrip } from "@/components/marketing/demo-chat/demo-lead-capture-strip";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -14,19 +16,53 @@ import { formatChatTimestamp } from "@/lib/chat/format";
 import {
   AI_HISTORY_LIMIT,
   AI_THINKING_PHASE_MS,
+  DEMO_LEAD_GATE_THINKING_MS,
+  DEMO_FLOATING_CTA_DELAY_MS,
   DEMO_WAITING_MESSAGES,
 } from "@/lib/demo/constants";
+import { demoStarterQuestion } from "@/lib/demo/config";
 import {
   createDemoMessageId,
   hasCompletedDemoLead,
+  hasShownDemoFloatingCta,
   loadDemoMessages,
+  markDemoFloatingCtaShown,
   markDemoLeadCompleted,
   saveDemoMessages,
   type DemoChatMessage,
 } from "@/lib/session/demo-client";
 import type { WidgetSettings } from "@/lib/widget/types";
+import { cn } from "@/lib/utils";
 
 const PENDING_MESSAGE_ID = "pending-user-message";
+
+function restoreDemoChatState(sessionId: string, leadFormEnabled: boolean) {
+  if (typeof window === "undefined") {
+    return {
+      messages: [] as DemoChatMessage[],
+      input: demoStarterQuestion,
+      leadCompleted: !leadFormEnabled,
+      showLeadStrip: false,
+      pendingMessage: null as string | null,
+      showFloatingCta: false,
+    };
+  }
+
+  const loadedMessages = loadDemoMessages(sessionId);
+  const completed = leadFormEnabled ? hasCompletedDemoLead(sessionId) : true;
+  const pendingMessageEntry = loadedMessages.find(
+    (message) => message.id === PENDING_MESSAGE_ID,
+  );
+
+  return {
+    messages: loadedMessages,
+    input: loadedMessages.length === 0 ? demoStarterQuestion : "",
+    leadCompleted: completed,
+    showLeadStrip: Boolean(pendingMessageEntry && !completed),
+    pendingMessage: pendingMessageEntry?.content ?? null,
+    showFloatingCta: hasShownDemoFloatingCta(sessionId),
+  };
+}
 
 type DemoChatInterfaceProps = {
   sessionId: string;
@@ -34,6 +70,21 @@ type DemoChatInterfaceProps = {
   widgetSettings: WidgetSettings;
   onClose?: () => void;
 };
+
+function TypingIndicator({ businessName }: { businessName: string }) {
+  return (
+    <div className="flex items-start gap-2">
+      <BusinessAvatar name={businessName} size="sm" className="mt-1" />
+      <div className="rounded-2xl bg-blue-50 px-4 py-3">
+        <div className="flex items-center gap-1">
+          <span className="size-1.5 animate-bounce rounded-full bg-zinc-400 [animation-delay:0ms]" />
+          <span className="size-1.5 animate-bounce rounded-full bg-zinc-400 [animation-delay:150ms]" />
+          <span className="size-1.5 animate-bounce rounded-full bg-zinc-400 [animation-delay:300ms]" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function WaitingIndicator({
   businessName,
@@ -63,42 +114,36 @@ export function DemoChatInterface({
   widgetSettings,
   onClose,
 }: DemoChatInterfaceProps) {
-  const [messages, setMessages] = useState<DemoChatMessage[]>([]);
-  const [input, setInput] = useState("");
+  const leadFormEnabled = widgetSettings.leadFormEnabled;
+  const initialStateRef = useRef(
+    restoreDemoChatState(sessionId, leadFormEnabled),
+  );
+  const initialState = initialStateRef.current;
+
+  const [messages, setMessages] = useState<DemoChatMessage[]>(
+    initialState.messages,
+  );
+  const [input, setInput] = useState(initialState.input);
   const [error, setError] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [waitingPhase, setWaitingPhase] = useState<"thinking" | "stillWorking">(
     "thinking",
   );
-  const [leadCompleted, setLeadCompleted] = useState(false);
-  const [showLeadStrip, setShowLeadStrip] = useState(false);
-  const [pendingMessage, setPendingMessage] = useState<string | null>(null);
+  const [leadCompleted, setLeadCompleted] = useState(initialState.leadCompleted);
+  const [showLeadStrip, setShowLeadStrip] = useState(initialState.showLeadStrip);
+  const [isLeadGateThinking, setIsLeadGateThinking] = useState(false);
+  const [pendingMessage, setPendingMessage] = useState<string | null>(
+    initialState.pendingMessage,
+  );
   const [retryMessage, setRetryMessage] = useState<string | null>(null);
+  const [showFloatingCta, setShowFloatingCta] = useState(
+    initialState.showFloatingCta,
+  );
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const leadGateTimerRef = useRef<number | null>(null);
+  const floatingCtaTimerRef = useRef<number | null>(null);
 
   const assistantLabel = `${business.name} assistant`;
-  const leadFormEnabled = widgetSettings.leadFormEnabled;
-
-  useEffect(() => {
-    if (!sessionId) {
-      return;
-    }
-
-    if (!leadFormEnabled) {
-      setLeadCompleted(true);
-      return;
-    }
-
-    setLeadCompleted(hasCompletedDemoLead(sessionId));
-  }, [sessionId, leadFormEnabled]);
-
-  useEffect(() => {
-    if (!sessionId) {
-      return;
-    }
-
-    setMessages(loadDemoMessages(sessionId));
-  }, [sessionId]);
 
   useEffect(() => {
     if (!sessionId) {
@@ -109,8 +154,54 @@ export function DemoChatInterface({
   }, [messages, sessionId]);
 
   useEffect(() => {
+    if (!showFloatingCta) {
+      return;
+    }
+
+    markDemoFloatingCtaShown(sessionId);
+  }, [showFloatingCta, sessionId]);
+
+  useEffect(() => {
+    if (showFloatingCta) {
+      return;
+    }
+
+    if (!messages.some((message) => message.role === "assistant")) {
+      return;
+    }
+
+    if (floatingCtaTimerRef.current !== null) {
+      return;
+    }
+
+    floatingCtaTimerRef.current = window.setTimeout(() => {
+      setShowFloatingCta(true);
+      floatingCtaTimerRef.current = null;
+    }, DEMO_FLOATING_CTA_DELAY_MS);
+
+    return () => {
+      if (floatingCtaTimerRef.current !== null) {
+        window.clearTimeout(floatingCtaTimerRef.current);
+        floatingCtaTimerRef.current = null;
+      }
+    };
+  }, [messages, showFloatingCta]);
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isSending, showLeadStrip, error]);
+  }, [messages, isSending, isLeadGateThinking, showLeadStrip, error, showFloatingCta]);
+
+  useEffect(() => {
+    return () => {
+      if (leadGateTimerRef.current !== null) {
+        window.clearTimeout(leadGateTimerRef.current);
+      }
+
+      if (floatingCtaTimerRef.current !== null) {
+        window.clearTimeout(floatingCtaTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!isSending) {
@@ -188,7 +279,7 @@ export function DemoChatInterface({
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (isSending) {
+    if (isSending || isLeadGateThinking) {
       return;
     }
 
@@ -215,8 +306,19 @@ export function DemoChatInterface({
 
       setMessages([optimisticMessage]);
       setPendingMessage(trimmedMessage);
-      setShowLeadStrip(true);
       setInput("");
+      setIsLeadGateThinking(true);
+
+      if (leadGateTimerRef.current !== null) {
+        window.clearTimeout(leadGateTimerRef.current);
+      }
+
+      leadGateTimerRef.current = window.setTimeout(() => {
+        setIsLeadGateThinking(false);
+        setShowLeadStrip(true);
+        leadGateTimerRef.current = null;
+      }, DEMO_LEAD_GATE_THINKING_MS);
+
       return;
     }
 
@@ -262,13 +364,19 @@ export function DemoChatInterface({
 
   const displayMessages = messages;
   const showWelcome =
-    displayMessages.length === 0 && !isSending && !showLeadStrip;
+    displayMessages.length === 0 &&
+    !isSending &&
+    !isLeadGateThinking &&
+    !showLeadStrip;
   const timestampLabel = formatChatTimestamp(new Date());
 
   return (
     <div className="flex h-full min-h-0 flex-col">
       <ChatWidgetShell businessName={business.name} onClose={onClose}>
-      <ScrollArea className="min-h-0 flex-1 bg-white">
+      <div className="relative flex min-h-0 flex-1 flex-col">
+      <ScrollArea
+        className={cn("min-h-0 flex-1 bg-white", showFloatingCta && "pb-24")}
+      >
         <div className="space-y-4 px-4 py-4">
           <p className="text-center text-xs text-zinc-400">{timestampLabel}</p>
 
@@ -313,12 +421,20 @@ export function DemoChatInterface({
                       isUser ? "bg-amber-50" : "bg-blue-50"
                     }`}
                   >
-                    {message.content}
+                    {isUser ? (
+                      message.content
+                    ) : (
+                      <DemoAssistantMessage content={message.content} />
+                    )}
                   </div>
                 </div>
               </div>
             );
           })}
+
+          {isLeadGateThinking ? (
+            <TypingIndicator businessName={business.name} />
+          ) : null}
 
           {isSending ? (
             <WaitingIndicator
@@ -330,6 +446,15 @@ export function DemoChatInterface({
           <div ref={bottomRef} />
         </div>
       </ScrollArea>
+
+      <div className="relative shrink-0">
+        {showFloatingCta ? (
+          <div className="pointer-events-none absolute inset-x-0 bottom-full z-10 flex justify-center px-4 pb-2 animate-in slide-in-from-bottom-6 fade-in duration-500">
+            <div className="pointer-events-auto">
+              <DemoChatFloatingCta />
+            </div>
+          </div>
+        ) : null}
 
       {error ? (
         <div className="border-t border-zinc-100 bg-zinc-50 px-4 py-3">
@@ -362,29 +487,50 @@ export function DemoChatInterface({
 
       <form
         onSubmit={handleSubmit}
-        className="border-t border-zinc-100 bg-zinc-50 px-4 py-3"
+        className="border-t border-zinc-200 bg-white px-4 py-3 shadow-[0_-6px_20px_rgba(17,36,55,0.08)]"
       >
-        <div className="flex items-center gap-2">
+        <label
+          htmlFor="demo-chat-input"
+          className="mb-2 block text-xs font-semibold uppercase tracking-wide text-zinc-500"
+        >
+          Your message
+        </label>
+        <div className="flex items-center gap-2 rounded-2xl border-2 border-zinc-200 bg-zinc-50 px-3 py-1.5 shadow-inner transition-colors focus-within:border-[var(--widget-accent)] focus-within:bg-white focus-within:shadow-[0_0_0_3px_rgba(252,123,2,0.12)]">
           <input
+            id="demo-chat-input"
             type="text"
             value={input}
             onChange={(event) => setInput(event.target.value)}
-            placeholder="Type here..."
-            className="min-w-0 flex-1 bg-transparent text-sm text-zinc-800 outline-none placeholder:text-zinc-400"
-            disabled={isSending}
+            placeholder="Ask about properties, pricing, locations..."
+            className="min-w-0 flex-1 bg-transparent py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 disabled:cursor-not-allowed disabled:text-zinc-400"
+            disabled={
+              isSending ||
+              isLeadGateThinking ||
+              (showLeadStrip && !leadCompleted)
+            }
           />
           <Button
             type="submit"
             variant="widgetAccent"
             size="icon-sm"
-            disabled={isSending || !input.trim()}
-            className="rounded-full"
+            disabled={
+              isSending ||
+              isLeadGateThinking ||
+              !input.trim() ||
+              (showLeadStrip && !leadCompleted)
+            }
+            className="size-9 shrink-0 rounded-full shadow-sm"
             aria-label="Send message"
           >
-            <Send className="size-3.5" />
+            <Send className="size-4" />
           </Button>
         </div>
+        <p className="mt-2 text-center text-[11px] text-zinc-400">
+          Tap send to try the demo, or edit the message first
+        </p>
       </form>
+      </div>
+      </div>
       </ChatWidgetShell>
     </div>
   );
