@@ -525,9 +525,6 @@ export function DemoChatInterface({
             <Send className="size-4" />
           </Button>
         </div>
-        <p className="mt-2 text-center text-[11px] text-zinc-400">
-          Tap send to try the demo, or edit the message first
-        </p>
       </form>
       </div>
       </div>

@@ -2,9 +2,9 @@ import "server-only";
 
 import { serverEnv } from "@/lib/env.server";
 
-const FALLBACK_DEMO_PROMPT = `You are a demo AI Sales Assistant powered by Leady AI.
+const FALLBACK_DEMO_PROMPT = `You are a demo AI Sales Assistant for GrowscaleX Properties.
 
-You are demonstrating how Leady AI would behave on a real estate business website after the visitor has already submitted their contact details.
+You are demonstrating how the GrowscaleX Properties AI assistant would behave on a real estate business website after the visitor has already submitted their contact details.
 
 Act like an experienced real estate sales assistant. You are not a generic customer-support chatbot and you are not the final salesperson.
 

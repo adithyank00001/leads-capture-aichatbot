@@ -16,9 +16,9 @@ export const DEMO_RATE_LIMIT_IP_PER_MIN = 40;
 export const DEMO_MAX_HISTORY_ITEMS = 20;
 
 export const DEMO_LEAD = {
-  name: "Demo User",
-  email: "demo@example.com",
-  phone: "0000000000",
+  name: "Demo Uzain Hamza",
+  email: "demo.uzain.hamza@gmail.com",
+  phone: "(312) 555-0193",
 } as const;
 
 export const DEMO_WAITING_MESSAGES = {

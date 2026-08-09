@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowUp } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -96,12 +97,10 @@ export function DemoLeadCaptureStrip({
 
   return (
     <div className="bg-transparent px-4 py-3">
-      <p className="mb-1 text-xs font-medium uppercase tracking-wide text-zinc-500">
-        Demo only — these details are not saved
-      </p>
-      <p className="mb-3 text-sm font-semibold leading-snug text-[var(--widget-accent)]">
-        Let&apos;s get your details first — then I&apos;ll answer your question.
-      </p>
+      <div className="mb-3 space-y-1 text-sm font-semibold leading-snug text-[var(--widget-accent)]">
+        <p>Your answer is ready</p>
+        <p>Complete the fields below to reveal it.</p>
+      </div>
       <form onSubmit={handleSubmit} className="space-y-2">
         {leadFields.map((field) => (
           <Input
@@ -118,18 +117,24 @@ export function DemoLeadCaptureStrip({
         ))}
         <Button
           type="button"
-          variant="outline"
-          className="h-9 w-full rounded-full border-[var(--widget-accent)]/40 text-sm font-medium text-[var(--widget-accent)]"
+          className="h-auto min-h-9 w-full gap-2 rounded-full border-transparent bg-[#112437] py-2 text-sm font-medium text-white shadow-none hover:bg-[#1a334d] hover:text-white"
           onClick={handleUseSampleData}
         >
-          Use sample data
+          <ArrowUp className="size-3.5 shrink-0" aria-hidden />
+          <span className="inline-flex flex-wrap items-center justify-center gap-2">
+            Use sample details
+            <span className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-normal uppercase tracking-wide text-white/90">
+              Only in demo
+            </span>
+          </span>
+          <ArrowUp className="size-3.5 shrink-0" aria-hidden />
         </Button>
         <Button
           type="submit"
           variant="widgetAccent"
           className="mt-1 h-9 w-full rounded-full text-sm font-medium"
         >
-          Submit details
+          Show My Answer →
         </Button>
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
       </form>

@@ -18,7 +18,10 @@ import {
 } from "lucide-react";
 
 import { CtaButton } from "@/components/marketing/cta-button";
-import { DemoChatSection } from "@/components/marketing/demo-chat/demo-chat-section";
+import {
+  DemoChatSection,
+  DemoTryButton,
+} from "@/components/marketing/demo-chat/demo-chat-section";
 import { RecentPurchasesSocialProof } from "@/components/marketing/recent-purchases-social-proof";
 import { StickyDesktopCta } from "@/components/marketing/sticky-desktop-cta";
 import { StickyMobileCta } from "@/components/marketing/sticky-mobile-cta";
@@ -64,7 +67,8 @@ const steps = [
   },
   {
     number: "2",
-    title: "Your AI Sales Assistant Goes Live",
+    title: "Customize Your AI Sales Assistant",
+    optionalSuffix: "(Optional)",
   },
   {
     number: "3",
@@ -771,9 +775,7 @@ export function SalesLandingPage() {
               <h2 className="text-balance text-[28px] font-bold uppercase tracking-tight text-[var(--landing-navy)] sm:text-[31px] lg:text-[38px]">
                 See It in Action
               </h2>
-              <p className="mt-1.5 text-[17px] font-medium text-[var(--landing-orange)] sm:mt-2 sm:text-[19px]">
-                Try a demo
-              </p>
+              <DemoTryButton />
               <ul className="mx-auto mt-4 flex w-full max-w-xl flex-col items-start gap-2 text-left sm:mt-5 sm:gap-2.5">
                 {demoHighlights.map((point) => (
                   <li
@@ -823,6 +825,14 @@ export function SalesLandingPage() {
                       </div>
                       <h3 className="text-[17px] font-semibold text-[var(--landing-navy)] sm:text-[19px] lg:text-[18px]">
                         {step.title}
+                        {"optionalSuffix" in step && step.optionalSuffix ? (
+                          <>
+                            {" "}
+                            <span className="font-medium text-[#8B9AAB]">
+                              {step.optionalSuffix}
+                            </span>
+                          </>
+                        ) : null}
                       </h3>
                     </CardContent>
                   </Card>

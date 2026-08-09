@@ -3,8 +3,7 @@ import type { WidgetSettings } from "@/lib/widget/types";
 
 export const demoBusiness: BusinessDisplay = {
   name: "GrowscaleX Properties",
-  welcomeMessage:
-    "Demo only — these details are not saved. Enter your details below to try the assistant.",
+  welcomeMessage: "Enter your details below to try the assistant.",
   chatWelcomeMessage:
     "Hi, I'm the AI sales assistant from GrowscaleX Demo Properties. Looking for the right property? Tell me what you have in mind — I'll help you narrow down the best options.",
 };

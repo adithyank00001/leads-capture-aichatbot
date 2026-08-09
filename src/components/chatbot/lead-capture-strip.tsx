@@ -96,9 +96,10 @@ export function LeadCaptureStrip({
 
   return (
     <div className="bg-transparent px-4 py-3">
-      <p className="mb-3 text-sm font-semibold leading-snug text-[var(--widget-accent)]">
-        Add your details — we&apos;ll reply in seconds.
-      </p>
+      <div className="mb-3 space-y-1 text-sm font-semibold leading-snug text-[var(--widget-accent)]">
+        <p>Your answer is ready</p>
+        <p>Complete the fields below to reveal it.</p>
+      </div>
       <form onSubmit={handleSubmit} className="space-y-2">
         {leadFields.map((field) => (
           <Input
@@ -119,7 +120,7 @@ export function LeadCaptureStrip({
           disabled={isSubmitting}
           className="mt-1 h-9 w-full rounded-full text-sm font-medium"
         >
-          {isSubmitting ? "Saving…" : "Continue"}
+          {isSubmitting ? "Saving…" : "Show My Answer →"}
         </Button>
         {error ? (
           <p className="text-xs font-medium text-red-700">{error}</p>

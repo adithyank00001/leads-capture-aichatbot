@@ -128,3 +128,18 @@
     @apply font-sans;
   }
 }
+
+@keyframes demo-launcher-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.38);
+  }
+}
+
+.animate-demo-launcher-pulse {
+  animation: demo-launcher-pulse 0.55s ease-in-out 3;
+}

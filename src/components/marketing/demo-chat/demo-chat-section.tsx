@@ -8,12 +8,17 @@ import {
   useSyncExternalStore,
 } from "react";
 import { createPortal } from "react-dom";
+import { ChevronRight } from "lucide-react";
 
 import { ChatLauncher } from "@/components/chatbot/chat-launcher";
 import { WidgetThemeProvider } from "@/components/chatbot/widget-theme-provider";
 import { DemoChatInterface } from "@/components/marketing/demo-chat/demo-chat-interface";
 import { demoBusiness, demoWidgetSettings } from "@/lib/demo/config";
-import { getOrCreateDemoSessionId, hasCompletedDemoLead, loadDemoMessages } from "@/lib/session/demo-client";
+import {
+  getOrCreateDemoSessionId,
+  hasCompletedDemoLead,
+  loadDemoMessages,
+} from "@/lib/session/demo-client";
 import { cn } from "@/lib/utils";
 
 function subscribe() {
@@ -35,6 +40,29 @@ const HINT_ENTER_MS = 500;
 const HINT_EXIT_MS = 350;
 
 type LauncherHintPhase = "idle" | "enter" | "visible" | "exit" | "done";
+
+const DEMO_LAUNCHER_PULSE_EVENT = "demo-chat-pulse-launcher";
+const LAUNCHER_PULSE_MS = 1650;
+
+export function DemoTryButton({ className }: { className?: string }) {
+  function handleClick() {
+    window.dispatchEvent(new CustomEvent(DEMO_LAUNCHER_PULSE_EVENT));
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      className={cn(
+        "mt-1.5 inline-flex items-center justify-center gap-1 rounded-[13px] bg-gradient-to-b from-[#E36F02] to-[#FDA85A] px-3.5 py-1.5 text-[14px] font-semibold text-white shadow-[0px_2px_10.1px_0px_#FC7B0233] transition-transform hover:scale-[1.04] sm:mt-2 sm:gap-1.5 sm:px-4 sm:py-2 sm:text-[15px]",
+        className,
+      )}
+    >
+      Try a demo
+      <ChevronRight className="size-4 shrink-0" />
+    </button>
+  );
+}
 
 type DemoChatPanelProps = {
   sessionId: string;
@@ -117,9 +145,11 @@ export function DemoChatSection() {
   const [canCloseBackdrop, setCanCloseBackdrop] = useState(false);
   const [launcherBottomPx, setLauncherBottomPx] = useState<number | null>(null);
   const [hintPhase, setHintPhase] = useState<LauncherHintPhase>("idle");
+  const [launcherPulsing, setLauncherPulsing] = useState(false);
   const justOpenedRef = useRef(false);
   const hintPlayedRef = useRef(false);
   const hintTimersRef = useRef<number[]>([]);
+  const launcherPulseTimerRef = useRef<number | null>(null);
   const sessionId = useSyncExternalStore(
     subscribe,
     getClientSessionId,
@@ -151,7 +181,35 @@ export function DemoChatSection() {
   }, []);
 
   useEffect(() => {
-    const demoStartHint = document.getElementById("landing-demo-start-hint");
+    function handleLauncherPulse() {
+      if (launcherPulseTimerRef.current !== null) {
+        window.clearTimeout(launcherPulseTimerRef.current);
+      }
+
+      setLauncherPulsing(false);
+
+      window.requestAnimationFrame(() => {
+        setLauncherPulsing(true);
+        launcherPulseTimerRef.current = window.setTimeout(() => {
+          setLauncherPulsing(false);
+          launcherPulseTimerRef.current = null;
+        }, LAUNCHER_PULSE_MS);
+      });
+    }
+
+    window.addEventListener(DEMO_LAUNCHER_PULSE_EVENT, handleLauncherPulse);
+
+    return () => {
+      window.removeEventListener(DEMO_LAUNCHER_PULSE_EVENT, handleLauncherPulse);
+
+      if (launcherPulseTimerRef.current !== null) {
+        window.clearTimeout(launcherPulseTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const demoStartHint = document.getElementById("landing-demo");
 
     if (!demoStartHint) {
       return;
@@ -185,9 +243,12 @@ export function DemoChatSection() {
       );
 
       hintTimersRef.current.push(
-        window.setTimeout(() => {
-          setHintPhase("done");
-        }, enterMs + HINT_VISIBLE_MS + exitMs),
+        window.setTimeout(
+          () => {
+            setHintPhase("done");
+          },
+          enterMs + HINT_VISIBLE_MS + exitMs,
+        ),
       );
     }
 
@@ -235,7 +296,9 @@ export function DemoChatSection() {
         return;
       }
 
-      setLauncherBottomPx(stickyCta.getBoundingClientRect().height + LAUNCHER_GAP_PX);
+      setLauncherBottomPx(
+        stickyCta.getBoundingClientRect().height + LAUNCHER_GAP_PX,
+      );
     }
 
     updateLauncherPosition();
@@ -309,7 +372,12 @@ export function DemoChatSection() {
             }}
             aria-label="Live demo chatbot"
           >
-            <div className="relative size-14 shrink-0">
+            <div
+              className={cn(
+                "relative size-14 shrink-0",
+                launcherPulsing && "animate-demo-launcher-pulse",
+              )}
+            >
               <DemoChatLauncherHint onOpen={openChat} phase={hintPhase} />
               <WidgetThemeProvider settings={demoWidgetSettings}>
                 <ChatLauncher onOpen={openChat} />
@@ -385,12 +453,6 @@ export function DemoChatSection() {
 
   return (
     <>
-      <p
-        id="landing-demo-start-hint"
-        className="text-center text-sm font-medium text-[var(--landing-navy)]/80"
-      >
-        Tap the chat icon in the corner to try
-      </p>
       {launcher}
       {mobileModal}
       {desktopPanel}
