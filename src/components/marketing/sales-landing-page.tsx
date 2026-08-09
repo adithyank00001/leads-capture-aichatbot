@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { Fragment } from "react";
 import {
   ArrowDown,
   Building2,
   Check,
+  ChevronRight,
   Heart,
   MessageCircle,
   MessageSquare,
@@ -16,7 +18,9 @@ import {
 } from "lucide-react";
 
 import { CtaButton } from "@/components/marketing/cta-button";
+import { DemoChatSection } from "@/components/marketing/demo-chat/demo-chat-section";
 import { RecentPurchasesSocialProof } from "@/components/marketing/recent-purchases-social-proof";
+import { StickyDesktopCta } from "@/components/marketing/sticky-desktop-cta";
 import { StickyMobileCta } from "@/components/marketing/sticky-mobile-cta";
 import { Card, CardContent } from "@/components/ui/card";
 import { FormattedPrice } from "@/components/ui/formatted-price";
@@ -132,6 +136,10 @@ const testimonials = [
   },
 ] as const;
 
+const DESKTOP_CONTAINER =
+  "lg:mx-auto lg:w-full lg:max-w-[1180px] lg:px-6 xl:max-w-[1200px]";
+const DESKTOP_SECTION = "lg:py-24";
+
 function AccentBullet({ className }: { className?: string }) {
   return (
     <span
@@ -187,7 +195,7 @@ function HeroPoint({
       )}
       <span
         className={cn(
-          "text-[18px] font-medium leading-relaxed text-[var(--landing-navy)]",
+          "text-[18px] font-medium leading-relaxed text-[var(--landing-navy)] lg:text-[19px]",
         )}
       >
         {children}
@@ -316,7 +324,7 @@ function QuoteWithHighlights({
     nodes.push(
       <span
         key={`${phrase}-${start}`}
-        className="text-[18px] font-semibold text-[var(--landing-orange)] sm:text-[21px]"
+        className="text-[18px] font-semibold text-[var(--landing-orange)] sm:text-[21px] lg:text-[17px]"
       >
         {phrase}
       </span>,
@@ -369,9 +377,9 @@ function ProblemPoint({
   children: React.ReactNode;
 }) {
   return (
-    <p className="flex items-start gap-3 text-[17px] font-normal leading-relaxed text-white">
+    <p className="flex items-start gap-3 text-[17px] font-normal leading-relaxed text-white lg:flex-col lg:items-center lg:gap-2.5 lg:text-center lg:text-[18px]">
       <Icon
-        className="mt-0.5 size-[18px] shrink-0 text-white/35"
+        className="mt-0.5 size-[18px] shrink-0 text-white/35 lg:mt-0"
         strokeWidth={1.5}
       />
       <span>{children}</span>
@@ -431,43 +439,63 @@ export function SalesLandingPage() {
       <div className="relative overflow-x-hidden bg-white [--landing-navy:#112437] [--landing-orange:#FC7B02] [--landing-orange-hover:#E36F02]">
         {/* Hero — ice blue secondary (30%) */}
         <section id="landing-hero" className="relative z-50 bg-white">
-          <div className="relative mx-auto grid min-h-svh max-w-6xl grid-rows-[auto_1fr] px-4 pb-12 pt-2 sm:px-6 sm:pb-16 sm:pt-3 lg:px-8">
-            <header className="shrink-0">
-              <LogoMark />
+          <div
+            className={cn(
+              "relative mx-auto grid min-h-svh max-w-6xl grid-rows-[auto_1fr] px-4 pb-12 pt-2 sm:px-6 sm:pb-16 sm:pt-3 lg:min-h-svh lg:grid-rows-[auto_1fr] lg:pb-12 lg:pt-6",
+              DESKTOP_CONTAINER,
+            )}
+          >
+            <header className="shrink-0 lg:pt-1">
+              <LogoMark className="lg:[&_div]:size-9 lg:[&_span]:text-[16px]" />
             </header>
 
-            <div className="flex flex-col justify-center">
-              <div className="mx-auto mt-8 w-full max-w-3xl text-center sm:mt-10">
-                <RecentPurchasesSocialProof className="mb-2 sm:mb-3" />
+            <div className="flex flex-col justify-center lg:py-2 lg:pb-4">
+              <div className="mx-auto mt-8 w-full max-w-3xl text-center sm:mt-10 lg:mt-2 lg:grid lg:max-w-none lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-10 lg:text-left xl:gap-12">
+                <div>
+                  <RecentPurchasesSocialProof className="mb-2 sm:mb-3 lg:mb-4 lg:text-left" />
 
-                <h1 className="mb-4 text-balance text-[31px] font-bold leading-[1.1] tracking-tight text-[var(--landing-navy)] sm:mb-5 sm:text-[37px] sm:leading-[1.1] lg:text-[49px] lg:leading-[1.1]">
-                  Turn Anonymous Website Visitors Into{" "}
-                  <span className="text-[var(--landing-orange)]">
-                    Real Estate Leads
-                  </span>
-                </h1>
+                  <h1 className="mb-4 text-balance text-[31px] font-bold leading-[1.1] tracking-tight text-[var(--landing-navy)] sm:mb-5 sm:text-[37px] sm:leading-[1.1] lg:mb-5 lg:max-w-[640px] lg:text-[52px] lg:leading-[1.08] xl:text-[56px]">
+                    Turn Anonymous Website Visitors Into{" "}
+                    <span className="text-[var(--landing-orange)]">
+                      Real Estate Leads
+                    </span>
+                  </h1>
 
-                <ul className="mx-auto mt-8 flex max-w-2xl flex-col gap-2.5 sm:mt-10 sm:gap-3">
-                  <HeroPoint type="good">
-                    High-intent prospects are already visiting your website.
-                  </HeroPoint>
-                  <HeroPoint type="bad">
-                    The problem? Around{" "}
-                    <span className="font-medium text-[#DC2626]/70">95%</span>{" "}
-                    leave without contacting you.
-                  </HeroPoint>
-                  <HeroPoint type="good">
-                    Our AI sales assistant captures their details before they
-                    leave — 24/7.
-                  </HeroPoint>
-                </ul>
+                  <ul className="mx-auto mt-8 flex max-w-2xl flex-col gap-2.5 sm:mt-10 sm:gap-3 lg:mx-0 lg:mt-8 lg:max-w-none lg:gap-4">
+                    <HeroPoint type="good">
+                      High-intent prospects are already visiting your website.
+                    </HeroPoint>
+                    <HeroPoint type="bad">
+                      The problem? Around{" "}
+                      <span className="font-medium text-[#DC2626]/70">95%</span>{" "}
+                      leave without contacting you.
+                    </HeroPoint>
+                    <HeroPoint type="good">
+                      Our AI sales assistant captures their details before they
+                      leave — 24/7.
+                    </HeroPoint>
+                  </ul>
+                </div>
 
-                <div className="mt-10 flex flex-col items-center sm:mt-12">
-                  <div className="inline-grid grid-cols-1 gap-5 sm:gap-6">
+                <div
+                  id="landing-hero-cta"
+                  className="mt-10 flex flex-col items-center sm:mt-12 lg:mt-4 lg:items-stretch lg:self-start"
+                >
+                  <div className="inline-grid w-full grid-cols-1 gap-5 sm:gap-6 lg:hidden">
                     <CtaButton className="w-full" />
-                    <div className="flex flex-col items-center gap-1">
+                    <div className="flex w-full flex-col items-center gap-1">
                       <MoneyBackGuarantee centered className="pt-4" />
                       <p className="text-center text-[15px] font-bold uppercase tracking-wide text-[#16A34A] sm:text-[16px]">
+                        Try It Risk-Free
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="hidden lg:flex lg:flex-col lg:rounded-2xl lg:border lg:border-[#D8E2EC] lg:bg-white lg:p-8 lg:shadow-[0_6px_28px_rgba(17,36,55,0.1)] xl:p-9">
+                    <CtaButton className="w-full" size="large" />
+                    <div className="mt-6 flex flex-col gap-1.5">
+                      <MoneyBackGuarantee centered className="pt-4 lg:[&_p:first-child]:text-[18px]" />
+                      <p className="text-center text-[16px] font-bold uppercase tracking-wide text-[#16A34A]">
                         Try It Risk-Free
                       </p>
                     </div>
@@ -480,21 +508,27 @@ export function SalesLandingPage() {
 
         {/* Problem — navy dominant (60%) */}
         <section id="landing-problem" className="bg-[var(--landing-navy)]">
-          <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-            <div className="mx-auto max-w-3xl text-left">
-              <SectionLabel className="mb-5 text-[14px] uppercase tracking-wider">
+          <div
+            className={cn(
+              "mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20",
+              DESKTOP_CONTAINER,
+              DESKTOP_SECTION,
+            )}
+          >
+            <div className="mx-auto max-w-3xl text-left lg:max-w-[960px] lg:text-center">
+              <SectionLabel className="mb-5 text-[14px] uppercase tracking-wider lg:mx-auto">
                 The Problem
               </SectionLabel>
 
-              <h2 className="text-[32px] font-bold leading-[1.12] tracking-tight sm:text-[53px] sm:leading-[1.1] lg:text-[61px]">
-                <span className="block text-white">Interest Doesn&apos;t</span>
-                <span className="block text-white">Always Turn Into</span>
-                <span className="block text-[var(--landing-orange)]">
+              <h2 className="text-[32px] font-bold leading-[1.12] tracking-tight sm:text-[53px] sm:leading-[1.1] lg:mx-auto lg:max-w-[900px] lg:text-[48px] lg:leading-[1.08] xl:text-[50px]">
+                <span className="block text-white lg:inline">Interest Doesn&apos;t </span>
+                <span className="block text-white lg:inline">Always Turn Into </span>
+                <span className="block text-[var(--landing-orange)] lg:inline">
                   An Enquiry
                 </span>
               </h2>
 
-              <div className="mt-7 flex flex-col gap-4">
+              <div className="mt-7 flex flex-col gap-4 lg:hidden">
                 <ProblemPoint icon={Building2}>
                   They may like your properties.
                 </ProblemPoint>
@@ -506,11 +540,23 @@ export function SalesLandingPage() {
                 </ProblemPoint>
               </div>
 
-              <p className="mt-6 text-[16px] font-medium leading-relaxed text-white/85 sm:text-[17px]">
+              <div className="mt-10 hidden lg:grid lg:grid-cols-3 lg:gap-8">
+                <ProblemPoint icon={Building2}>
+                  They may like your properties.
+                </ProblemPoint>
+                <ProblemPoint icon={MessageCircle}>
+                  They may have questions.
+                </ProblemPoint>
+                <ProblemPoint icon={Heart}>
+                  They may be seriously considering one.
+                </ProblemPoint>
+              </div>
+
+              <p className="mt-6 text-[16px] font-medium leading-relaxed text-white/85 sm:text-[17px] lg:mt-8 lg:text-[18px]">
                 But they can still leave without contacting you.
               </p>
 
-              <p className="mt-5 border-l-4 border-[var(--landing-orange)] pl-4 text-[17px] font-bold leading-snug text-white sm:pl-5 sm:text-[19px]">
+              <p className="mt-5 border-l-4 border-[var(--landing-orange)] pl-4 text-[17px] font-bold leading-snug text-white sm:pl-5 sm:text-[19px] lg:mx-auto lg:mt-8 lg:max-w-[780px] lg:border-l-0 lg:border-t-4 lg:px-8 lg:py-5 lg:pl-8 lg:text-center lg:text-[22px] lg:font-extrabold lg:leading-[1.35] lg:tracking-tight">
                 And once they leave, your sales team may never get another
                 chance to follow up.
               </p>
@@ -520,28 +566,34 @@ export function SalesLandingPage() {
 
         {/* Solution — ice blue secondary (30%) */}
         <section className="bg-white">
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-            <div className="mx-auto max-w-3xl text-center">
+          <div
+            className={cn(
+              "mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20",
+              DESKTOP_CONTAINER,
+              DESKTOP_SECTION,
+            )}
+          >
+            <div className="mx-auto max-w-3xl text-center lg:max-w-[720px]">
               <SectionLabel light className="mb-6 text-[14px]">
                 The Solution
               </SectionLabel>
 
-              <h2 className="text-balance text-[28px] font-bold uppercase tracking-tight text-[var(--landing-navy)] sm:text-[31px] lg:text-[37px]">
+              <h2 className="text-balance text-[28px] font-bold uppercase tracking-tight text-[var(--landing-navy)] sm:text-[31px] lg:text-[38px]">
                 <span className="text-[var(--landing-orange)]">
                   Capture Their Details{" "}
                 </span>
                 Before They Leave
               </h2>
-              <p className="mt-4 text-[17px] font-medium text-[var(--landing-navy)] sm:text-[19px]">
+              <p className="mt-4 text-[17px] font-medium text-[var(--landing-navy)] sm:text-[19px] lg:text-[19px]">
                 Our AI sales assistant works 24/7 to:
               </p>
             </div>
 
-            <div className="mx-auto mt-10 grid max-w-4xl gap-3 sm:mt-12 sm:grid-cols-2 sm:gap-4 lg:gap-5">
+            <div className="mx-auto mt-10 grid max-w-4xl gap-3 sm:mt-12 sm:grid-cols-2 sm:gap-4 lg:hidden">
               {captureFeatures.map((feature, index) => (
                 <Card
                   key={feature.text}
-                  className="border-[#D8E2EC] bg-white py-0 shadow-sm transition-shadow hover:shadow-md"
+                  className="h-full border-[#D8E2EC] bg-white py-0 shadow-sm transition-shadow hover:shadow-md"
                 >
                   <CardContent className="flex items-center gap-2.5 px-3.5 py-2.5 sm:px-4 sm:py-3">
                     <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--landing-orange)]/10 text-[var(--landing-orange)]">
@@ -560,7 +612,53 @@ export function SalesLandingPage() {
               ))}
             </div>
 
-            <p className="mx-auto mt-10 max-w-2xl text-center text-[17px] font-semibold text-[var(--landing-navy)] sm:mt-12 sm:text-[19px]">
+            <div className="mx-auto mt-10 hidden max-w-[1140px] lg:block lg:mt-12">
+              <div className="grid grid-cols-3 gap-5">
+                {captureFeatures.slice(0, 3).map((feature, index) => (
+                  <Card
+                    key={feature.text}
+                    className={cn(
+                      "min-h-[88px] border-[#D8E2EC] bg-white py-0 shadow-md",
+                      index === 0 &&
+                        "ring-1 ring-[var(--landing-orange)]/25",
+                    )}
+                  >
+                    <CardContent className="flex h-full items-center gap-3 px-5 py-4">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--landing-orange)]/10 text-[var(--landing-orange)]">
+                        <feature.icon className="size-[18px]" />
+                      </div>
+                      <p
+                        className={cn(
+                          "text-[17px] leading-snug text-[var(--landing-navy)]",
+                          index === 0 ? "font-bold" : "font-medium",
+                        )}
+                      >
+                        {feature.text}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              <div className="mx-auto mt-5 grid max-w-[68%] grid-cols-2 gap-5">
+                {captureFeatures.slice(3).map((feature) => (
+                  <Card
+                    key={feature.text}
+                    className="min-h-[88px] border-[#D8E2EC] bg-white py-0 shadow-md"
+                  >
+                    <CardContent className="flex h-full items-center gap-3 px-5 py-4">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--landing-orange)]/10 text-[var(--landing-orange)]">
+                        <feature.icon className="size-[18px]" />
+                      </div>
+                      <p className="text-[17px] font-medium leading-snug text-[var(--landing-navy)]">
+                        {feature.text}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            <p className="mx-auto mt-10 max-w-2xl text-center text-[17px] font-semibold text-[var(--landing-navy)] sm:mt-12 sm:text-[19px] lg:mt-10 lg:max-w-3xl lg:text-[20px]">
               So your team can follow up while the interest is still there.
             </p>
           </div>
@@ -568,29 +666,39 @@ export function SalesLandingPage() {
 
         {/* Testimonials — navy dominant (60%) */}
         <section className="bg-[var(--landing-navy)]">
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+          <div
+            className={cn(
+              "mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20",
+              DESKTOP_CONTAINER,
+              DESKTOP_SECTION,
+            )}
+          >
             <div className="mx-auto max-w-3xl text-center">
-              <SectionHeading onDark className="text-[28px]">
+              <SectionHeading
+                onDark
+                className="text-[28px] lg:text-[38px]"
+              >
                 <span className="text-[var(--landing-orange)]">
                   Real Feedback
                 </span>{" "}
                 From
-                <br />
+                <br className="lg:hidden" />
+                <span className="hidden lg:inline"> </span>
                 Real Estate Pros
               </SectionHeading>
 
               <AverageRatingSummary className="mt-6 sm:mt-8" />
             </div>
 
-            <div className="mx-auto mt-8 grid max-w-5xl gap-4 sm:mt-10 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
+            <div className="mx-auto mt-8 grid max-w-5xl gap-4 sm:mt-10 sm:grid-cols-2 sm:gap-6 lg:mt-10 lg:max-w-none lg:grid-cols-3 lg:gap-5">
               {testimonials.map((testimonial) => (
                 <Card
                   key={testimonial.quote}
-                  className="border-2 border-[var(--landing-orange)] bg-white shadow-md shadow-[var(--landing-navy)]/5"
+                  className="flex h-full flex-col border-2 border-[var(--landing-orange)] bg-white shadow-md shadow-[var(--landing-navy)]/5 lg:shadow-lg"
                 >
-                  <CardContent className="space-y-4 p-5 sm:p-6">
+                  <CardContent className="flex flex-1 flex-col space-y-4 p-5 sm:p-6 lg:p-7 lg:space-y-5">
                     <FiveStarRating rating={testimonial.rating} />
-                    <p className="text-[18px] leading-[27px] text-[#3F4F5F] sm:text-[21px] sm:leading-8">
+                    <p className="flex-1 text-[18px] leading-[27px] text-[#3F4F5F] sm:text-[21px] sm:leading-8 lg:text-[17px] lg:leading-[26px]">
                       <QuoteWithHighlights
                         quote={testimonial.quote}
                         highlights={
@@ -600,7 +708,7 @@ export function SalesLandingPage() {
                         }
                       />
                     </p>
-                    <div>
+                    <div className="mt-auto">
                       <p className="font-semibold text-[var(--landing-navy)]">
                         {testimonial.name}
                       </p>
@@ -613,19 +721,52 @@ export function SalesLandingPage() {
               ))}
             </div>
 
-            <div className="mx-auto mt-10 max-w-3xl text-left sm:mt-12">
-              <p className="border-l-4 border-[var(--landing-orange)] pl-4 text-[17px] font-bold leading-snug text-white sm:pl-5 sm:text-[19px]">
+            <div className="mx-auto mt-10 max-w-3xl text-left sm:mt-12 lg:mt-10 lg:text-center">
+              <p className="border-l-4 border-[var(--landing-orange)] pl-4 text-[17px] font-bold leading-snug text-white sm:pl-5 sm:text-[19px] lg:mx-auto lg:max-w-2xl lg:border-l-0 lg:pl-0 lg:text-[19px]">
                 Now imagine this working on your website.
               </p>
             </div>
           </div>
         </section>
 
+        {/* Live demo — floating chat widget */}
+        <section id="landing-demo" className="bg-white">
+          <div
+            className={cn(
+              "mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20",
+              DESKTOP_CONTAINER,
+              DESKTOP_SECTION,
+            )}
+          >
+            <div className="mx-auto max-w-3xl text-center lg:max-w-[960px]">
+              <SectionLabel className="mb-5 text-[14px] uppercase tracking-wider lg:mx-auto" light>
+                Live Demo
+              </SectionLabel>
+              <SectionHeading className="mb-4">
+                See Leady AI in Action
+              </SectionHeading>
+              <p className="mx-auto max-w-2xl text-[17px] font-medium leading-relaxed text-[var(--landing-navy)] sm:text-[19px]">
+                Click the chat icon in the bottom corner to try the AI sales
+                assistant live. Ask questions, see how it captures leads, and
+                experience how it works on your website.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <DemoChatSection />
+
         {/* Steps — ice blue secondary (30%) */}
         <section className="bg-white">
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+          <div
+            className={cn(
+              "mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20",
+              DESKTOP_CONTAINER,
+              DESKTOP_SECTION,
+            )}
+          >
             <div className="mx-auto max-w-3xl text-center">
-              <SectionHeading>
+              <SectionHeading className="lg:text-[38px]">
                 Start Capturing Leads in{" "}
                 <span className="text-[var(--landing-orange)]">
                   3 Simple Steps
@@ -633,26 +774,29 @@ export function SalesLandingPage() {
               </SectionHeading>
             </div>
 
-            <div className="mx-auto mt-10 flex max-w-2xl flex-col items-center gap-2 sm:mt-12">
+            <div className="mx-auto mt-10 flex max-w-2xl flex-col items-center gap-2 sm:mt-12 lg:mt-10 lg:max-w-none lg:flex-row lg:items-stretch lg:gap-4">
               {steps.map((step, index) => (
-                <div
-                  key={step.number}
-                  className="flex w-full flex-col items-center"
-                >
-                  <Card className="w-full border-[#D8E2EC] bg-white shadow-sm">
-                    <CardContent className="flex items-center gap-4 p-5 sm:p-6">
-                      <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--landing-orange)] text-[19px] font-bold text-white">
+                <Fragment key={step.number}>
+                  <Card className="h-full w-full border-[#D8E2EC] bg-white shadow-sm lg:min-h-[200px] lg:flex-1 lg:shadow-md">
+                    <CardContent className="flex h-full items-center gap-4 p-5 sm:p-6 lg:flex-col lg:justify-center lg:px-6 lg:py-8 lg:text-center">
+                      <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--landing-orange)] text-[19px] font-bold text-white lg:size-14 lg:text-[22px]">
                         {step.number}
                       </div>
-                      <h3 className="text-[17px] font-semibold text-[var(--landing-navy)] sm:text-[19px]">
+                      <h3 className="text-[17px] font-semibold text-[var(--landing-navy)] sm:text-[19px] lg:text-[18px]">
                         {step.title}
                       </h3>
                     </CardContent>
                   </Card>
                   {index < steps.length - 1 ? (
-                    <ArrowDown className="my-1 size-5 text-[#8B9AAB]" />
+                    <>
+                      <ArrowDown className="my-1 size-5 text-[#8B9AAB] lg:hidden" />
+                      <ChevronRight
+                        className="hidden size-7 shrink-0 self-center text-[#8B9AAB] lg:block"
+                        strokeWidth={2}
+                      />
+                    </>
                   ) : null}
-                </div>
+                </Fragment>
               ))}
             </div>
           </div>
@@ -660,17 +804,71 @@ export function SalesLandingPage() {
 
         {/* Comparison */}
         <section>
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+          <div
+            className={cn(
+              "mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20",
+              DESKTOP_CONTAINER,
+              DESKTOP_SECTION,
+            )}
+          >
             <div className="mx-auto max-w-3xl text-center">
-              <SectionHeading className="text-[28px]">
+              <SectionHeading className="text-[28px] lg:text-[38px]">
                 <span className="text-[var(--landing-orange)]">Without</span>{" "}
                 vs. <span className="text-[var(--landing-orange)]">With</span>
-                <br />
+                <br className="lg:hidden" />
+                <span className="hidden lg:inline"> </span>
                 Our AI Sales Assistant
               </SectionHeading>
             </div>
 
-            <div className="mx-auto mt-10 flex max-w-3xl flex-col gap-[14px] sm:mt-12 sm:gap-5">
+            <div className="mx-auto mt-10 hidden overflow-hidden rounded-2xl border border-[#D8E2EC] lg:mt-10 lg:grid lg:w-full lg:max-w-[1140px] lg:grid-cols-2">
+              <div className="border-b border-[#D8E2EC] bg-[#FEF2F2] px-6 py-4 text-center text-[15px] font-bold uppercase tracking-wide text-[#6B7280] lg:border-r">
+                Without
+              </div>
+              <div className="border-b border-[#D8E2EC] bg-[#EFF6FF] px-6 py-4 text-center text-[15px] font-bold uppercase tracking-wide text-[var(--landing-navy)]">
+                With
+              </div>
+              {comparisonRows.map((row) => (
+                <Fragment key={row.without}>
+                  <div className="flex min-h-[72px] items-center gap-3 border-b border-[#D8E2EC] bg-[#FEF2F2] px-6 py-5 last:border-b-0 lg:border-r">
+                    <X
+                      className="size-5 shrink-0 text-[#F87171]"
+                      strokeWidth={2.5}
+                    />
+                    <p className="text-[17px] leading-snug text-[#6B7280]">
+                      {row.without}
+                    </p>
+                  </div>
+                  <div className="flex min-h-[72px] items-center gap-3 border-b border-[#D8E2EC] bg-[#EFF6FF] px-6 py-5 last:border-b-0">
+                    <Check
+                      className="size-5 shrink-0 text-[#3B82F6]"
+                      strokeWidth={2.5}
+                    />
+                    {"withSuffixStack" in row && row.withSuffixStack ? (
+                      <p className="text-[17px] font-bold leading-snug text-[var(--landing-navy)]">
+                        {row.withPrefix}{" "}
+                        {row.withSuffixStack[0]}{" "}
+                        {row.withSuffixStack[1]}
+                      </p>
+                    ) : "withPrice" in row && row.withPrice ? (
+                      <p className="text-[17px] font-bold leading-snug text-[var(--landing-navy)]">
+                        {row.withPrefix}{" "}
+                        <FormattedPrice
+                          amount={publicConfig.lifetimeAccessPriceUsd}
+                        />{" "}
+                        {row.withSuffix}
+                      </p>
+                    ) : "with" in row ? (
+                      <p className="text-[17px] font-bold leading-snug text-[var(--landing-navy)]">
+                        {row.with}
+                      </p>
+                    ) : null}
+                  </div>
+                </Fragment>
+              ))}
+            </div>
+
+            <div className="mx-auto mt-10 flex max-w-3xl flex-col gap-[14px] sm:mt-12 sm:gap-5 lg:hidden">
               {comparisonRows.map((row) => (
                 <div
                   key={row.without}
@@ -724,14 +922,20 @@ export function SalesLandingPage() {
           </div>
         </section>
 
-        {/* Pricing — navy dominant (60%); z-50 hides floating CTA while this section is in view */}
+        {/* Pricing — navy dominant (60%); z-50 hides mobile floating CTA while this section is in view */}
         <section
           id="landing-pricing"
           className="relative z-50 bg-[var(--landing-navy)]"
         >
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+          <div
+            className={cn(
+              "mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20",
+              DESKTOP_CONTAINER,
+              DESKTOP_SECTION,
+            )}
+          >
             <div className="mx-auto max-w-3xl text-center">
-              <SectionHeading onDark className="text-[28px]">
+              <SectionHeading onDark className="text-[28px] lg:text-[40px]">
                 Stop Losing Potential Leads for Just{" "}
                 <span className="text-[#FC9018]">
                   <FormattedPrice amount={publicConfig.lifetimeAccessPriceUsd} />
@@ -739,46 +943,53 @@ export function SalesLandingPage() {
               </SectionHeading>
             </div>
 
-            <Card className="mx-auto mt-10 max-w-2xl overflow-hidden border-white/10 bg-white py-0 shadow-xl sm:mt-12">
-              <CardContent className="space-y-5 px-6 pb-4 pt-6 sm:space-y-6 sm:px-8 sm:pb-5 sm:pt-7">
-                <p className="text-center text-[21px] font-bold uppercase tracking-wide text-[var(--landing-orange)] sm:text-[25px]">
+            <Card className="mx-auto mt-10 max-w-2xl overflow-hidden border-white/10 bg-white py-0 shadow-xl sm:mt-12 lg:mt-10 lg:max-w-[1040px] lg:shadow-2xl">
+              <CardContent className="space-y-5 px-6 pb-4 pt-6 sm:space-y-6 sm:px-8 sm:pb-5 sm:pt-7 lg:space-y-0 lg:px-10 lg:pb-8 lg:pt-9">
+                <p className="text-center text-[21px] font-bold uppercase tracking-wide text-[var(--landing-orange)] sm:text-[25px] lg:hidden">
                   Pay Once. Use Forever.
                 </p>
 
-                <ul className="grid gap-3 sm:grid-cols-2">
-                  {pricingFeatures.map((feature) => (
-                    <li
-                      key={feature}
-                      className="flex items-start gap-2.5 text-[16px] text-[var(--landing-navy)] sm:text-[17px]"
-                    >
-                      <Check
-                        className="mt-0.5 size-5 shrink-0 text-[#3B82F6]"
-                        strokeWidth={2.5}
-                      />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-
-                <Separator className="bg-[#D8E2EC]" />
-
-                <div className="flex flex-col items-center gap-2 text-center sm:gap-3">
-                  <p className="text-[17px] font-semibold text-[var(--landing-navy)] sm:text-[19px]">
-                    Capture More Leads Without Another Monthly Bill.
-                  </p>
-                  <div className="flex flex-col items-center gap-3">
-                    <RecentPurchasesSocialProof />
-                    <CtaButton
-                      className="w-full sm:w-auto"
-                      showDiscountBadge
-                      size="large"
-                      priceBelow
-                    />
+                <div className="lg:grid lg:grid-cols-[0.88fr_1.12fr] lg:items-center lg:gap-10 lg:gap-x-10 xl:gap-x-12">
+                  <div>
+                    <p className="mb-5 hidden text-[24px] font-bold uppercase tracking-wide text-[var(--landing-orange)] lg:block xl:text-[26px]">
+                      Pay Once. Use Forever.
+                    </p>
+                    <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 lg:gap-3.5">
+                      {pricingFeatures.map((feature) => (
+                        <li
+                          key={feature}
+                          className="flex items-start gap-2.5 text-[16px] text-[var(--landing-navy)] sm:text-[17px] lg:text-[18px]"
+                        >
+                          <Check
+                            className="mt-0.5 size-5 shrink-0 text-[#3B82F6]"
+                            strokeWidth={2.5}
+                          />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <p className="mb-1 pt-1 text-[13px] font-bold uppercase tracking-wide text-[#16A34A]">
-                    Try It Risk-Free
-                  </p>
-                  <MoneyBackGuarantee centered />
+
+                  <div className="flex flex-col items-center gap-2 text-center sm:gap-3 lg:justify-center lg:gap-4 lg:px-1 lg:py-2">
+                    <Separator className="bg-[#D8E2EC] lg:hidden" />
+
+                    <p className="text-[17px] font-semibold text-[var(--landing-navy)] sm:text-[19px] lg:text-[22px] lg:leading-snug">
+                      Capture More Leads Without Another Monthly Bill.
+                    </p>
+                    <div className="flex w-full flex-col items-center gap-3 lg:gap-4">
+                      <RecentPurchasesSocialProof className="lg:text-[16px]" />
+                      <CtaButton
+                        className="w-full sm:w-auto lg:w-full lg:[&_a]:px-7 lg:[&_a]:py-4 lg:[&_a]:text-[20px]"
+                        showDiscountBadge
+                        size="large"
+                        priceBelow
+                      />
+                    </div>
+                    <p className="mb-1 pt-1 text-[13px] font-bold uppercase tracking-wide text-[#16A34A] lg:text-[14px]">
+                      Try It Risk-Free
+                    </p>
+                    <MoneyBackGuarantee centered className="lg:[&_p:first-child]:text-[18px]" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -786,8 +997,13 @@ export function SalesLandingPage() {
         </section>
 
         {/* Footer */}
-        <section className="bg-white pb-8">
-          <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+        <section className="bg-white pb-8 lg:pb-12">
+          <div
+            className={cn(
+              "mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12",
+              DESKTOP_CONTAINER,
+            )}
+          >
             <footer className="flex flex-col items-center gap-3 border-t border-[#D8E2EC] pt-8 text-center">
               <LogoMark />
               <p className="text-[13px] text-[#8B9AAB]">
@@ -798,6 +1014,7 @@ export function SalesLandingPage() {
           </div>
         </section>
         <StickyMobileCta />
+        <StickyDesktopCta />
       </div>
     </>
   );

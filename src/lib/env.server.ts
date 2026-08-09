@@ -52,6 +52,10 @@ export const serverEnv = {
     readOptionalEnv("DODO_PAYMENTS_ENVIRONMENT") ?? "test_mode",
   dodoLtdProductId: readOptionalEnv("DODO_LTD_PRODUCT_ID"),
   dodoPaymentsReturnUrl: readOptionalEnv("DODO_PAYMENTS_RETURN_URL"),
+  demoSystemPrompt: readOptionalEnv("DEMO_SYSTEM_PROMPT"),
+  demoRateLimitSessionPerMin: readIntEnv("DEMO_RATE_LIMIT_SESSION_PER_MIN", 10),
+  demoRateLimitIpPerMin: readIntEnv("DEMO_RATE_LIMIT_IP_PER_MIN", 40),
+  demoAiTimeoutMs: readIntEnv("DEMO_AI_TIMEOUT_MS", 30_000),
 } as const;
 
 export function getServiceStatus(): {

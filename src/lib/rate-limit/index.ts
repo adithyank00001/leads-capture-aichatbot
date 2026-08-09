@@ -1,6 +1,7 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
+import { serverEnv } from "@/lib/env.server";
 import { ApiValidationError } from "@/lib/validation/errors";
 
 let loggedMissingRedisInProduction = false;
@@ -54,6 +55,28 @@ const chatBotDailyLimiter = createLimiter(200, "1 d");
 const leadIpLimiter = createLimiter(20, "1 m");
 const leadBotDailyLimiter = createLimiter(50, "1 d");
 
+let demoSessionLimiter: Ratelimit | null = null;
+let demoIpLimiter: Ratelimit | null = null;
+
+function getDemoSessionLimiter() {
+  if (!demoSessionLimiter) {
+    demoSessionLimiter = createLimiter(
+      serverEnv.demoRateLimitSessionPerMin,
+      "1 m",
+    );
+  }
+
+  return demoSessionLimiter;
+}
+
+function getDemoIpLimiter() {
+  if (!demoIpLimiter) {
+    demoIpLimiter = createLimiter(serverEnv.demoRateLimitIpPerMin, "1 m");
+  }
+
+  return demoIpLimiter;
+}
+
 export function getClientIp(request: Request) {
   const forwarded = request.headers.get("x-forwarded-for");
 
@@ -80,6 +103,30 @@ async function assertLimit(limiter: Ratelimit | null, key: string) {
   }
 }
 
+async function assertLimitFailOpen(limiter: Ratelimit | null, key: string) {
+  if (!limiter || isRateLimitBypassed()) {
+    return;
+  }
+
+  try {
+    const result = await limiter.limit(key);
+
+    if (!result.success) {
+      throw new ApiValidationError(
+        "RATE_LIMITED",
+        "Too many requests. Please wait a moment and try again.",
+        429,
+      );
+    }
+  } catch (error) {
+    if (error instanceof ApiValidationError) {
+      throw error;
+    }
+
+    console.error("[rate-limit] Demo limiter failed open:", error);
+  }
+}
+
 export async function assertChatRateLimits(
   request: Request,
   botId: string,
@@ -97,4 +144,17 @@ export async function assertLeadRateLimits(request: Request, botId: string) {
 
   await assertLimit(leadIpLimiter, `lead:ip:${ip}`);
   await assertLimit(leadBotDailyLimiter, `lead:bot:${botId}`);
+}
+
+export async function assertDemoRateLimits(
+  request: Request,
+  sessionId: string,
+) {
+  const ip = getClientIp(request);
+
+  await assertLimitFailOpen(
+    getDemoSessionLimiter(),
+    `demo:session:${sessionId}`,
+  );
+  await assertLimitFailOpen(getDemoIpLimiter(), `demo:ip:${ip}`);
 }
