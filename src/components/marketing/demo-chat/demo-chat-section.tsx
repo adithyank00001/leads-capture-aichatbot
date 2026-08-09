@@ -30,6 +30,11 @@ function getServerSessionId() {
 
 const STICKY_CTA_ID = "sticky-mobile-cta";
 const LAUNCHER_GAP_PX = 16;
+const HINT_VISIBLE_MS = 6000;
+const HINT_ENTER_MS = 500;
+const HINT_EXIT_MS = 350;
+
+type LauncherHintPhase = "idle" | "enter" | "visible" | "exit" | "done";
 
 type DemoChatPanelProps = {
   sessionId: string;
@@ -64,12 +69,57 @@ function hasExistingDemoSession() {
   );
 }
 
+function DemoChatLauncherHint({
+  onOpen,
+  phase,
+}: {
+  onOpen: () => void;
+  phase: LauncherHintPhase;
+}) {
+  const expanded = phase === "enter" || phase === "visible";
+  const isInteractive = expanded;
+
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className={cn(
+        "absolute bottom-[calc(100%+12px)] right-4 z-10 w-max max-w-[min(210px,calc(100vw-5.5rem))] origin-bottom-right overflow-visible text-left sm:right-6 sm:max-w-[230px]",
+        "transition-[transform,opacity] will-change-transform",
+        expanded
+          ? "pointer-events-auto translate-x-0 translate-y-0 scale-100 opacity-100"
+          : "pointer-events-none translate-x-3 translate-y-4 scale-[0.18] opacity-0",
+        phase === "enter" &&
+          "duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
+        phase === "visible" && "duration-300 ease-out",
+        phase === "exit" && "duration-350 ease-in",
+        (phase === "idle" || phase === "done") && "duration-0",
+      )}
+      aria-hidden={!isInteractive}
+      tabIndex={isInteractive ? 0 : -1}
+      aria-label="See how it captures a lead"
+    >
+      <span className="relative block overflow-visible rounded-3xl border border-black/10 bg-[#E2E8EF] px-3.5 py-2 text-[13px] font-semibold leading-snug tracking-tight text-[#112437] shadow-[0_0_0_0.5px_rgba(0,0,0,0.18),0_4px_14px_rgba(17,36,55,0.08)] sm:rounded-full sm:px-4 sm:py-2.5 sm:text-[14px] sm:whitespace-nowrap">
+        See How It Captures a Lead
+        <span
+          className="absolute bottom-0 right-3 block size-2.5 translate-x-0.5 translate-y-[48%] rotate-[28deg] border-b border-r border-black/10 bg-[#E2E8EF]"
+          aria-hidden
+        />
+      </span>
+    </button>
+  );
+}
+
 export function DemoChatSection() {
+  const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isChatMounted, setIsChatMounted] = useState(false);
   const [canCloseBackdrop, setCanCloseBackdrop] = useState(false);
   const [launcherBottomPx, setLauncherBottomPx] = useState<number | null>(null);
+  const [hintPhase, setHintPhase] = useState<LauncherHintPhase>("idle");
   const justOpenedRef = useRef(false);
+  const hintPlayedRef = useRef(false);
+  const hintTimersRef = useRef<number[]>([]);
   const sessionId = useSyncExternalStore(
     subscribe,
     getClientSessionId,
@@ -91,9 +141,82 @@ export function DemoChatSection() {
   }, []);
 
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (hasExistingDemoSession()) {
       setIsChatMounted(true);
     }
+  }, []);
+
+  useEffect(() => {
+    const demoStartHint = document.getElementById("landing-demo-start-hint");
+
+    if (!demoStartHint) {
+      return;
+    }
+
+    function clearHintTimers() {
+      hintTimersRef.current.forEach((timer) => {
+        window.clearTimeout(timer);
+      });
+      hintTimersRef.current = [];
+    }
+
+    function scheduleHintTimers(reducedMotion: boolean) {
+      clearHintTimers();
+
+      const enterMs = reducedMotion ? 0 : HINT_ENTER_MS;
+      const exitMs = reducedMotion ? 0 : HINT_EXIT_MS;
+
+      setHintPhase("enter");
+
+      hintTimersRef.current.push(
+        window.setTimeout(() => {
+          setHintPhase("visible");
+        }, enterMs),
+      );
+
+      hintTimersRef.current.push(
+        window.setTimeout(() => {
+          setHintPhase("exit");
+        }, enterMs + HINT_VISIBLE_MS),
+      );
+
+      hintTimersRef.current.push(
+        window.setTimeout(() => {
+          setHintPhase("done");
+        }, enterMs + HINT_VISIBLE_MS + exitMs),
+      );
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+
+        if (!entry?.isIntersecting || hintPlayedRef.current) {
+          return;
+        }
+
+        hintPlayedRef.current = true;
+        observer.disconnect();
+
+        const reducedMotion = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+
+        scheduleHintTimers(reducedMotion);
+      },
+      { threshold: 0.75, rootMargin: "0px 0px -5% 0px" },
+    );
+
+    observer.observe(demoStartHint);
+
+    return () => {
+      observer.disconnect();
+      clearHintTimers();
+    };
   }, []);
 
   useEffect(() => {
@@ -170,11 +293,11 @@ export function DemoChatSection() {
   }, [canCloseBackdrop, closeChat]);
 
   const launcher =
-    !isOpen && typeof document !== "undefined"
+    isMounted && !isOpen
       ? createPortal(
           <div
             className={cn(
-              "fixed right-4 z-[100] size-14 touch-manipulation sm:right-6",
+              "fixed right-4 z-[100] touch-manipulation sm:right-6",
               "lg:bottom-6",
               launcherBottomPx === null && "bottom-36",
             )}
@@ -186,16 +309,19 @@ export function DemoChatSection() {
             }}
             aria-label="Live demo chatbot"
           >
-            <WidgetThemeProvider settings={demoWidgetSettings}>
-              <ChatLauncher onOpen={openChat} />
-            </WidgetThemeProvider>
+            <div className="relative size-14 shrink-0">
+              <DemoChatLauncherHint onOpen={openChat} phase={hintPhase} />
+              <WidgetThemeProvider settings={demoWidgetSettings}>
+                <ChatLauncher onOpen={openChat} />
+              </WidgetThemeProvider>
+            </div>
           </div>,
           document.body,
         )
       : null;
 
   const mobileModal =
-    isChatMounted && typeof document !== "undefined"
+    isMounted && isChatMounted
       ? createPortal(
           <div
             className={cn(
@@ -233,7 +359,7 @@ export function DemoChatSection() {
       : null;
 
   const desktopPanel =
-    isChatMounted && typeof document !== "undefined"
+    isMounted && isChatMounted
       ? createPortal(
           <div
             className={cn(
@@ -259,8 +385,11 @@ export function DemoChatSection() {
 
   return (
     <>
-      <p className="text-center text-sm font-medium text-[var(--landing-navy)]/80">
-        Tap the chat icon in the corner to start the demo
+      <p
+        id="landing-demo-start-hint"
+        className="text-center text-sm font-medium text-[var(--landing-navy)]/80"
+      >
+        Tap the chat icon in the corner to try
       </p>
       {launcher}
       {mobileModal}

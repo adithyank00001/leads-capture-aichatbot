@@ -51,6 +51,12 @@ const captureFeatures = [
   },
 ] as const;
 
+const demoHighlights = [
+  "No typing needed · No signup",
+  "Pre-written message — just tap to send",
+  "Sample details already filled in",
+] as const;
+
 const steps = [
   {
     number: "1",
@@ -433,6 +439,16 @@ function SectionHeading({
   );
 }
 
+function LandingFadeSeparator() {
+  return (
+    <div aria-hidden className="relative z-[90] bg-white py-5 sm:py-6">
+      <div className="mx-auto w-full max-w-4xl px-4 sm:px-6">
+        <div className="h-px w-full bg-[linear-gradient(90deg,transparent_0%,#B8C4CE_42%,#B8C4CE_58%,transparent_100%)]" />
+      </div>
+    </div>
+  );
+}
+
 export function SalesLandingPage() {
   return (
     <>
@@ -514,7 +530,7 @@ export function SalesLandingPage() {
         </section>
 
         {/* Problem — navy dominant (60%) */}
-        {/* Problem — z-[110] hides demo chat launcher; sticky CTA (z-[120]) stays on top */}
+        {/* Problem — z-[110] hides demo chat launcher (z-[100]) */}
         <section
           id="landing-problem"
           className="relative z-[110] bg-[var(--landing-navy)]"
@@ -579,7 +595,7 @@ export function SalesLandingPage() {
           </div>
         </section>
 
-        {/* Solution — z-[110] hides demo chat launcher */}
+        {/* Solution — z-[110] hides demo chat launcher (z-[100]) */}
         <section className="relative z-[110] bg-white">
           <div
             className={cn(
@@ -678,7 +694,7 @@ export function SalesLandingPage() {
           </div>
         </section>
 
-        {/* Testimonials — z-[110] hides demo chat launcher */}
+        {/* Testimonials — z-[110] hides demo chat launcher (z-[100]) */}
         <section className="relative z-[110] bg-[var(--landing-navy)]">
           <div
             className={cn(
@@ -740,39 +756,52 @@ export function SalesLandingPage() {
           </div>
         </section>
 
-        {/* Live demo — z-[95] lets demo chat launcher (z-[100]) show above this section */}
-        <section id="landing-demo" className="relative z-[95] bg-white">
+        {/* Live demo — z-[90] shows demo chat launcher (z-[100]) above this section */}
+        <section id="landing-demo" className="relative z-[90] bg-white">
           <div
             className={cn(
-              "mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20",
+              "mx-auto max-w-6xl px-4 pt-14 pb-8 sm:px-6 sm:pt-20 sm:pb-10",
               DESKTOP_CONTAINER,
-              DESKTOP_SECTION,
             )}
           >
             <div className="mx-auto max-w-3xl text-center lg:max-w-[960px]">
-              <SectionLabel
-                className="mb-5 text-[14px] uppercase tracking-wider lg:mx-auto"
-                light
-              >
+              <SectionLabel light className="mb-6 text-[14px]">
                 Live Demo
               </SectionLabel>
-              <SectionHeading className="mb-6 normal-case sm:mb-8">
-                See How a Visitor Becomes a Lead
-              </SectionHeading>
+              <h2 className="text-balance text-[28px] font-bold uppercase tracking-tight text-[var(--landing-navy)] sm:text-[31px] lg:text-[38px]">
+                See It in Action
+              </h2>
+              <p className="mt-1.5 text-[17px] font-medium text-[var(--landing-orange)] sm:mt-2 sm:text-[19px]">
+                Try a demo
+              </p>
+              <ul className="mx-auto mt-4 flex w-full max-w-xl flex-col items-start gap-2 text-left sm:mt-5 sm:gap-2.5">
+                {demoHighlights.map((point) => (
+                  <li
+                    key={point}
+                    className="flex w-full items-start gap-2.5 text-left sm:gap-3"
+                  >
+                    <Check className="mt-0.5 size-5 shrink-0 stroke-[2.5] text-[#16A34A]" />
+                    <span className="min-w-0 flex-1 text-left text-[17px] font-medium leading-relaxed text-[var(--landing-navy)] sm:text-[19px]">
+                      {point}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <div className="mx-auto max-w-2xl">
+            <div className="mx-auto mt-8 max-w-2xl sm:mt-10">
               <DemoChatSection />
             </div>
           </div>
         </section>
 
-        {/* Steps — z-[110] hides demo chat launcher when scrolled past */}
-        <section className="relative z-[110] bg-white">
+        <LandingFadeSeparator />
+
+        {/* Steps — z-[90] keeps demo chat launcher (z-[100]) visible above */}
+        <section id="landing-steps" className="relative z-[90] bg-white">
           <div
             className={cn(
-              "mx-auto max-w-6xl px-4 pt-0 pb-16 sm:px-6 sm:pb-20 lg:pt-0",
+              "mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10",
               DESKTOP_CONTAINER,
-              DESKTOP_SECTION,
             )}
           >
             <div className="mx-auto max-w-3xl text-center">
@@ -812,13 +841,14 @@ export function SalesLandingPage() {
           </div>
         </section>
 
-        {/* Comparison — z-[110] hides demo chat launcher */}
-        <section className="relative z-[110] bg-white">
+        <LandingFadeSeparator />
+
+        {/* Comparison — z-[90] keeps demo chat launcher (z-[100]) visible above */}
+        <section className="relative z-[90] bg-white">
           <div
             className={cn(
-              "mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20",
+              "mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10",
               DESKTOP_CONTAINER,
-              DESKTOP_SECTION,
             )}
           >
             <div className="mx-auto max-w-3xl text-center">
@@ -931,14 +961,14 @@ export function SalesLandingPage() {
           </div>
         </section>
 
-        {/* Pricing — sticky CTA (z-[120]) stays visible above this section */}
+        {/* Pricing — z-[110] hides demo chat launcher; sticky CTA (z-[120]) stays visible */}
         <section
           id="landing-pricing"
-          className="relative z-[110] bg-[var(--landing-navy)]"
+          className="relative z-[110] mt-10 bg-[var(--landing-navy)] sm:mt-12 lg:mt-16"
         >
           <div
             className={cn(
-              "mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20",
+              "mx-auto max-w-6xl px-4 pt-20 pb-16 sm:px-6 sm:pt-24 sm:pb-20",
               DESKTOP_CONTAINER,
               DESKTOP_SECTION,
             )}
@@ -1011,6 +1041,7 @@ export function SalesLandingPage() {
         </section>
 
         {/* Footer */}
+        {/* Footer — z-[110] keeps demo chat launcher hidden */}
         <section className="relative z-[110] bg-white pb-8 lg:pb-12">
           <div
             className={cn(
