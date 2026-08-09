@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 
 import { CtaButton } from "@/components/marketing/cta-button";
-import { DemoChatSection } from "@/components/marketing/demo-chat/demo-chat-section";
 import { RecentPurchasesSocialProof } from "@/components/marketing/recent-purchases-social-proof";
 import { StickyDesktopCta } from "@/components/marketing/sticky-desktop-cta";
 import { StickyMobileCta } from "@/components/marketing/sticky-mobile-cta";
@@ -728,33 +727,6 @@ export function SalesLandingPage() {
             </div>
           </div>
         </section>
-
-        {/* Live demo — floating chat widget */}
-        <section id="landing-demo" className="bg-white">
-          <div
-            className={cn(
-              "mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20",
-              DESKTOP_CONTAINER,
-              DESKTOP_SECTION,
-            )}
-          >
-            <div className="mx-auto max-w-3xl text-center lg:max-w-[960px]">
-              <SectionLabel className="mb-5 text-[14px] uppercase tracking-wider lg:mx-auto" light>
-                Live Demo
-              </SectionLabel>
-              <SectionHeading className="mb-4">
-                See Leady AI in Action
-              </SectionHeading>
-              <p className="mx-auto max-w-2xl text-[17px] font-medium leading-relaxed text-[var(--landing-navy)] sm:text-[19px]">
-                Click the chat icon in the bottom corner to try the AI sales
-                assistant live. Ask questions, see how it captures leads, and
-                experience how it works on your website.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <DemoChatSection />
 
         {/* Steps — ice blue secondary (30%) */}
         <section className="bg-white">
