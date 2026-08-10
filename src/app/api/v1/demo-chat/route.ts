@@ -1,8 +1,13 @@
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { sendDemoChatMessage } from "@/lib/api/handlers/demo-chat";
 import { handleRouteError, parseJsonBody } from "@/lib/api/request";
+import { isPublicDemoEnabled } from "@/lib/demo/config";
 
 export async function POST(request: Request) {
+  if (!isPublicDemoEnabled) {
+    return apiError("NOT_FOUND", "Demo is not available.", 404);
+  }
+
   let sessionId: string | undefined;
 
   try {

@@ -28,6 +28,7 @@ import { StickyMobileCta } from "@/components/marketing/sticky-mobile-cta";
 import { Card, CardContent } from "@/components/ui/card";
 import { FormattedPrice } from "@/components/ui/formatted-price";
 import { Separator } from "@/components/ui/separator";
+import { isPublicDemoEnabled } from "@/lib/demo/config";
 import { publicConfig } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
@@ -753,50 +754,58 @@ export function SalesLandingPage() {
             </div>
 
             <div className="mx-auto mt-10 max-w-3xl text-left sm:mt-12 lg:mt-10 lg:text-center">
-              <p className="border-l-4 border-[var(--landing-orange)] pl-4 text-[17px] font-bold leading-snug text-white sm:pl-5 sm:text-[19px] lg:mx-auto lg:max-w-2xl lg:border-l-0 lg:pl-0 lg:text-[19px]">
-                Now imagine this working on your website.
-              </p>
+              {isPublicDemoEnabled ? (
+                <p className="border-l-4 border-[var(--landing-orange)] pl-4 text-[17px] font-bold leading-snug text-white sm:pl-5 sm:text-[19px] lg:mx-auto lg:max-w-2xl lg:border-l-0 lg:pl-0 lg:text-[19px]">
+                  Now imagine this working on your website.
+                </p>
+              ) : null}
             </div>
           </div>
         </section>
 
-        {/* Live demo — z-[90] shows demo chat launcher (z-[100]) above this section */}
-        <section id="landing-demo" className="relative z-[90] bg-white">
-          <div
-            className={cn(
-              "mx-auto max-w-6xl px-4 pt-14 pb-8 sm:px-6 sm:pt-20 sm:pb-10",
-              DESKTOP_CONTAINER,
-            )}
-          >
-            <div className="mx-auto max-w-3xl text-center lg:max-w-[960px]">
-              <SectionLabel light className="mb-6 text-[14px]">
-                Live Demo
-              </SectionLabel>
-              <h2 className="text-balance text-[28px] font-bold uppercase tracking-tight text-[var(--landing-navy)] sm:text-[31px] lg:text-[38px]">
-                See It in Action
-              </h2>
-              <DemoTryButton />
-              <ul className="mx-auto mt-4 flex w-full max-w-xl flex-col items-start gap-2 text-left sm:mt-5 sm:gap-2.5">
-                {demoHighlights.map((point) => (
-                  <li
-                    key={point}
-                    className="flex w-full items-start gap-2.5 text-left sm:gap-3"
-                  >
-                    <Check className="mt-0.5 size-5 shrink-0 stroke-[2.5] text-[#16A34A]" />
-                    <span className="min-w-0 flex-1 text-left text-[17px] font-medium leading-relaxed text-[var(--landing-navy)] sm:text-[19px]">
-                      {point}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="mx-auto mt-8 max-w-2xl sm:mt-10">
-              <DemoChatSection />
-            </div>
-          </div>
-        </section>
+        {isPublicDemoEnabled ? (
+          <>
+            {/* Live demo — z-[90] shows demo chat launcher (z-[100]) above this section */}
+            <section id="landing-demo" className="relative z-[90] bg-white">
+              <div
+                className={cn(
+                  "mx-auto max-w-6xl px-4 pt-14 pb-8 sm:px-6 sm:pt-20 sm:pb-10",
+                  DESKTOP_CONTAINER,
+                )}
+              >
+                <div className="mx-auto max-w-3xl text-center lg:max-w-[960px]">
+                  <SectionLabel light className="mb-6 text-[14px]">
+                    Live Demo
+                  </SectionLabel>
+                  <h2 className="text-balance text-[28px] font-bold uppercase tracking-tight text-[var(--landing-navy)] sm:text-[31px] lg:text-[38px]">
+                    See It in Action
+                  </h2>
+                  <DemoTryButton />
+                  <ul className="mx-auto mt-4 flex w-full max-w-xl flex-col items-start gap-2 text-left sm:mt-5 sm:gap-2.5">
+                    {demoHighlights.map((point) => (
+                      <li
+                        key={point}
+                        className="flex w-full items-start gap-2.5 text-left sm:gap-3"
+                      >
+                        <Check className="mt-0.5 size-5 shrink-0 stroke-[2.5] text-[#16A34A]" />
+                        <span className="min-w-0 flex-1 text-left text-[17px] font-medium leading-relaxed text-[var(--landing-navy)] sm:text-[19px]">
+                          {point}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="mx-auto mt-8 max-w-2xl sm:mt-10">
+                  <DemoChatSection />
+                </div>
+              </div>
+            </section>
 
-        <LandingFadeSeparator />
+            <LandingFadeSeparator />
+          </>
+        ) : (
+          <LandingFadeSeparator />
+        )}
 
         {/* Steps — z-[90] keeps demo chat launcher (z-[100]) visible above */}
         <section id="landing-steps" className="relative z-[90] bg-white">

@@ -1,6 +1,9 @@
 import type { BusinessDisplay } from "@/lib/business/display";
 import type { WidgetSettings } from "@/lib/widget/types";
 
+/** Set to true in code when you want the landing-page demo section and chat back. */
+export const isPublicDemoEnabled = false;
+
 export const demoBusiness: BusinessDisplay = {
   name: "GrowscaleX Properties",
   welcomeMessage: "Enter your details below to try the assistant.",
