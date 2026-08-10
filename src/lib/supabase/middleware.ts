@@ -71,12 +71,26 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
+  if (!user && pathname.startsWith("/dashboard")) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/login";
+    redirectUrl.searchParams.set("next", pathname);
+    return NextResponse.redirect(redirectUrl);
+  }
+
   if (user) {
     const isPostPaymentLogin =
       pathname === "/login" &&
       request.nextUrl.searchParams.get("paid") === "1";
 
     const hasLifetimeAccess = await getHasLifetimeAccess(supabase, user.id);
+
+    if (pathname.startsWith("/dashboard") && !hasLifetimeAccess) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/checkout";
+      redirectUrl.search = "";
+      return NextResponse.redirect(redirectUrl);
+    }
 
     if (hasLifetimeAccess && isCheckoutLandingPath(pathname)) {
       const redirectUrl = request.nextUrl.clone();

@@ -12,7 +12,11 @@ export const config = {
     "/signup",
     "/checkout",
     "/checkout/:path*",
+    "/dashboard",
+    "/dashboard/:path*",
     "/api/checkout",
     "/api/checkout/:path*",
+    "/api/dashboard",
+    "/api/dashboard/:path*",
   ],
 };

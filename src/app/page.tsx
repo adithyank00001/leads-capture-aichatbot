@@ -5,6 +5,7 @@ import { DatabaseTestPanel } from "@/components/database-test";
 import { HealthCheckPanel } from "@/components/health-check";
 import { SalesLandingPage } from "@/components/marketing/sales-landing-page";
 import { publicConfig } from "@/lib/config";
+import { getHasLifetimeAccessForMarketing } from "@/lib/marketing/access";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -14,10 +15,12 @@ export const metadata: Metadata = {
     "High-intent prospects visit your website but leave without contacting you. Our AI sales assistant captures their details before they leave, 24/7.",
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const hasLifetimeAccess = await getHasLifetimeAccessForMarketing();
+
   return (
     <>
-      <SalesLandingPage />
+      <SalesLandingPage hasLifetimeAccess={hasLifetimeAccess} />
 
       {!isProduction ? (
         <div className="border-t border-border/60 bg-muted/30">

@@ -17,6 +17,10 @@ export function getSafeOAuthNextPath(nextPath?: string | null) {
   return nextPath;
 }
 
+export function resolvePostLoginRedirect(hasLifetimeAccess: boolean) {
+  return hasLifetimeAccess ? "/dashboard" : "/checkout";
+}
+
 export function getRequestOrigin(request: Request) {
   const { origin } = new URL(request.url);
   const forwardedHost = request.headers.get("x-forwarded-host");

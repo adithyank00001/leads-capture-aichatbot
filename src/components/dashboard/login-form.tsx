@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GoogleSignInButton } from "@/components/dashboard/google-sign-in-button";
 import { getCustomerErrorMessage } from "@/lib/dashboard/customer-errors";
-import { getSafeOAuthNextPath } from "@/lib/auth/oauth";
+import { resolvePostLoginRedirect } from "@/lib/auth/oauth";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { Separator } from "@/components/ui/separator";
 
@@ -29,9 +29,17 @@ type LoginFormProps = {
 
 async function claimPurchaseIfNeeded() {
   try {
-    await fetch("/api/auth/claim-purchase", { method: "POST" });
+    const response = await fetch("/api/auth/claim-purchase", { method: "POST" });
+    const result = (await response.json()) as {
+      ok?: boolean;
+      data?: {
+        hasLifetimeAccess?: boolean;
+      };
+    };
+
+    return result.data?.hasLifetimeAccess ?? false;
   } catch {
-    // Claim is retried on dashboard load if webhook is still processing.
+    return false;
   }
 }
 
@@ -70,10 +78,10 @@ export function LoginForm({
       return;
     }
 
-    await claimPurchaseIfNeeded();
+    const hasLifetimeAccess = await claimPurchaseIfNeeded();
     setLoading(false);
 
-    router.push(getSafeOAuthNextPath(nextPath));
+    router.push(resolvePostLoginRedirect(hasLifetimeAccess));
     router.refresh();
   }
 
@@ -91,7 +99,7 @@ export function LoginForm({
             </AlertDescription>
           </Alert>
         ) : null}
-        <GoogleSignInButton nextPath={nextPath} onError={setError} />
+        <GoogleSignInButton nextPath="/checkout" onError={setError} />
         <div className="flex items-center gap-3">
           <Separator className="flex-1" />
           <span className="text-xs text-muted-foreground">or sign in with email</span>

@@ -68,9 +68,15 @@ type DemoChatPanelProps = {
   sessionId: string;
   onClose: () => void;
   className?: string;
+  hasLifetimeAccess?: boolean;
 };
 
-function DemoChatPanel({ sessionId, onClose, className }: DemoChatPanelProps) {
+function DemoChatPanel({
+  sessionId,
+  onClose,
+  className,
+  hasLifetimeAccess = false,
+}: DemoChatPanelProps) {
   return (
     <div className={cn("flex flex-col overflow-hidden", className)}>
       <WidgetThemeProvider settings={demoWidgetSettings}>
@@ -79,6 +85,7 @@ function DemoChatPanel({ sessionId, onClose, className }: DemoChatPanelProps) {
           business={demoBusiness}
           widgetSettings={demoWidgetSettings}
           onClose={onClose}
+          hasLifetimeAccess={hasLifetimeAccess}
         />
       </WidgetThemeProvider>
     </div>
@@ -138,7 +145,11 @@ function DemoChatLauncherHint({
   );
 }
 
-export function DemoChatSection() {
+export function DemoChatSection({
+  hasLifetimeAccess = false,
+}: {
+  hasLifetimeAccess?: boolean;
+}) {
   const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isChatMounted, setIsChatMounted] = useState(false);
@@ -415,6 +426,7 @@ export function DemoChatSection() {
               <DemoChatPanel
                 sessionId={sessionId}
                 onClose={closeChat}
+                hasLifetimeAccess={hasLifetimeAccess}
                 className={cn(
                   "relative z-10 h-full w-full max-w-[380px]",
                   "max-h-[620px] rounded-2xl shadow-xl",
@@ -444,6 +456,7 @@ export function DemoChatSection() {
             <DemoChatPanel
               sessionId={sessionId}
               onClose={closeChat}
+              hasLifetimeAccess={hasLifetimeAccess}
               className="h-full w-full rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.18)]"
             />
           </div>,

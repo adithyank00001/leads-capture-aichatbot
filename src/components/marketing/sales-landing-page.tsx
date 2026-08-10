@@ -29,6 +29,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { FormattedPrice } from "@/components/ui/formatted-price";
 import { Separator } from "@/components/ui/separator";
 import { isPublicDemoEnabled } from "@/lib/demo/config";
+import { resolveMarketingCta } from "@/lib/marketing/cta";
 import { publicConfig } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
@@ -455,7 +456,13 @@ function LandingFadeSeparator() {
   );
 }
 
-export function SalesLandingPage() {
+export function SalesLandingPage({
+  hasLifetimeAccess = false,
+}: {
+  hasLifetimeAccess?: boolean;
+}) {
+  const marketingCta = resolveMarketingCta(hasLifetimeAccess);
+
   return (
     <>
       <div className="relative overflow-x-hidden bg-white [--landing-navy:#112437] [--landing-orange:#FC7B02] [--landing-orange-hover:#E36F02]">
@@ -505,7 +512,7 @@ export function SalesLandingPage() {
                   className="mt-10 flex flex-col items-center sm:mt-12 lg:mt-4 lg:items-stretch lg:self-start"
                 >
                   <div className="mx-auto inline-flex flex-col items-stretch gap-5 sm:gap-6 lg:hidden">
-                    <CtaButton variant="secondary" />
+                    <CtaButton variant="secondary" {...marketingCta} />
                     <div className="flex w-full flex-col items-stretch gap-1">
                       <MoneyBackGuarantee
                         centered
@@ -518,7 +525,7 @@ export function SalesLandingPage() {
                   </div>
 
                   <div className="hidden lg:flex lg:flex-col lg:rounded-2xl lg:border lg:border-[#D8E2EC] lg:bg-white lg:p-8 lg:shadow-[0_6px_28px_rgba(17,36,55,0.1)] xl:p-9">
-                    <CtaButton className="w-full" size="large" />
+                    <CtaButton className="w-full" size="large" {...marketingCta} />
                     <div className="mt-6 flex flex-col gap-1.5">
                       <MoneyBackGuarantee
                         centered
@@ -813,7 +820,7 @@ export function SalesLandingPage() {
                   </ul>
                 </div>
                 <div className="mx-auto mt-8 max-w-2xl sm:mt-10">
-                  <DemoChatSection />
+                  <DemoChatSection hasLifetimeAccess={hasLifetimeAccess} />
                 </div>
               </div>
             </section>
@@ -1057,9 +1064,10 @@ export function SalesLandingPage() {
                       <RecentPurchasesSocialProof className="lg:text-[16px]" />
                       <CtaButton
                         className="w-full sm:w-auto lg:w-full lg:[&_a]:px-7 lg:[&_a]:py-4 lg:[&_a]:text-[20px]"
-                        showDiscountBadge
+                        showDiscountBadge={!hasLifetimeAccess}
                         size="large"
                         priceBelow
+                        {...marketingCta}
                       />
                     </div>
                     <p className="mb-1 pt-1 text-[13px] font-bold uppercase tracking-wide text-[#16A34A] lg:text-[14px]">
@@ -1094,8 +1102,8 @@ export function SalesLandingPage() {
             </footer>
           </div>
         </section>
-        <StickyMobileCta />
-        <StickyDesktopCta />
+        <StickyMobileCta hasLifetimeAccess={hasLifetimeAccess} />
+        <StickyDesktopCta hasLifetimeAccess={hasLifetimeAccess} />
       </div>
     </>
   );

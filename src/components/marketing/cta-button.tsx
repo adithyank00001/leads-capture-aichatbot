@@ -28,6 +28,7 @@ export function CtaButton({
   priceBelow = false,
   variant = "primary",
   label = "Get Lifetime Access",
+  href = "/checkout",
   showPrice = true,
 }: {
   className?: string;
@@ -37,6 +38,7 @@ export function CtaButton({
   priceBelow?: boolean;
   variant?: "primary" | "secondary";
   label?: string;
+  href?: string;
   showPrice?: boolean;
 }) {
   const isLarge = size === "large";
@@ -67,7 +69,7 @@ export function CtaButton({
       )}
     >
       <Link
-        href="/checkout"
+        href={href}
         className={cn(
           "relative z-10 flex w-full items-center justify-center gap-2 overflow-hidden font-medium text-white transition-all will-change-transform before:absolute before:inset-0 before:z-0 before:bg-gradient-to-b before:opacity-0 before:transition-opacity before:duration-200",
           isSecondary

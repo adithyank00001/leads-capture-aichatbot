@@ -69,6 +69,7 @@ type DemoChatInterfaceProps = {
   business: BusinessDisplay;
   widgetSettings: WidgetSettings;
   onClose?: () => void;
+  hasLifetimeAccess?: boolean;
 };
 
 function TypingIndicator({ businessName }: { businessName: string }) {
@@ -113,6 +114,7 @@ export function DemoChatInterface({
   business,
   widgetSettings,
   onClose,
+  hasLifetimeAccess = false,
 }: DemoChatInterfaceProps) {
   const leadFormEnabled = widgetSettings.leadFormEnabled;
   const initialStateRef = useRef(
@@ -451,7 +453,7 @@ export function DemoChatInterface({
         {showFloatingCta ? (
           <div className="pointer-events-none absolute inset-x-0 bottom-full z-10 flex justify-center px-4 pb-2 animate-in slide-in-from-bottom-6 fade-in duration-500">
             <div className="pointer-events-auto">
-              <DemoChatFloatingCta />
+              <DemoChatFloatingCta hasLifetimeAccess={hasLifetimeAccess} />
             </div>
           </div>
         ) : null}

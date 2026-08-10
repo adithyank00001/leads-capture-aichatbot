@@ -4,12 +4,15 @@ import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DashboardHeaderFallback } from "@/components/dashboard/dashboard-header-fallback";
 import { DashboardMobileNav } from "@/components/dashboard/dashboard-mobile-nav";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
+import { requireDashboardAuth } from "@/lib/auth/dashboard-session";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  await requireDashboardAuth();
+
   return (
     <div className="min-h-screen bg-background">
       <DashboardMobileNav />
