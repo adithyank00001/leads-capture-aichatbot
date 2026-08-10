@@ -3,7 +3,6 @@ import { handleRouteError } from "@/lib/api/request";
 import { requireDashboardApiUser } from "@/lib/auth/dashboard-session";
 import { getBotByCustomerId } from "@/lib/db/bots";
 import { getCustomerByUserId } from "@/lib/db/customers";
-import { getWebsiteBuildLogs } from "@/lib/db/website-build-log";
 import {
   getWebsitePagesBySourceId,
   toWebsitePageStatusItem,
@@ -38,7 +37,6 @@ export async function GET(request: Request) {
     });
 
     const source = await getWebsiteSourceByBotId(supabase, bot.bot_id);
-    const logs = await getWebsiteBuildLogs(supabase, bot.bot_id, 40);
     const pages = source
       ? (await getWebsitePagesBySourceId(supabase, source.id)).map(
           toWebsitePageStatusItem,
@@ -48,14 +46,6 @@ export async function GET(request: Request) {
     return apiSuccess({
       ...toWebsiteStatusResponse(source),
       pages,
-      logs: logs.map((log) => ({
-        id: log.id,
-        side: log.side,
-        step: log.step,
-        status: log.status,
-        message: log.message,
-        createdAt: log.created_at,
-      })),
     });
   } catch (error) {
     const routeError = handleRouteError(error);

@@ -36,6 +36,7 @@ const captureFeatures = [
   {
     icon: UserCheck,
     text: "Capture Name, Phone & Email First",
+    optionalSuffix: "(customizable)",
   },
   {
     icon: Users,
@@ -642,6 +643,14 @@ export function SalesLandingPage() {
                       )}
                     >
                       {feature.text}
+                      {"optionalSuffix" in feature && feature.optionalSuffix ? (
+                        <>
+                          {" "}
+                          <span className="font-medium text-[#8B9AAB]">
+                            {feature.optionalSuffix}
+                          </span>
+                        </>
+                      ) : null}
                     </p>
                   </CardContent>
                 </Card>
@@ -669,6 +678,14 @@ export function SalesLandingPage() {
                         )}
                       >
                         {feature.text}
+                        {"optionalSuffix" in feature && feature.optionalSuffix ? (
+                          <>
+                            {" "}
+                            <span className="font-medium text-[#8B9AAB]">
+                              {feature.optionalSuffix}
+                            </span>
+                          </>
+                        ) : null}
                       </p>
                     </CardContent>
                   </Card>

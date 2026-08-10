@@ -16,19 +16,9 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { fetchJsonWithTimeout } from "@/lib/api/fetch-client";
 import { getCustomerErrorMessage } from "@/lib/dashboard/customer-errors";
 import { getWebsiteStatusCustomerLabel } from "@/lib/dashboard/setup-status";
-
-type WebsiteBuildLog = {
-  id: string;
-  side: "nextjs" | "gas";
-  step: string;
-  status: string;
-  message: string;
-  createdAt: string;
-};
 
 type WebsitePageStatus = {
   id: string;
@@ -57,7 +47,6 @@ type WebsiteStatus = {
   lastProcessedAt: string | null;
   updatedAt: string | null;
   pages?: WebsitePageStatus[];
-  logs?: WebsiteBuildLog[];
 };
 
 type StatusResponse = {
@@ -125,8 +114,6 @@ function getProgressLabel(status: WebsiteStatus) {
   return getWebsiteStatusCustomerLabel(status.status);
 }
 
-const showTechnicalLogs = process.env.NODE_ENV === "development";
-
 function getStatusBadgeVariant(
   status: WebsitePageStatus["status"],
 ): "default" | "secondary" | "destructive" | "outline" {
@@ -145,7 +132,6 @@ function getStatusBadgeVariant(
 export function WebsiteKnowledgePanel() {
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [status, setStatus] = useState<WebsiteStatus | null>(null);
-  const [logs, setLogs] = useState<WebsiteBuildLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [building, setBuilding] = useState(false);
   const [retryingPageId, setRetryingPageId] = useState<string | null>(null);
@@ -165,7 +151,6 @@ export function WebsiteKnowledgePanel() {
     }
 
     setStatus(result.data);
-    setLogs(result.data.logs ?? []);
 
     if (!websiteUrlRef.current && result.data.websiteUrl) {
       setWebsiteUrl(result.data.websiteUrl);
@@ -392,25 +377,6 @@ export function WebsiteKnowledgePanel() {
               })}
             </ul>
           </div>
-        ) : null}
-
-        {logs.length > 0 && showTechnicalLogs ? (
-          <>
-            <Separator />
-            <div className="rounded-lg border bg-muted/30 p-4">
-              <p className="mb-2 text-sm font-semibold">Build logs</p>
-              <div className="max-h-64 space-y-2 overflow-y-auto text-xs text-muted-foreground">
-                {[...logs].reverse().map((log) => (
-                  <div key={log.id} className="rounded-lg border bg-card px-2 py-1">
-                    <p className="font-medium text-foreground">
-                      [{log.side}] {log.step} — {log.status}
-                    </p>
-                    <p>{log.message}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
         ) : null}
       </CardContent>
     </Card>
