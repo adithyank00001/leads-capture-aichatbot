@@ -35,7 +35,7 @@ export const serverEnv = {
   supabaseServiceRoleKey: readOptionalEnv("SUPABASE_SERVICE_ROLE_KEY"),
   openRouterApiKey: readOptionalEnv("OPENROUTER_API_KEY"),
   openRouterModel:
-    readOptionalEnv("OPENROUTER_MODEL") ?? "deepseek/deepseek-v4-flash",
+    readOptionalEnv("OPENROUTER_MODEL") ?? "~deepseek/deepseek-v4-flash-latest",
   openRouterFallbackModel:
     readOptionalEnv("OPENROUTER_FALLBACK_MODEL") ?? "google/gemini-2.5-flash",
   openRouterEmbeddingModel:

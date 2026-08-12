@@ -22,6 +22,7 @@ import {
 } from "@/lib/session/client";
 
 const PENDING_MESSAGE_ID = "pending-user-message";
+const LEAD_GATE_THINKING_MS = 2_000;
 
 type ChatInterfaceProps = {
   botId: string;
@@ -68,8 +69,10 @@ export function ChatInterface({
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [leadCompleted, setLeadCompleted] = useState(false);
   const [showLeadStrip, setShowLeadStrip] = useState(false);
+  const [isLeadGateThinking, setIsLeadGateThinking] = useState(false);
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const leadGateTimerRef = useRef<number | null>(null);
 
   const assistantLabel = `${business.name} assistant`;
   const pageUrl =
@@ -120,7 +123,15 @@ export function ChatInterface({
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isSending, showLeadStrip]);
+  }, [messages, isSending, isLeadGateThinking, showLeadStrip]);
+
+  useEffect(() => {
+    return () => {
+      if (leadGateTimerRef.current !== null) {
+        window.clearTimeout(leadGateTimerRef.current);
+      }
+    };
+  }, []);
 
   async function sendMessageToApi(message: string) {
     setIsSending(true);
@@ -154,7 +165,7 @@ export function ChatInterface({
 
     const trimmedMessage = input.trim();
 
-    if (!trimmedMessage || isSending) {
+    if (!trimmedMessage || isSending || isLeadGateThinking) {
       return;
     }
 
@@ -173,8 +184,19 @@ export function ChatInterface({
 
       setMessages([optimisticMessage]);
       setPendingMessage(trimmedMessage);
-      setShowLeadStrip(true);
       setInput("");
+      setIsLeadGateThinking(true);
+
+      if (leadGateTimerRef.current !== null) {
+        window.clearTimeout(leadGateTimerRef.current);
+      }
+
+      leadGateTimerRef.current = window.setTimeout(() => {
+        setIsLeadGateThinking(false);
+        setShowLeadStrip(true);
+        leadGateTimerRef.current = null;
+      }, LEAD_GATE_THINKING_MS);
+
       return;
     }
 
@@ -212,6 +234,7 @@ export function ChatInterface({
     !isLoadingHistory &&
     displayMessages.length === 0 &&
     !isSending &&
+    !isLeadGateThinking &&
     !showLeadStrip;
   const timestampLabel = formatChatTimestamp(new Date());
 
@@ -275,6 +298,10 @@ export function ChatInterface({
             );
           })}
 
+          {isLeadGateThinking ? (
+            <TypingIndicator businessName={business.name} />
+          ) : null}
+
           {isSending ? <TypingIndicator businessName={business.name} /> : null}
 
           <div ref={bottomRef} />
@@ -308,13 +335,13 @@ export function ChatInterface({
             onChange={(event) => setInput(event.target.value)}
             placeholder="Type here..."
             className="min-w-0 flex-1 bg-transparent text-sm text-zinc-800 outline-none placeholder:text-zinc-400"
-            disabled={isSending}
+            disabled={isSending || isLeadGateThinking}
           />
           <Button
             type="submit"
             variant="widgetAccent"
             size="icon-sm"
-            disabled={isSending || !input.trim()}
+            disabled={isSending || isLeadGateThinking || !input.trim()}
             className="rounded-full"
             aria-label="Send message"
           >

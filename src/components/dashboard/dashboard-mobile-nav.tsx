@@ -5,16 +5,15 @@ import { usePathname } from "next/navigation";
 import { MenuIcon } from "lucide-react";
 
 import { DashboardLogoutButton } from "@/components/dashboard/logout-button";
+import { BrandLogo } from "@/components/marketing/brand-logo";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
-  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { publicConfig } from "@/lib/config";
 
 const navItems = [
   { href: "/dashboard", label: "Overview", exact: true },
@@ -30,12 +29,7 @@ export function DashboardMobileNav() {
 
   return (
     <div className="flex items-center justify-between border-b border-sidebar-border bg-sidebar px-4 py-3 text-sidebar-foreground md:hidden">
-      <div className="flex items-center gap-2">
-        <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground">
-          LA
-        </div>
-        <span className="font-semibold">{publicConfig.appName}</span>
-      </div>
+      <BrandLogo href="/dashboard" size="md" />
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="outline" size="icon" className="border-sidebar-border bg-transparent">
@@ -45,7 +39,7 @@ export function DashboardMobileNav() {
         </SheetTrigger>
         <SheetContent side="left" className="w-72 p-0">
           <SheetHeader className="border-b px-4 py-4">
-            <SheetTitle>{publicConfig.appName}</SheetTitle>
+            <BrandLogo href="/dashboard" size="md" />
           </SheetHeader>
           <nav className="flex flex-col gap-1 p-3">
             {navItems.map((item) => {

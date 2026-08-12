@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 
+import { BrandLogo } from "@/components/marketing/brand-logo";
 import { CtaButton } from "@/components/marketing/cta-button";
 import {
   DemoChatSection,
@@ -166,28 +167,8 @@ function AccentBullet({ className }: { className?: string }) {
   );
 }
 
-function LogoMark({
-  className,
-  onDark = false,
-}: {
-  className?: string;
-  onDark?: boolean;
-}) {
-  return (
-    <div className={cn("flex items-center gap-2", className)}>
-      <div className="flex size-8 items-center justify-center rounded-lg bg-[var(--landing-navy)] text-[13px] font-bold text-white shadow-sm">
-        LA
-      </div>
-      <span
-        className={cn(
-          "text-[15px] font-semibold tracking-tight",
-          onDark ? "text-white" : "text-[var(--landing-navy)]",
-        )}
-      >
-        {publicConfig.appName}
-      </span>
-    </div>
-  );
+function LogoMark({ className }: { className?: string }) {
+  return <BrandLogo className={className} size="xs" href="/" />;
 }
 
 function HeroPoint({
@@ -476,7 +457,7 @@ export function SalesLandingPage({
             )}
           >
             <header className="shrink-0 lg:pt-1">
-              <LogoMark className="lg:[&_div]:size-9 lg:[&_span]:text-[16px]" />
+              <LogoMark />
             </header>
 
             <div className="flex flex-col justify-center lg:py-2 lg:pb-4">
@@ -525,7 +506,11 @@ export function SalesLandingPage({
                   </div>
 
                   <div className="hidden lg:flex lg:flex-col lg:rounded-2xl lg:border lg:border-[#D8E2EC] lg:bg-white lg:p-8 lg:shadow-[0_6px_28px_rgba(17,36,55,0.1)] xl:p-9">
-                    <CtaButton className="w-full" size="large" {...marketingCta} />
+                    <CtaButton
+                      className="w-full"
+                      size="large"
+                      {...marketingCta}
+                    />
                     <div className="mt-6 flex flex-col gap-1.5">
                       <MoneyBackGuarantee
                         centered
@@ -685,7 +670,8 @@ export function SalesLandingPage({
                         )}
                       >
                         {feature.text}
-                        {"optionalSuffix" in feature && feature.optionalSuffix ? (
+                        {"optionalSuffix" in feature &&
+                        feature.optionalSuffix ? (
                           <>
                             {" "}
                             <span className="font-medium text-[#8B9AAB]">
@@ -1095,6 +1081,26 @@ export function SalesLandingPage({
           >
             <footer className="flex flex-col items-center gap-3 border-t border-[#D8E2EC] pt-8 text-center">
               <LogoMark />
+              <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+                <Link
+                  href="/terms-of-service"
+                  className="text-[13px] font-medium text-[#5B6B7C] hover:text-[var(--landing-navy)] hover:underline"
+                >
+                  Terms of Service
+                </Link>
+                <Link
+                  href="/privacy-policy"
+                  className="text-[13px] font-medium text-[#5B6B7C] hover:text-[var(--landing-navy)] hover:underline"
+                >
+                  Privacy Policy
+                </Link>
+                <Link
+                  href="/refund-policy"
+                  className="text-[13px] font-medium text-[#5B6B7C] hover:text-[var(--landing-navy)] hover:underline"
+                >
+                  Refund Policy
+                </Link>
+              </nav>
               <p className="text-[13px] text-[#8B9AAB]">
                 © {new Date().getFullYear()} {publicConfig.appName}. All rights
                 reserved.

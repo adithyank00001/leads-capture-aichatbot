@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { DashboardLogoutButton } from "@/components/dashboard/logout-button";
+import { BrandLogo } from "@/components/marketing/brand-logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { publicConfig } from "@/lib/config";
 
 const navItems = [
   { href: "/dashboard", label: "Overview", exact: true },
@@ -22,11 +22,8 @@ export function DashboardSidebar() {
 
   return (
     <aside className="hidden w-60 shrink-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex md:flex-col">
-      <div className="flex items-center gap-2 border-b border-sidebar-border px-4 py-5">
-        <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground">
-          LA
-        </div>
-        <span className="font-semibold tracking-tight">{publicConfig.appName}</span>
+      <div className="flex items-center border-b border-sidebar-border px-4 py-5">
+        <BrandLogo href="/dashboard" size="md" />
       </div>
       <nav className="flex flex-1 flex-col gap-1 p-3">
         {navItems.map((item) => {

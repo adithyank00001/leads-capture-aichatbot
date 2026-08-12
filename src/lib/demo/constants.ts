@@ -18,7 +18,7 @@ export const DEMO_MAX_HISTORY_ITEMS = 20;
 export const DEMO_LEAD = {
   name: "Demo Uzain Hamza",
   email: "demo.uzain.hamza@gmail.com",
-  phone: "(312) 555-0193",
+  phone: "+13125550193",
 } as const;
 
 export const DEMO_WAITING_MESSAGES = {

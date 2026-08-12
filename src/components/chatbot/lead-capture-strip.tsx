@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PhoneInputWithCountryCode } from "@/components/chatbot/phone-input-with-country-code";
 import { submitLead } from "@/lib/api/client";
 import type { LeadFieldConfig } from "@/lib/widget/types";
 import { isStandardLeadFieldId } from "@/lib/widget/types";
@@ -101,19 +102,30 @@ export function LeadCaptureStrip({
         <p>Complete the fields below to reveal it.</p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-2">
-        {leadFields.map((field) => (
-          <Input
-            key={field.id}
-            type={fieldInputTypes[field.id] ?? "text"}
-            value={values[field.id] ?? ""}
-            onChange={(event) => updateValue(field.id, event.target.value)}
-            placeholder={field.label}
-            autoComplete={isStandardLeadFieldId(field.id) ? field.id : "off"}
-            disabled={isSubmitting}
-            className="h-9 rounded-lg border-2 border-[var(--widget-accent)] bg-white text-sm text-zinc-900 shadow-none placeholder:text-zinc-500 focus-visible:border-[var(--widget-accent)] focus-visible:ring-[var(--widget-accent)]/50"
-            aria-label={field.label}
-          />
-        ))}
+        {leadFields.map((field) =>
+          field.id === "phone" ? (
+            <PhoneInputWithCountryCode
+              key={field.id}
+              value={values[field.id] ?? ""}
+              onChange={(nextValue) => updateValue(field.id, nextValue)}
+              placeholder={field.label}
+              disabled={isSubmitting}
+              aria-label={field.label}
+            />
+          ) : (
+            <Input
+              key={field.id}
+              type={fieldInputTypes[field.id] ?? "text"}
+              value={values[field.id] ?? ""}
+              onChange={(event) => updateValue(field.id, event.target.value)}
+              placeholder={field.label}
+              autoComplete={isStandardLeadFieldId(field.id) ? field.id : "off"}
+              disabled={isSubmitting}
+              className="h-9 rounded-lg border-2 border-[var(--widget-accent)] bg-white text-sm text-zinc-900 shadow-none placeholder:text-zinc-500 focus-visible:border-[var(--widget-accent)] focus-visible:ring-[var(--widget-accent)]/50"
+              aria-label={field.label}
+            />
+          ),
+        )}
         <Button
           type="submit"
           variant="widgetAccent"
