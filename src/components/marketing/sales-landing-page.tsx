@@ -248,8 +248,11 @@ function MoneyBackGuarantee({
         <p className="whitespace-nowrap text-[17px] font-bold uppercase leading-tight text-[#16A34A]">
           100% Money-Back Guarantee
         </p>
-        <p className="whitespace-nowrap text-[15px] font-medium leading-snug text-[#16A34A]">
+        <p className="whitespace-nowrap text-[15px] font-medium italic leading-snug text-[#16A34A]">
           No lead in 30 days? Get full refund.
+        </p>
+        <p className="whitespace-nowrap text-[16px] font-bold uppercase leading-snug text-[#16A34A]">
+          No questions asked
         </p>
       </div>
     </div>
