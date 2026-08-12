@@ -168,7 +168,9 @@ function AccentBullet({ className }: { className?: string }) {
 }
 
 function LogoMark({ className }: { className?: string }) {
-  return <BrandLogo className={className} size="xs" href="/" />;
+  return (
+    <BrandLogo className={cn("lg:h-6", className)} size="xs" href="/" />
+  );
 }
 
 function HeroPoint({
