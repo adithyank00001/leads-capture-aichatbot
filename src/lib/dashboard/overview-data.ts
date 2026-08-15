@@ -24,6 +24,13 @@ export type DashboardOverviewData = {
   } | null;
   websiteStatus: WebsiteBuildStatus;
   completedPages: number;
+  widgetMonitor: {
+    status: "never_seen" | "installed" | "removed";
+    firstInstalledAt: string | null;
+    lastSeenAt: string | null;
+    lastCheckedAt: string | null;
+    monitoringLabel: "Waiting for website" | "Active" | "Completed" | "Not started";
+  } | null;
 };
 
 type DashboardBundle = NonNullable<Awaited<ReturnType<typeof getDashboardBundle>>>;
@@ -57,6 +64,39 @@ export function mapDashboardBundleToOverview(
       : null,
     websiteStatus: bot?.bot_website_sources?.status ?? null,
     completedPages: bot?.bot_website_sources?.completed_pages ?? 0,
+    widgetMonitor: mapWidgetMonitor(bot?.bot_widget_monitors ?? null, overviewDomainsLength(bot)),
+  };
+}
+
+function overviewDomainsLength(bot: DashboardBundle["customer"]["bots"]) {
+  return (bot?.bot_allowed_domains ?? []).length;
+}
+
+function mapWidgetMonitor(
+  monitor: NonNullable<DashboardBundle["customer"]["bots"]>["bot_widget_monitors"],
+  domainCount: number,
+): DashboardOverviewData["widgetMonitor"] {
+  if (!monitor) {
+    return null;
+  }
+
+  let monitoringLabel: NonNullable<DashboardOverviewData["widgetMonitor"]>["monitoringLabel"] =
+    "Not started";
+
+  if (monitor.completed_at) {
+    monitoringLabel = "Completed";
+  } else if (monitor.next_check_at) {
+    monitoringLabel = "Active";
+  } else if (domainCount === 0) {
+    monitoringLabel = "Waiting for website";
+  }
+
+  return {
+    status: monitor.install_status,
+    firstInstalledAt: monitor.first_installed_at,
+    lastSeenAt: monitor.last_seen_at,
+    lastCheckedAt: monitor.last_checked_at,
+    monitoringLabel,
   };
 }
 

@@ -52,6 +52,14 @@ export function DashboardOverview({
   const readinessLabel = getChatbotReadinessLabel(setupInput);
   const displayName = userEmail.split("@")[0] || "there";
 
+  function formatMonitorDate(value: string | null) {
+    if (!value) {
+      return "—";
+    }
+
+    return new Date(value).toLocaleDateString();
+  }
+
   if (!initialData.knowledge) {
     return (
       <Alert variant="destructive">
@@ -137,6 +145,48 @@ export function DashboardOverview({
           </CardHeader>
         </Card>
       </div>
+
+      {initialData.widgetMonitor ? (
+        <Card className="shadow-md ring-primary/5">
+          <CardHeader>
+            <CardTitle>Website widget</CardTitle>
+            <CardDescription>
+              Whether the chatbot is running on your website.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-sm">
+            <div>
+              <p className="text-muted-foreground">Widget status</p>
+              <p className="mt-1 font-medium">
+                {initialData.widgetMonitor.status === "installed"
+                  ? "Widget installed"
+                  : initialData.widgetMonitor.status === "removed"
+                    ? "Widget not detected"
+                    : "Installation not detected"}
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Monitoring</p>
+              <p className="mt-1 font-medium">
+                {initialData.widgetMonitor.monitoringLabel}
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">First installed</p>
+              <p className="mt-1 font-medium">
+                {formatMonitorDate(initialData.widgetMonitor.firstInstalledAt)}
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Last seen / last checked</p>
+              <p className="mt-1 font-medium">
+                {formatMonitorDate(initialData.widgetMonitor.lastSeenAt)} /{" "}
+                {formatMonitorDate(initialData.widgetMonitor.lastCheckedAt)}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
     </div>
   );
 }

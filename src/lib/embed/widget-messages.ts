@@ -7,11 +7,16 @@ export function postWidgetResize(mode: WidgetResizeMode) {
     return;
   }
 
-  window.parent.postMessage(
-    {
-      type: WIDGET_RESIZE_MESSAGE_TYPE,
-      mode,
-    },
-    "*",
-  );
+  function send() {
+    window.parent.postMessage(
+      {
+        type: WIDGET_RESIZE_MESSAGE_TYPE,
+        mode,
+      },
+      "*",
+    );
+  }
+
+  send();
+  window.requestAnimationFrame(send);
 }

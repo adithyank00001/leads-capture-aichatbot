@@ -475,6 +475,165 @@ export type Database = {
         };
         Relationships: [];
       };
+      bot_widget_monitors: {
+        Row: {
+          bot_id: string;
+          domain: string | null;
+          install_status: "never_seen" | "installed" | "removed";
+          purchase_at: string;
+          install_window_end_at: string;
+          first_installed_at: string | null;
+          active_monitoring_start_at: string | null;
+          active_monitoring_end_at: string | null;
+          last_seen_at: string | null;
+          last_checked_at: string | null;
+          last_error: string | null;
+          slot_minute: number | null;
+          next_check_at: string | null;
+          in_progress_at: string | null;
+          current_check_id: string | null;
+          check_heartbeat_at: string | null;
+          completed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          bot_id: string;
+          domain?: string | null;
+          install_status?: "never_seen" | "installed" | "removed";
+          purchase_at: string;
+          install_window_end_at: string;
+          first_installed_at?: string | null;
+          active_monitoring_start_at?: string | null;
+          active_monitoring_end_at?: string | null;
+          last_seen_at?: string | null;
+          last_checked_at?: string | null;
+          last_error?: string | null;
+          slot_minute?: number | null;
+          next_check_at?: string | null;
+          in_progress_at?: string | null;
+          current_check_id?: string | null;
+          check_heartbeat_at?: string | null;
+          completed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          bot_id?: string;
+          domain?: string | null;
+          install_status?: "never_seen" | "installed" | "removed";
+          purchase_at?: string;
+          install_window_end_at?: string;
+          first_installed_at?: string | null;
+          active_monitoring_start_at?: string | null;
+          active_monitoring_end_at?: string | null;
+          last_seen_at?: string | null;
+          last_checked_at?: string | null;
+          last_error?: string | null;
+          slot_minute?: number | null;
+          next_check_at?: string | null;
+          in_progress_at?: string | null;
+          current_check_id?: string | null;
+          check_heartbeat_at?: string | null;
+          completed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      bot_widget_monitor_checks: {
+        Row: {
+          id: string;
+          bot_id: string;
+          check_id: string;
+          website_url: string;
+          result: "installed" | "missing" | "check_error" | null;
+          page_ok: boolean | null;
+          heartbeat_matched: boolean;
+          visitor_heartbeat_protected: boolean;
+          error_message: string | null;
+          started_at: string;
+          completed_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          bot_id: string;
+          check_id: string;
+          website_url: string;
+          result?: "installed" | "missing" | "check_error" | null;
+          page_ok?: boolean | null;
+          heartbeat_matched?: boolean;
+          visitor_heartbeat_protected?: boolean;
+          error_message?: string | null;
+          started_at?: string;
+          completed_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          bot_id?: string;
+          check_id?: string;
+          website_url?: string;
+          result?: "installed" | "missing" | "check_error" | null;
+          page_ok?: boolean | null;
+          heartbeat_matched?: boolean;
+          visitor_heartbeat_protected?: boolean;
+          error_message?: string | null;
+          started_at?: string;
+          completed_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      bot_widget_monitor_events: {
+        Row: {
+          id: string;
+          bot_id: string;
+          event_type: "installed" | "removed" | "reinstalled";
+          occurred_at: string;
+          check_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          bot_id: string;
+          event_type: "installed" | "removed" | "reinstalled";
+          occurred_at?: string;
+          check_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          bot_id?: string;
+          event_type?: "installed" | "removed" | "reinstalled";
+          occurred_at?: string;
+          check_id?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      widget_monitor_settings: {
+        Row: {
+          id: number;
+          tick_url: string | null;
+          cron_secret: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          tick_url?: string | null;
+          cron_secret?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          tick_url?: string | null;
+          cron_secret?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -538,6 +697,26 @@ export type Database = {
         Args: {
           p_stale_minutes?: number;
         };
+        Returns: Json;
+      };
+      enroll_bot_widget_monitor: {
+        Args: {
+          p_bot_id: string;
+        };
+        Returns: Json;
+      };
+      claim_due_widget_monitor_check: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      fail_stale_widget_monitor_checks: {
+        Args: {
+          p_stale_minutes?: number;
+        };
+        Returns: Json;
+      };
+      dispatch_widget_monitor_tick: {
+        Args: Record<string, never>;
         Returns: Json;
       };
     };

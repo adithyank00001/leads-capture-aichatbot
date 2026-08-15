@@ -49,24 +49,79 @@
     return null;
   }
 
+  function setBox(element, styles) {
+    var keys = Object.keys(styles);
+    for (var i = 0; i < keys.length; i++) {
+      element.style.setProperty(keys[i], styles[keys[i]], "important");
+    }
+  }
+
   function applyLauncherStyles(container, iframe) {
-    container.style.width = LAUNCHER_SIZE + "px";
-    container.style.height = LAUNCHER_SIZE + "px";
-    container.style.maxWidth = LAUNCHER_SIZE + "px";
-    container.style.maxHeight = LAUNCHER_SIZE + "px";
-    iframe.style.borderRadius = "9999px";
-    iframe.style.boxShadow = "none";
-    iframe.style.background = "transparent";
+    setBox(container, {
+      width: LAUNCHER_SIZE + "px",
+      height: LAUNCHER_SIZE + "px",
+      "max-width": LAUNCHER_SIZE + "px",
+      "max-height": LAUNCHER_SIZE + "px",
+      "min-width": LAUNCHER_SIZE + "px",
+      "min-height": LAUNCHER_SIZE + "px",
+      overflow: "hidden",
+    });
+    setBox(iframe, {
+      width: "100%",
+      height: "100%",
+      "border-radius": "9999px",
+      "box-shadow": "none",
+      background: "transparent",
+    });
   }
 
   function applyPanelStyles(container, iframe) {
-    container.style.width = "min(100vw - 32px, 380px)";
-    container.style.height = "min(100vh - 32px, 620px)";
-    container.style.maxWidth = "380px";
-    container.style.maxHeight = "620px";
-    iframe.style.borderRadius = "16px";
-    iframe.style.boxShadow = "0 12px 40px rgba(0, 0, 0, 0.18)";
-    iframe.style.background = "#ffffff";
+    setBox(container, {
+      width: "min(100vw - 32px, 380px)",
+      height: "min(100vh - 32px, 620px)",
+      "max-width": "380px",
+      "max-height": "620px",
+      "min-width": "280px",
+      "min-height": "420px",
+      overflow: "visible",
+    });
+    setBox(iframe, {
+      width: "100%",
+      height: "100%",
+      "min-width": "100%",
+      "min-height": "100%",
+      "border-radius": "16px",
+      "box-shadow": "0 12px 40px rgba(0, 0, 0, 0.18)",
+      background: "#ffffff",
+    });
+  }
+
+  function sendHeartbeat(baseUrl, botId) {
+    try {
+      var checkId = "";
+      try {
+        checkId = new URLSearchParams(window.location.search).get("leady_check") || "";
+      } catch (readError) {
+        checkId = "";
+      }
+
+      var payload = {
+        botId: botId,
+        pageUrl: window.location.href,
+      };
+
+      if (checkId) {
+        payload.checkId = checkId;
+      }
+
+      fetch(baseUrl + "/api/v1/widget-heartbeat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        keepalive: true,
+        mode: "cors",
+      }).catch(function () {});
+    } catch (heartbeatError) {}
   }
 
   function createWidget(script) {
@@ -76,6 +131,8 @@
     if (!botId || !baseUrl) {
       return null;
     }
+
+    sendHeartbeat(baseUrl, botId);
 
     if (document.getElementById(WIDGET_ROOT_ID)) {
       return null;
@@ -101,7 +158,6 @@
       encodeURIComponent(botId) +
       "?parentUrl=" +
       encodeURIComponent(window.location.href);
-    iframe.setAttribute("loading", "lazy");
     iframe.style.cssText = [
       "width: 100%",
       "height: 100%",
@@ -128,7 +184,7 @@
     });
 
     window.addEventListener("message", function (event) {
-      if (event.origin !== baseUrl) {
+      if (iframe.contentWindow && event.source !== iframe.contentWindow) {
         return;
       }
 

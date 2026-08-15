@@ -1,4 +1,5 @@
 import { serverEnv } from "@/lib/env.server";
+import { enrollBotWidgetMonitor } from "@/lib/monitoring/enroll";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import {
   extractHostFromUrl,
@@ -150,6 +151,7 @@ export async function replaceAllowedDomains(botId: string, domains: string[]) {
   }
 
   if (normalized.length === 0) {
+    await enrollBotWidgetMonitor(botId);
     return [];
   }
 
@@ -166,6 +168,8 @@ export async function replaceAllowedDomains(botId: string, domains: string[]) {
   if (error) {
     throw new Error(error.message);
   }
+
+  await enrollBotWidgetMonitor(botId);
 
   return (data ?? []).map((row) => row.domain);
 }

@@ -48,6 +48,14 @@ type BotBundle = {
     status: WebsiteBuildStatus;
     completed_pages: number;
   } | null;
+  bot_widget_monitors: {
+    install_status: "never_seen" | "installed" | "removed";
+    first_installed_at: string | null;
+    last_seen_at: string | null;
+    last_checked_at: string | null;
+    next_check_at: string | null;
+    completed_at: string | null;
+  } | null;
 };
 
 type CustomerBundle = {
@@ -76,7 +84,15 @@ const CUSTOMER_BUNDLE_SELECT = `
       extra_notes
     ),
     bot_allowed_domains (domain),
-    bot_website_sources (status, completed_pages)
+    bot_website_sources (status, completed_pages),
+    bot_widget_monitors (
+      install_status,
+      first_installed_at,
+      last_seen_at,
+      last_checked_at,
+      next_check_at,
+      completed_at
+    )
   )
 `;
 
