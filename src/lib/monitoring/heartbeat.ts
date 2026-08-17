@@ -1,5 +1,6 @@
-import { extractHostFromUrl, isHostAllowed } from "@/lib/security/domain-shared";
+import { isWidgetMonitoringEnabled } from "@/lib/monitoring/enabled";
 import { getAllowedDomainsForBot } from "@/lib/security/domain";
+import { extractHostFromUrl, isHostAllowed } from "@/lib/security/domain-shared";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { ApiValidationError } from "@/lib/validation/errors";
 
@@ -10,6 +11,10 @@ export async function recordWidgetHeartbeat(input: {
   pageUrl: string;
   checkId?: string | null;
 }) {
+  if (!isWidgetMonitoringEnabled()) {
+    return { recorded: false as const };
+  }
+
   const supabase = getSupabaseAdmin();
   const pageHost = extractHostFromUrl(input.pageUrl);
 

@@ -50,6 +50,7 @@ export const serverEnv = {
   gasMonitorWebAppUrl: readOptionalEnv("GAS_MONITOR_WEB_APP_URL"),
   gasMonitorHmacSecret: readOptionalEnv("GAS_MONITOR_HMAC_SECRET"),
   widgetMonitorCronSecret: readOptionalEnv("WIDGET_MONITOR_CRON_SECRET"),
+  widgetMonitoringEnabled: readOptionalEnv("WIDGET_MONITORING_ENABLED") === "true",
   minUsableWebsiteTextChars: readIntEnv("MIN_USABLE_WEBSITE_TEXT_CHARS", 300),
   appUrl: readOptionalEnv("NEXT_PUBLIC_APP_URL") ?? "http://localhost:3000",
   dodoPaymentsApiKey: readOptionalEnv("DODO_PAYMENTS_API_KEY"),

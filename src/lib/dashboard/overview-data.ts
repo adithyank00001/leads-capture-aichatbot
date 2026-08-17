@@ -2,6 +2,7 @@ import "server-only";
 
 import type { getDashboardBundle } from "@/lib/auth/dashboard-session";
 import type { WebsiteBuildStatus } from "@/lib/dashboard/setup-status";
+import { isWidgetMonitoringEnabled } from "@/lib/monitoring/enabled";
 
 export type DashboardOverviewData = {
   botId: string;
@@ -76,6 +77,10 @@ function mapWidgetMonitor(
   monitor: NonNullable<DashboardBundle["customer"]["bots"]>["bot_widget_monitors"],
   domainCount: number,
 ): DashboardOverviewData["widgetMonitor"] {
+  if (!isWidgetMonitoringEnabled()) {
+    return null;
+  }
+
   if (!monitor) {
     return null;
   }

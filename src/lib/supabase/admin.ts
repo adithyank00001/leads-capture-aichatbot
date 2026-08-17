@@ -715,6 +715,13 @@ export type Database = {
         };
         Returns: Json;
       };
+      schedule_widget_monitor_next: {
+        Args: {
+          p_bot_id: string;
+          p_was_check_error: boolean;
+        };
+        Returns: Json;
+      };
       dispatch_widget_monitor_tick: {
         Args: Record<string, never>;
         Returns: Json;

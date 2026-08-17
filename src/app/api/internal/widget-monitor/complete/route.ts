@@ -1,6 +1,7 @@
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { handleRouteError, parseJsonBody } from "@/lib/api/request";
 import { completeWidgetMonitorCheck } from "@/lib/monitoring/complete";
+import { isWidgetMonitoringEnabled } from "@/lib/monitoring/enabled";
 import {
   type MonitorCompletePayload,
   verifyMonitorCompletePayload,
@@ -9,6 +10,10 @@ import { ApiValidationError } from "@/lib/validation/errors";
 
 export async function POST(request: Request) {
   try {
+    if (!isWidgetMonitoringEnabled()) {
+      return apiSuccess({ monitoring_disabled: true as const });
+    }
+
     const body = (await parseJsonBody(request)) as MonitorCompletePayload;
 
     if (body.action !== "monitor_complete" || !verifyMonitorCompletePayload(body)) {

@@ -1,21 +1,9 @@
+import { isWidgetMonitoringEnabled } from "@/lib/monitoring/enabled";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { ApiValidationError } from "@/lib/validation/errors";
 
 type InstallStatus = "never_seen" | "installed" | "removed";
 type CheckResult = "installed" | "missing" | "check_error";
-
-function nextSlotUtc(slotMinute: number, from = new Date()) {
-  const utc = new Date(
-    Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate(), 0, 0, 0, 0),
-  );
-  utc.setUTCMinutes(slotMinute);
-
-  if (utc.getTime() <= from.getTime()) {
-    utc.setUTCDate(utc.getUTCDate() + 1);
-  }
-
-  return utc.toISOString();
-}
 
 export async function completeWidgetMonitorCheck(input: {
   checkId: string;
@@ -23,6 +11,15 @@ export async function completeWidgetMonitorCheck(input: {
   pageOk: boolean;
   errorMessage?: string | null;
 }) {
+  if (!isWidgetMonitoringEnabled()) {
+    return {
+      ok: true as const,
+      duplicate: false as const,
+      result: null,
+      monitoring_disabled: true as const,
+    };
+  }
+
   const supabase = getSupabaseAdmin();
   const now = new Date();
   const nowIso = now.toISOString();
@@ -112,11 +109,6 @@ export async function completeWidgetMonitorCheck(input: {
     now.getTime() >= new Date(monitor.install_window_end_at).getTime();
 
   const shouldStop = activeEnded || installWindowEndedNeverSeen;
-  const nextCheckAt = shouldStop
-    ? null
-    : monitor.slot_minute == null
-      ? null
-      : nextSlotUtc(monitor.slot_minute, now);
 
   await supabase
     .from("bot_widget_monitor_checks")
@@ -151,12 +143,26 @@ export async function completeWidgetMonitorCheck(input: {
       in_progress_at: null,
       current_check_id: null,
       check_heartbeat_at: null,
-      next_check_at: nextCheckAt,
       slot_minute: shouldStop ? null : monitor.slot_minute,
       completed_at: shouldStop ? (completedAt ?? nowIso) : completedAt,
       updated_at: nowIso,
+      ...(shouldStop ? { next_check_at: null } : {}),
     })
     .eq("bot_id", input.botId);
+
+  if (!shouldStop) {
+    const { error: scheduleError } = await supabase.rpc(
+      "schedule_widget_monitor_next",
+      {
+        p_bot_id: input.botId,
+        p_was_check_error: result === "check_error",
+      },
+    );
+
+    if (scheduleError) {
+      throw new Error(scheduleError.message);
+    }
+  }
 
   return { ok: true as const, duplicate: false as const, result };
 }

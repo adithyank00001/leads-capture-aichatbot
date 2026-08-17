@@ -1,7 +1,12 @@
-import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import { isWidgetMonitoringEnabled } from "@/lib/monitoring/enabled";
 import { serverEnv } from "@/lib/env.server";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
 export async function syncWidgetMonitorDispatchSettings() {
+  if (!isWidgetMonitoringEnabled()) {
+    return;
+  }
+
   const tickUrl = `${serverEnv.appUrl.replace(/\/+$/, "")}/api/internal/widget-monitor/tick`;
   const cronSecret = serverEnv.widgetMonitorCronSecret;
 
@@ -23,6 +28,10 @@ export async function syncWidgetMonitorDispatchSettings() {
 }
 
 export async function enrollBotWidgetMonitor(botId: string) {
+  if (!isWidgetMonitoringEnabled()) {
+    return;
+  }
+
   try {
     const supabase = getSupabaseAdmin();
     await syncWidgetMonitorDispatchSettings();

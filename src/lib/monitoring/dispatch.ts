@@ -1,8 +1,13 @@
+import { isWidgetMonitoringEnabled } from "@/lib/monitoring/enabled";
+import { signMonitorCheckPayload } from "@/lib/monitoring/hmac";
 import { serverEnv } from "@/lib/env.server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
-import { signMonitorCheckPayload } from "@/lib/monitoring/hmac";
 
 export async function dispatchDueWidgetMonitorCheck() {
+  if (!isWidgetMonitoringEnabled()) {
+    return { dispatched: false as const, reason: "monitoring_disabled" as const };
+  }
+
   const supabase = getSupabaseAdmin();
   await supabase.rpc("fail_stale_widget_monitor_checks", { p_stale_minutes: 12 });
 

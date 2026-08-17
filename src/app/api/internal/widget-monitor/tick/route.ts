@@ -1,11 +1,16 @@
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { handleRouteError } from "@/lib/api/request";
 import { dispatchDueWidgetMonitorCheck } from "@/lib/monitoring/dispatch";
+import { isWidgetMonitoringEnabled } from "@/lib/monitoring/enabled";
 import { verifyCronSecret } from "@/lib/monitoring/hmac";
 import { ApiValidationError } from "@/lib/validation/errors";
 
 export async function POST(request: Request) {
   try {
+    if (!isWidgetMonitoringEnabled()) {
+      return apiSuccess({ monitoring_disabled: true as const });
+    }
+
     if (!verifyCronSecret(request.headers.get("authorization"))) {
       throw new ApiValidationError("UNAUTHORIZED", "Unauthorized.", 401);
     }
