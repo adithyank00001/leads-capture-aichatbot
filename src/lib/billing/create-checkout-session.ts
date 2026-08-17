@@ -15,10 +15,14 @@ function createDodoClient() {
 
 const LOW_FRICTION_CHECKOUT = {
   minimal_address: true,
+  billing_address: { country: "AE" as const },
+  billing_currency: "AED" as const,
   feature_flags: {
     allow_phone_number_collection: false,
     require_phone_number: false,
     allow_tax_id: false,
+    allow_customer_editing_country: true,
+    allow_currency_selection: true,
   },
 };
 

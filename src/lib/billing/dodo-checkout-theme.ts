@@ -10,6 +10,7 @@ const ORANGE_BUTTON = {
 export const DODO_CHECKOUT_CUSTOMIZATION: DodoPayments.CheckoutSessions.CheckoutSessionCustomization =
   {
     theme: "light",
+    show_order_details: false,
     theme_config: {
       pay_button_text: "Get lifetime access",
       radius: "14px",
