@@ -12,6 +12,15 @@ function createDodoClient() {
   });
 }
 
+const LOW_FRICTION_CHECKOUT = {
+  minimal_address: true,
+  feature_flags: {
+    allow_phone_number_collection: false,
+    require_phone_number: false,
+    allow_tax_id: false,
+  },
+};
+
 export async function createAuthenticatedCheckoutSession(input: {
   userId: string;
   email: string;
@@ -27,6 +36,11 @@ export async function createAuthenticatedCheckoutSession(input: {
     metadata: { user_id: input.userId },
     return_url: `${appOrigin}/checkout/success`,
     cancel_url: `${appOrigin}/checkout/cancel`,
+    ...LOW_FRICTION_CHECKOUT,
+    feature_flags: {
+      ...LOW_FRICTION_CHECKOUT.feature_flags,
+      allow_customer_editing_email: false,
+    },
   });
 }
 
@@ -40,6 +54,7 @@ export async function createGuestCheckoutSession(input: { origin: string }) {
     metadata: { flow: "guest" },
     return_url: `${appOrigin}/login?paid=1&next=${encodeURIComponent("/dashboard")}`,
     cancel_url: `${appOrigin}/checkout/cancel`,
+    ...LOW_FRICTION_CHECKOUT,
   });
 }
 
