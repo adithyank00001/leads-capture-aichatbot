@@ -2,6 +2,7 @@ export type MarketingCtaConfig = {
   label: string;
   href: string;
   showPrice: boolean;
+  startCheckout: boolean;
 };
 
 type MarketingCtaOverrides = {
@@ -18,6 +19,7 @@ export function resolveMarketingCta(
       label: "Dashboard",
       href: "/dashboard",
       showPrice: false,
+      startCheckout: false,
     };
   }
 
@@ -25,5 +27,6 @@ export function resolveMarketingCta(
     label: overrides.label ?? "Get Lifetime Access",
     href: "/checkout",
     showPrice: overrides.showPrice ?? true,
+    startCheckout: true,
   };
 }

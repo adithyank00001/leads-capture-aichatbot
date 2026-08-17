@@ -33,8 +33,8 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
   }
 
   return (
-    <div className="relative min-h-screen bg-background">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,oklch(0.52_0.19_252/0.12),transparent_55%)]" />
+    <div className="relative min-h-screen bg-white [--landing-navy:#112437] [--landing-orange:#FC7B02] [--landing-orange-hover:#E36F02]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(252,123,2,0.12),transparent_55%)]" />
       <div className="relative mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-4 py-10">
         <CheckoutCard
           errorCode={error}
