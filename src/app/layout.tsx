@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-import { MetaPixelHead } from "@/components/marketing/meta-pixel-head";
-import { MetaPixelPageView } from "@/components/marketing/meta-pixel";
+import {
+  GoogleTagManager,
+  GoogleTagManagerNoscript,
+} from "@/components/marketing/google-tag-manager";
 import { Toaster } from "@/components/ui/sonner";
 import { publicConfig } from "@/lib/config";
 
@@ -33,10 +35,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
-        <MetaPixelHead />
+        <GoogleTagManager />
       </head>
       <body className="min-h-full flex flex-col">
-        <MetaPixelPageView />
+        <GoogleTagManagerNoscript />
         {children}
         <Toaster richColors position="top-center" />
       </body>

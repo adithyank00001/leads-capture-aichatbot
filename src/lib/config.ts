@@ -10,8 +10,7 @@ export const publicConfig = {
   appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
   lifetimeAccessPriceUsd: 369,
   lifetimeAccessOriginalPrice: 1849,
-  metaPixelId:
-    process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim() || "2188700325392484",
+  gtmId: process.env.NEXT_PUBLIC_GTM_ID?.trim() || "GTM-NTK43VFS",
 } as const;
 
 export function getEmbedPath(botId: string) {
