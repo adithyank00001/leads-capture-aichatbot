@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+import { MetaPixel } from "@/components/marketing/meta-pixel";
 import { Toaster } from "@/components/ui/sonner";
 import { publicConfig } from "@/lib/config";
 
@@ -31,6 +32,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <MetaPixel />
         {children}
         <Toaster richColors position="top-center" />
       </body>
