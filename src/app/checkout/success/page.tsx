@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { MetaPixelPurchase } from "@/components/meta-pixel-purchase";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -45,6 +46,7 @@ export default async function CheckoutSuccessPage() {
               <Button asChild className="w-full" size="lg">
                 <Link href="/dashboard">Go to dashboard</Link>
               </Button>
+              <MetaPixelPurchase />
             </CardContent>
           </Card>
         </div>
