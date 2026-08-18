@@ -58,7 +58,7 @@ export async function createGuestCheckoutSession(input: { origin: string }) {
   return client.checkoutSessions.create({
     product_cart: [{ product_id: dodo.productId, quantity: 1 }],
     metadata: { flow: "guest" },
-    return_url: `${appOrigin}/login?paid=1&next=${encodeURIComponent("/dashboard")}`,
+    return_url: `${appOrigin}/thank-you`,
     cancel_url: `${appOrigin}/checkout/cancel`,
     customization: DODO_CHECKOUT_CUSTOMIZATION,
     ...LOW_FRICTION_CHECKOUT,

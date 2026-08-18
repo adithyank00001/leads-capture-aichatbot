@@ -19,9 +19,15 @@ import { getCustomerErrorMessage } from "@/lib/dashboard/customer-errors";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { Separator } from "@/components/ui/separator";
 
-export function SignupForm() {
+export function SignupForm({
+  defaultEmail,
+  nextPath = "/checkout",
+}: {
+  defaultEmail?: string;
+  nextPath?: string;
+}) {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(defaultEmail ?? "");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -47,12 +53,26 @@ export function SignupForm() {
     }
 
     if (data.session) {
+      let redirectPath = nextPath;
+
       try {
-        await fetch("/api/auth/claim-purchase", { method: "POST" });
+        const response = await fetch("/api/auth/claim-purchase", {
+          method: "POST",
+        });
+        const result = (await response.json()) as {
+          data?: {
+            hasLifetimeAccess?: boolean;
+          };
+        };
+
+        if (result.data?.hasLifetimeAccess) {
+          redirectPath = "/dashboard";
+        }
       } catch {
         // Claim is retried on dashboard load if webhook is still processing.
       }
-      router.push("/checkout");
+
+      router.push(redirectPath);
       router.refresh();
       return;
     }
@@ -72,7 +92,7 @@ export function SignupForm() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <GoogleSignInButton nextPath="/checkout" onError={setError} />
+        <GoogleSignInButton nextPath={nextPath} onError={setError} />
         <div className="flex items-center gap-3">
           <Separator className="flex-1" />
           <span className="text-xs text-muted-foreground">or sign up with email</span>

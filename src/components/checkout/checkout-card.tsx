@@ -3,6 +3,10 @@
 import { useState } from "react";
 
 import { FormattedPrice } from "@/components/ui/formatted-price";
+import {
+  goToDodoCheckout,
+  isSafeInternalRedirect,
+} from "@/lib/billing/start-landing-checkout";
 import { publicConfig } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
@@ -92,13 +96,17 @@ export function CheckoutCard({
         return;
       }
 
-      if (body.data.alreadyPaid && body.data.redirectUrl) {
+      if (
+        body.data.alreadyPaid &&
+        body.data.redirectUrl &&
+        isSafeInternalRedirect(body.data.redirectUrl)
+      ) {
         window.location.assign(body.data.redirectUrl);
         return;
       }
 
       if (body.data.checkoutUrl) {
-        window.location.assign(body.data.checkoutUrl);
+        goToDodoCheckout(body.data.checkoutUrl);
         return;
       }
 

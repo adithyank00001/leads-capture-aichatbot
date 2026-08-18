@@ -99,6 +99,13 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(redirectUrl);
     }
 
+    if (hasLifetimeAccess && pathname === "/thank-you") {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/dashboard";
+      redirectUrl.search = "";
+      return NextResponse.redirect(redirectUrl);
+    }
+
     if (
       !isPostPaymentLogin &&
       (pathname === "/login" || pathname === "/signup")

@@ -59,6 +59,22 @@ export async function findUnclaimedPendingPurchasesByEmail(email: string) {
   return data ?? [];
 }
 
+export async function findPendingPurchaseByPaymentId(paymentId: string) {
+  const admin = getSupabaseAdmin();
+
+  const { data, error } = await admin
+    .from("pending_lifetime_purchases")
+    .select("email")
+    .eq("dodo_payment_id", paymentId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
 export async function markPendingPurchasesClaimed(input: {
   ids: string[];
   userId: string;

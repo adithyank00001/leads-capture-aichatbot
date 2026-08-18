@@ -1,5 +1,7 @@
-import Link from "next/link";
-
+import {
+  CancelCheckoutButton,
+  PendingDodoRedirect,
+} from "@/components/checkout/cancel-checkout-button";
 import { FormattedPrice } from "@/components/ui/formatted-price";
 import { publicConfig } from "@/lib/config";
 
@@ -28,7 +30,8 @@ export default function CheckoutCancelPage() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(252,123,2,0.12),transparent_55%)]" />
       <div className="relative mx-auto flex min-h-screen max-w-lg flex-col justify-center px-4 py-10">
         <div className="rounded-2xl border border-[#8B9AAB] bg-white px-6 py-8 text-center shadow-[0_8px_32px_rgba(17,36,55,0.12)] sm:px-8">
-          <h1 className="text-balance text-[30px] font-bold leading-[1.05] tracking-tight text-[var(--landing-navy)] sm:text-[38px]">
+          <PendingDodoRedirect>
+            <h1 className="text-balance text-[30px] font-bold leading-[1.05] tracking-tight text-[var(--landing-navy)] sm:text-[38px]">
             Don&apos;t Miss Your Next{" "}
             <span className="inline-block bg-gradient-to-br from-[#D96800] via-[#FC7B02] to-[#FDA85A] bg-clip-text text-[38px] text-transparent drop-shadow-[0_2px_14px_rgba(252,123,2,0.28)] sm:text-[48px]">
               Big Deal.
@@ -46,12 +49,7 @@ export default function CheckoutCancelPage() {
           <p className="mt-2 text-[20px] font-bold italic text-[#16A34A] sm:text-[24px]">
             200X ROI
           </p>
-          <Link
-            href="/"
-            className="animate-checkout-cancel-cta-pulse mt-7 inline-flex w-full items-center justify-center rounded-[13px] bg-gradient-to-b from-[#E36F02] to-[#FDA85A] px-4 py-3.5 text-[17px] font-semibold text-white shadow-[0px_2px_10.1px_0px_#FC7B0233]"
-          >
-            Unlock a Lifetime of Leads →
-          </Link>
+          <CancelCheckoutButton />
           <p className="mt-7 text-center text-[15px] font-bold uppercase tracking-wide text-[#16A34A]">
             Try It Risk-Free
           </p>
@@ -66,6 +64,7 @@ export default function CheckoutCancelPage() {
               No-questions-asked
             </p>
           </div>
+          </PendingDodoRedirect>
         </div>
       </div>
     </div>
