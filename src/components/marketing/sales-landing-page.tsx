@@ -619,7 +619,9 @@ export function SalesLandingPage({
                 Before They Leave
               </h2>
               <p className="mt-4 text-[17px] font-medium text-[var(--landing-navy)] sm:text-[19px] lg:text-[19px]">
-                Our AI sales assistant works 24/7 to:
+                Our AI sales assistant works 24/7
+                <br />
+                in your website to:
               </p>
             </div>
 

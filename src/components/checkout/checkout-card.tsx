@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-import { BrandLogo } from "@/components/marketing/brand-logo";
 import { FormattedPrice } from "@/components/ui/formatted-price";
 import { publicConfig } from "@/lib/config";
 import { cn } from "@/lib/utils";
@@ -34,6 +33,25 @@ const CHECKOUT_ERROR_MESSAGES: Record<string, string> = {
   dodo_product_not_configured:
     "Payments are not ready yet. Please contact support.",
 };
+
+function GuaranteeShield() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden className="size-7 shrink-0 sm:size-8">
+      <path
+        fill="#16A34A"
+        d="M12 1.5 4 5v5.5c0 5.25 3.5 10 8 11.5 4.5-1.5 8-6.25 8-11.5V5l-8-3.5z"
+      />
+      <path
+        d="M8.5 12.5 11 15l4.5-5"
+        fill="none"
+        stroke="white"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 type CheckoutCardProps = {
   errorCode?: string | null;
@@ -98,10 +116,6 @@ export function CheckoutCard({
 
   return (
     <div className="w-full max-w-lg">
-      <div className="mb-8 flex justify-center">
-        <BrandLogo size="sm" href="/" />
-      </div>
-
       <div className="rounded-2xl border border-[#8B9AAB] bg-white px-6 py-8 shadow-[0_8px_32px_rgba(17,36,55,0.12)] sm:px-8 sm:py-10">
         <p className="text-center text-[13px] font-bold uppercase italic tracking-wide text-[var(--landing-orange-hover)]">
           Almost yours
@@ -111,29 +125,18 @@ export function CheckoutCard({
           You&apos;re one click away from a lifetime of leads.
         </h1>
 
-        <p className="mx-auto mt-4 max-w-md text-pretty text-center text-[16px] font-medium leading-relaxed text-[#5B6B7C] sm:text-[17px]">
-          Every visitor who leaves without talking is money walking out the
-          door. Stop that today — and keep it stopped forever.
+        <p className="mx-auto mt-5 inline-flex w-full flex-wrap items-center justify-center gap-1.5 text-[18px] font-bold leading-tight text-[#16A34A] sm:text-[22px]">
+          <span>just 1 Deal</span>
+          <span aria-hidden>&gt;</span>
+          <FormattedPrice
+            amount={publicConfig.lifetimeAccessPriceUsd}
+            weight="bold"
+            className="font-bold text-[#16A34A]"
+          />
         </p>
-
-        <div className="mt-7 rounded-xl border border-[var(--landing-orange)]/25 bg-[#FFF7ED] px-5 py-5 text-center">
-          <p className="text-[13px] font-bold uppercase tracking-wide text-[var(--landing-orange-hover)]">
-            Pay once. Leads for life.
-          </p>
-          <p className="mt-2 flex items-center justify-center gap-3 text-[var(--landing-navy)]">
-            <FormattedPrice
-              amount={publicConfig.lifetimeAccessPriceUsd}
-              weight="bold"
-              className="text-[40px] font-bold"
-            />
-            <FormattedPrice
-              amount={publicConfig.lifetimeAccessOriginalPrice}
-              lineThrough
-              weight="regular"
-              className="text-[18px] text-[#5B6B7C]"
-            />
-          </p>
-        </div>
+        <p className="mt-2 text-center text-[20px] font-bold italic text-[#16A34A] sm:text-[24px]">
+          200X ROI
+        </p>
 
         {error ? (
           <p
@@ -149,36 +152,29 @@ export function CheckoutCard({
           disabled={loading}
           onClick={handleCheckout}
           className={cn(
-            "mt-6 w-full rounded-[14px] bg-gradient-to-b from-[#FDA85A] to-[#FC7B02] p-[1px] transition-transform hover:scale-[1.03] disabled:pointer-events-none disabled:opacity-80",
+            "mt-6 w-full rounded-[14px] bg-gradient-to-b from-[#FDA85A] to-[#FC7B02] p-[1px] disabled:pointer-events-none disabled:opacity-80",
+            !loading && "animate-checkout-cancel-cta-pulse",
           )}
         >
           <span className="flex w-full items-center justify-center rounded-[13px] bg-gradient-to-b from-[#E36F02] to-[#FDA85A] px-4 py-3.5 text-[18px] font-semibold text-white shadow-[0px_2px_10.1px_0px_#FC7B0233]">
-            {loading ? (
-              "Starting checkout..."
-            ) : (
-              <span className="inline-flex flex-wrap items-center justify-center gap-x-1.5">
-                Claim lifetime access —
-                <FormattedPrice
-                  amount={publicConfig.lifetimeAccessPriceUsd}
-                  weight="bold"
-                />
-              </span>
-            )}
+            {loading ? "Starting checkout..." : "Unlock a Lifetime of Leads →"}
           </span>
         </button>
 
-        <p className="mt-5 text-center text-[15px] font-bold uppercase leading-snug text-[#16A34A]">
-          100% money-back guarantee
+        <p className="mt-7 text-center text-[15px] font-bold uppercase tracking-wide text-[#16A34A]">
+          Try It Risk-Free
         </p>
-        <p className="mt-1 text-center text-[14px] font-medium italic text-[#16A34A]">
-          No lead in 30 days? Full refund. No questions asked.
-        </p>
-
-        {isGuest ? (
-          <p className="mt-5 text-center text-[13px] leading-relaxed text-[#5B6B7C]">
-            Pay first. Then walk in with the same email.
+        <div className="relative mt-5 rounded-xl border border-[#86EFAC] bg-[#F0FDF4] px-4 pb-4 pt-5 text-center">
+          <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 bg-[#F0FDF4] px-1.5">
+            <GuaranteeShield />
+          </div>
+          <p className="text-[17px] font-bold uppercase leading-tight text-[#16A34A]">
+            100% Money-Back Guarantee
           </p>
-        ) : null}
+          <p className="mt-1 text-[16px] font-bold uppercase leading-snug text-[#16A34A]">
+            No-questions-asked
+          </p>
+        </div>
       </div>
     </div>
   );
