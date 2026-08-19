@@ -463,12 +463,16 @@ export function SalesLandingPage({
                     </p>
                   </div>
 
-                  <h1 className="mb-4 w-[calc(100%+1.5rem)] max-w-none -mx-3 text-[31px] font-bold leading-[1.1] tracking-tight text-[var(--landing-navy)] sm:mx-0 sm:mb-5 sm:w-full sm:text-[37px] sm:leading-[1.1] lg:mb-5 lg:text-[52px] lg:leading-[1.08] xl:text-[56px]">
-                    Generate More
-                    <span className="block whitespace-nowrap text-[var(--landing-orange)]">
+                  <h1 className="mb-4 w-[calc(100%+1.5rem)] max-w-none -mx-3 text-[31px] font-bold leading-[1.1] tracking-tight text-[var(--landing-navy)] sm:mx-0 sm:mb-5 sm:w-full sm:text-[37px] sm:leading-[1.1] lg:mb-5 lg:text-balance lg:text-[52px] lg:leading-[1.08] xl:text-[56px]">
+                    <span className="block lg:inline">Generate More</span>
+                    <span className="hidden lg:inline"> </span>
+                    <span className="block whitespace-nowrap text-[var(--landing-orange)] lg:inline">
                       Qualified Student Leads
                     </span>
-                    With a 24/7 AI Counselor
+                    <span className="hidden lg:inline"> </span>
+                    <span className="block whitespace-nowrap lg:inline">
+                      With a 24/7 AI Counselor
+                    </span>
                   </h1>
 
                   <div className="mx-auto mt-8 max-w-2xl sm:mt-10 lg:mx-0 lg:mt-8 lg:max-w-none">
