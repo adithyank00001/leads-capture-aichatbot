@@ -573,13 +573,16 @@ export function SalesLandingPage({
 
               <h2 className="text-[32px] font-bold leading-[1.12] tracking-tight sm:text-[53px] sm:leading-[1.1] lg:mx-auto lg:max-w-[900px] lg:text-[48px] lg:leading-[1.08] xl:text-[50px]">
                 <span className="block text-white lg:inline">
-                  Student Interest Doesn&apos;t{" "}
+                  Student Interest{" "}
                 </span>
-                <span className="block text-white lg:inline">
-                  Always Turn Into{" "}
+                <span className="block whitespace-nowrap text-white lg:inline">
+                  Doesn&apos;t Always Turn{" "}
                 </span>
-                <span className="block text-[var(--landing-orange)] lg:inline">
-                  An Enquiry
+                <span className="block whitespace-nowrap text-white lg:inline">
+                  Into{" "}
+                  <span className="text-[var(--landing-orange)]">
+                    An Enquiry
+                  </span>
                 </span>
               </h2>
 
@@ -654,7 +657,7 @@ export function SalesLandingPage({
                       <p className="text-[17px] font-bold leading-snug text-[var(--landing-navy)]">
                         {feature.title}
                       </p>
-                      <p className="mt-1 text-[15px] font-medium leading-snug text-[#5A6B7D]">
+                      <p className="mt-1 text-[16px] font-medium leading-snug text-[#5A6B7D]">
                         {feature.description}
                       </p>
                     </div>
@@ -677,7 +680,7 @@ export function SalesLandingPage({
                       <p className="text-[17px] font-bold leading-snug text-[var(--landing-navy)]">
                         {feature.title}
                       </p>
-                      <p className="mt-1.5 text-[15px] font-medium leading-snug text-[#5A6B7D]">
+                      <p className="mt-1.5 text-[16px] font-medium leading-snug text-[#5A6B7D]">
                         {feature.description}
                       </p>
                     </div>
