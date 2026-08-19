@@ -463,7 +463,7 @@ export function SalesLandingPage({
                     </p>
                   </div>
 
-                  <h1 className="mb-4 text-balance text-[31px] font-bold leading-[1.1] tracking-tight text-[var(--landing-navy)] sm:mb-5 sm:text-[37px] sm:leading-[1.1] lg:mb-5 lg:max-w-[640px] lg:text-[52px] lg:leading-[1.08] xl:text-[56px]">
+                  <h1 className="mb-4 w-[calc(100%+1.5rem)] max-w-none -mx-3 text-[31px] font-bold leading-[1.1] tracking-tight text-[var(--landing-navy)] sm:mx-0 sm:mb-5 sm:w-full sm:text-[37px] sm:leading-[1.1] lg:mb-5 lg:text-balance lg:text-[52px] lg:leading-[1.08] xl:text-[56px]">
                     Generate More{" "}
                     <span className="text-[var(--landing-orange)]">
                       Qualified Student Leads
@@ -472,15 +472,15 @@ export function SalesLandingPage({
                   </h1>
 
                   <div className="mx-auto mt-8 max-w-2xl sm:mt-10 lg:mx-0 lg:mt-8 lg:max-w-none">
-                    <div className="-mx-4 w-[calc(100%+2rem)] text-center lg:mx-0 lg:w-full lg:text-left">
-                      <p className="text-center text-[17px] font-medium leading-relaxed text-[var(--landing-navy)] sm:text-[18px] lg:text-left lg:text-[19px]">
+                    <div className="mx-auto w-full max-w-[19.5rem] text-left sm:max-w-md lg:mx-0 lg:max-w-none">
+                      <p className="text-left text-[17px] font-medium leading-relaxed text-[var(--landing-navy)] sm:text-[18px] lg:text-[19px]">
                         Turn your anonymous website visitors into qualified
                         student leads.
                       </p>
-                      <p className="mt-4 whitespace-nowrap text-center text-[17px] font-medium leading-relaxed tracking-tight text-[var(--landing-navy)] sm:text-[18px] sm:tracking-normal lg:mt-5 lg:text-left lg:text-[19px] max-[22.5rem]:whitespace-normal max-[22.5rem]:tracking-normal">
+                      <p className="mt-4 text-left text-[17px] font-medium leading-relaxed text-[var(--landing-navy)] sm:text-[18px] lg:mt-5 lg:text-[19px]">
                         Our AI counselor works 24/7 on your website to:
                       </p>
-                      <ul className="mx-auto mt-3 flex w-fit max-w-full flex-col gap-2.5 px-4 sm:mt-4 sm:gap-3 lg:mx-0 lg:px-0">
+                      <ul className="mt-3 flex flex-col gap-2.5 sm:mt-4 sm:gap-3">
                         <HeroCheckPoint>
                           <strong className="font-bold">Answering</strong>{" "}
                           student questions
