@@ -168,32 +168,14 @@ function AccentBullet({ className }: { className?: string }) {
 }
 
 function LogoMark({ className }: { className?: string }) {
-  return (
-    <BrandLogo className={cn("lg:h-6", className)} size="xs" href="/" />
-  );
+  return <BrandLogo className={cn("lg:h-6", className)} size="xs" href="/" />;
 }
 
-function HeroPoint({
-  type,
-  children,
-}: {
-  type: "good" | "bad";
-  children: React.ReactNode;
-}) {
-  const isGood = type === "good";
-
+function HeroCheckPoint({ children }: { children: React.ReactNode }) {
   return (
     <li className="flex items-start gap-3 text-left">
-      {isGood ? (
-        <Check className="mt-1 size-5 shrink-0 stroke-[2.5] text-[#16A34A]" />
-      ) : (
-        <X className="mt-1 size-5 shrink-0 stroke-[2.5] text-[#DC2626]" />
-      )}
-      <span
-        className={cn(
-          "text-[18px] font-medium leading-relaxed text-[var(--landing-navy)] lg:text-[19px]",
-        )}
-      >
+      <Check className="mt-1 size-5 shrink-0 stroke-[2.5] text-[#16A34A]" />
+      <span className="text-[17px] font-medium leading-relaxed text-[var(--landing-navy)] sm:text-[18px] lg:text-[19px]">
         {children}
       </span>
     </li>
@@ -468,29 +450,52 @@ export function SalesLandingPage({
             <div className="flex flex-col justify-center lg:py-2 lg:pb-4">
               <div className="mx-auto mt-8 w-full max-w-3xl text-center sm:mt-10 lg:mt-2 lg:grid lg:max-w-none lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-10 lg:text-left xl:gap-12">
                 <div>
-                  <RecentPurchasesSocialProof className="mb-2 sm:mb-3 lg:mb-4 lg:text-left" />
+                  <div className="mb-2 flex items-center justify-center gap-1.5 sm:mb-3 lg:mb-4 lg:justify-start">
+                    <FiveStarRating
+                      className="gap-px [&_svg]:size-3.5"
+                      rating={5}
+                    />
+                    <p className="text-[13px] font-normal whitespace-nowrap text-[#5A6B7D]">
+                      <span className="font-bold text-[var(--landing-navy)]">
+                        4.9
+                      </span>
+                      /5 from customers
+                    </p>
+                  </div>
 
                   <h1 className="mb-4 text-balance text-[31px] font-bold leading-[1.1] tracking-tight text-[var(--landing-navy)] sm:mb-5 sm:text-[37px] sm:leading-[1.1] lg:mb-5 lg:max-w-[640px] lg:text-[52px] lg:leading-[1.08] xl:text-[56px]">
-                    Turn Anonymous Website Visitors Into{" "}
+                    Generate More{" "}
                     <span className="text-[var(--landing-orange)]">
-                      Real Estate Leads
-                    </span>
+                      Qualified Student Leads
+                    </span>{" "}
+                    With a 24/7 AI Counselor
                   </h1>
 
-                  <ul className="mx-auto mt-8 flex max-w-2xl flex-col gap-2.5 sm:mt-10 sm:gap-3 lg:mx-0 lg:mt-8 lg:max-w-none lg:gap-4">
-                    <HeroPoint type="good">
-                      High-intent prospects are already visiting your website.
-                    </HeroPoint>
-                    <HeroPoint type="bad">
-                      The problem? Around{" "}
-                      <span className="font-medium text-[#DC2626]/70">95%</span>{" "}
-                      leave without contacting you.
-                    </HeroPoint>
-                    <HeroPoint type="good">
-                      Our AI sales assistant captures their details before they
-                      leave — 24/7.
-                    </HeroPoint>
-                  </ul>
+                  <div className="mx-auto mt-8 max-w-2xl sm:mt-10 lg:mx-0 lg:mt-8 lg:max-w-none">
+                    <div className="-mx-4 w-[calc(100%+2rem)] text-center lg:mx-0 lg:w-full lg:text-left">
+                      <p className="text-center text-[17px] font-medium leading-relaxed text-[var(--landing-navy)] sm:text-[18px] lg:text-left lg:text-[19px]">
+                        Turn your anonymous website visitors into qualified
+                        student leads.
+                      </p>
+                      <p className="mt-4 whitespace-nowrap text-center text-[17px] font-medium leading-relaxed tracking-tight text-[var(--landing-navy)] sm:text-[18px] sm:tracking-normal lg:mt-5 lg:text-left lg:text-[19px] max-[22.5rem]:whitespace-normal max-[22.5rem]:tracking-normal">
+                        Our AI counselor works 24/7 on your website to:
+                      </p>
+                      <ul className="mx-auto mt-3 flex w-fit max-w-full flex-col gap-2.5 px-4 sm:mt-4 sm:gap-3 lg:mx-0 lg:px-0">
+                        <HeroCheckPoint>
+                          <strong className="font-bold">Answering</strong>{" "}
+                          student questions
+                        </HeroCheckPoint>
+                        <HeroCheckPoint>
+                          <strong className="font-bold">Qualifying</strong>{" "}
+                          students
+                        </HeroCheckPoint>
+                        <HeroCheckPoint>
+                          <strong className="font-bold">Capturing</strong> their
+                          contact details before they leave
+                        </HeroCheckPoint>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
 
                 <div
