@@ -2,18 +2,16 @@ import Link from "next/link";
 import { Fragment } from "react";
 import {
   ArrowDown,
-  Building2,
   Check,
   ChevronRight,
-  Heart,
-  MessageCircle,
+  CircleHelp,
+  ClipboardCheck,
+  Globe,
   MessageSquare,
   Phone,
-  Sparkles,
   Star,
   StarHalf,
   UserCheck,
-  Users,
   X,
 } from "lucide-react";
 
@@ -37,24 +35,39 @@ import { cn } from "@/lib/utils";
 const captureFeatures = [
   {
     icon: UserCheck,
-    text: "Capture Name, Phone & Email First",
-    optionalSuffix: "(customizable)",
+    title: "Capture student details before they leave",
+    description: "Name, phone & email — fully customizable.",
   },
   {
-    icon: Users,
-    text: "Turn anonymous visitors into contactable leads",
-  },
-  {
-    icon: Sparkles,
-    text: "Understand what they're looking for",
+    icon: ClipboardCheck,
+    title: "Qualify students automatically",
+    description:
+      "Understand what they want, where they want to study, and when.",
   },
   {
     icon: MessageSquare,
-    text: "Handle their questions and objections",
+    title: "Answer their questions instantly",
+    description: "Courses, universities, fees, eligibility, and more.",
   },
   {
     icon: Phone,
-    text: "Send the lead and conversation to your sales team",
+    title: "Send qualified leads to your team",
+    description: "With the full conversation and student details.",
+  },
+] as const;
+
+const problemPoints = [
+  {
+    icon: Globe,
+    text: "They may be researching their ideal country or university.",
+  },
+  {
+    icon: CircleHelp,
+    text: "They may have questions about courses, fees, or eligibility.",
+  },
+  {
+    icon: ClipboardCheck,
+    text: "They may be seriously considering applying.",
   },
 ] as const;
 
@@ -478,23 +491,22 @@ export function SalesLandingPage({
                   <div className="mx-auto mt-8 max-w-2xl sm:mt-10 lg:mx-0 lg:mt-8 lg:max-w-none">
                     <div className="mx-auto w-full max-w-[19.5rem] text-left sm:max-w-md lg:mx-0 lg:max-w-none">
                       <p className="text-left text-[17px] font-medium leading-relaxed text-[var(--landing-navy)] sm:text-[18px] lg:text-[19px]">
-                        Turn your anonymous website visitors into qualified
-                        student leads.
+                        Our AI turns your anonymous website visitors into
+                        qualified student leads.
                       </p>
                       <p className="mt-4 text-left text-[17px] font-medium leading-relaxed text-[var(--landing-navy)] sm:text-[18px] lg:mt-5 lg:text-[19px]">
                         Our AI counselor works 24/7 on your website to:
                       </p>
                       <ul className="mt-3 flex flex-col gap-2.5 sm:mt-4 sm:gap-3">
                         <HeroCheckPoint>
-                          <strong className="font-bold">Answering</strong>{" "}
-                          student questions
+                          <strong className="font-bold">Answer</strong> student
+                          questions
                         </HeroCheckPoint>
                         <HeroCheckPoint>
-                          <strong className="font-bold">Qualifying</strong>{" "}
-                          students
+                          <strong className="font-bold">Qualify</strong> students
                         </HeroCheckPoint>
                         <HeroCheckPoint>
-                          <strong className="font-bold">Capturing</strong> their
+                          <strong className="font-bold">Capture</strong> their
                           contact details before they leave
                         </HeroCheckPoint>
                       </ul>
@@ -561,7 +573,7 @@ export function SalesLandingPage({
 
               <h2 className="text-[32px] font-bold leading-[1.12] tracking-tight sm:text-[53px] sm:leading-[1.1] lg:mx-auto lg:max-w-[900px] lg:text-[48px] lg:leading-[1.08] xl:text-[50px]">
                 <span className="block text-white lg:inline">
-                  Interest Doesn&apos;t{" "}
+                  Student Interest Doesn&apos;t{" "}
                 </span>
                 <span className="block text-white lg:inline">
                   Always Turn Into{" "}
@@ -572,36 +584,32 @@ export function SalesLandingPage({
               </h2>
 
               <div className="mt-7 flex flex-col gap-4 lg:hidden">
-                <ProblemPoint icon={Building2}>
-                  They may like your properties.
-                </ProblemPoint>
-                <ProblemPoint icon={MessageCircle}>
-                  They may have questions.
-                </ProblemPoint>
-                <ProblemPoint icon={Heart}>
-                  They may be seriously considering one.
-                </ProblemPoint>
+                {problemPoints.map((point) => (
+                  <ProblemPoint key={point.text} icon={point.icon}>
+                    {point.text}
+                  </ProblemPoint>
+                ))}
               </div>
 
               <div className="mt-10 hidden lg:grid lg:grid-cols-3 lg:gap-8">
-                <ProblemPoint icon={Building2}>
-                  They may like your properties.
-                </ProblemPoint>
-                <ProblemPoint icon={MessageCircle}>
-                  They may have questions.
-                </ProblemPoint>
-                <ProblemPoint icon={Heart}>
-                  They may be seriously considering one.
-                </ProblemPoint>
+                {problemPoints.map((point) => (
+                  <ProblemPoint key={point.text} icon={point.icon}>
+                    {point.text}
+                  </ProblemPoint>
+                ))}
               </div>
 
               <p className="mt-6 text-[16px] font-medium leading-relaxed text-white/85 sm:text-[17px] lg:mt-8 lg:text-[18px]">
-                But they can still leave without contacting you.
+                But if they can&apos;t get instant answers, they can still leave
+                your website without making an enquiry.
               </p>
 
               <p className="mt-5 border-l-4 border-[var(--landing-orange)] pl-4 text-[17px] font-bold leading-snug text-white sm:pl-5 sm:text-[19px] lg:mx-auto lg:mt-8 lg:max-w-[780px] lg:border-l-0 lg:border-t-4 lg:px-8 lg:py-5 lg:pl-8 lg:text-center lg:text-[22px] lg:font-extrabold lg:leading-[1.35] lg:tracking-tight">
-                And once they leave, your sales team may never get another
-                chance to follow up.
+                And once they leave, there&apos;s a good chance{" "}
+                <span className="italic text-[var(--landing-orange)]">
+                  they&apos;ll find another agency
+                </span>{" "}
+                — and your team may never get another chance.
               </p>
             </div>
           </div>
@@ -616,111 +624,70 @@ export function SalesLandingPage({
               DESKTOP_SECTION,
             )}
           >
-            <div className="mx-auto max-w-3xl text-center lg:max-w-[720px]">
+            <div className="mx-auto max-w-3xl text-center lg:max-w-[900px]">
               <SectionLabel light className="mb-6 text-[14px]">
                 The Solution
               </SectionLabel>
 
-              <h2 className="text-balance text-[28px] font-bold uppercase tracking-tight text-[var(--landing-navy)] sm:text-[31px] lg:text-[38px]">
+              <h2 className="text-balance text-[28px] font-bold tracking-tight text-[var(--landing-navy)] sm:text-[31px] lg:text-[38px]">
+                Turn More Website Visitors Into{" "}
                 <span className="text-[var(--landing-orange)]">
-                  Capture Their Details{" "}
+                  Qualified Student Leads
                 </span>
-                Before They Leave
               </h2>
               <p className="mt-4 text-[17px] font-medium text-[var(--landing-navy)] sm:text-[19px] lg:text-[19px]">
-                Our AI sales assistant works 24/7
-                <br />
-                in your website to:
+                Our AI counselor works 24/7 on your website to:
               </p>
             </div>
 
             <div className="mx-auto mt-10 grid max-w-4xl gap-3 sm:mt-12 sm:grid-cols-2 sm:gap-4 lg:hidden">
-              {captureFeatures.map((feature, index) => (
+              {captureFeatures.map((feature) => (
                 <Card
-                  key={feature.text}
+                  key={feature.title}
                   className="h-full border-[#D8E2EC] bg-white py-0 shadow-sm transition-shadow hover:shadow-md"
                 >
-                  <CardContent className="flex items-center gap-2.5 px-3.5 py-2.5 sm:px-4 sm:py-3">
-                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--landing-orange)]/10 text-[var(--landing-orange)]">
+                  <CardContent className="flex items-start gap-2.5 px-3.5 py-3 sm:px-4 sm:py-3.5">
+                    <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--landing-orange)]/10 text-[var(--landing-orange)]">
                       <feature.icon className="size-[18px]" />
                     </div>
-                    <p
-                      className={cn(
-                        "text-[16px] leading-snug text-[var(--landing-navy)] sm:text-[17px]",
-                        index === 0 ? "font-bold" : "font-medium",
-                      )}
-                    >
-                      {feature.text}
-                      {"optionalSuffix" in feature && feature.optionalSuffix ? (
-                        <>
-                          {" "}
-                          <span className="font-medium text-[#8B9AAB]">
-                            {feature.optionalSuffix}
-                          </span>
-                        </>
-                      ) : null}
-                    </p>
+                    <div>
+                      <p className="text-[17px] font-bold leading-snug text-[var(--landing-navy)]">
+                        {feature.title}
+                      </p>
+                      <p className="mt-1 text-[15px] font-medium leading-snug text-[#5A6B7D]">
+                        {feature.description}
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
 
-            <div className="mx-auto mt-10 hidden max-w-[1140px] lg:block lg:mt-12">
-              <div className="grid grid-cols-3 gap-5">
-                {captureFeatures.slice(0, 3).map((feature, index) => (
-                  <Card
-                    key={feature.text}
-                    className={cn(
-                      "min-h-[88px] border-[#D8E2EC] bg-white py-0 shadow-md",
-                      index === 0 && "ring-1 ring-[var(--landing-orange)]/25",
-                    )}
-                  >
-                    <CardContent className="flex h-full items-center gap-3 px-5 py-4">
-                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--landing-orange)]/10 text-[var(--landing-orange)]">
-                        <feature.icon className="size-[18px]" />
-                      </div>
-                      <p
-                        className={cn(
-                          "text-[17px] leading-snug text-[var(--landing-navy)]",
-                          index === 0 ? "font-bold" : "font-medium",
-                        )}
-                      >
-                        {feature.text}
-                        {"optionalSuffix" in feature &&
-                        feature.optionalSuffix ? (
-                          <>
-                            {" "}
-                            <span className="font-medium text-[#8B9AAB]">
-                              {feature.optionalSuffix}
-                            </span>
-                          </>
-                        ) : null}
+            <div className="mx-auto mt-10 hidden max-w-[1140px] grid-cols-2 gap-5 lg:mt-12 lg:grid">
+              {captureFeatures.map((feature) => (
+                <Card
+                  key={feature.title}
+                  className="min-h-[88px] border-[#D8E2EC] bg-white py-0 shadow-md"
+                >
+                  <CardContent className="flex h-full items-start gap-3 px-5 py-5">
+                    <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--landing-orange)]/10 text-[var(--landing-orange)]">
+                      <feature.icon className="size-[18px]" />
+                    </div>
+                    <div>
+                      <p className="text-[17px] font-bold leading-snug text-[var(--landing-navy)]">
+                        {feature.title}
                       </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-              <div className="mx-auto mt-5 grid max-w-[68%] grid-cols-2 gap-5">
-                {captureFeatures.slice(3).map((feature) => (
-                  <Card
-                    key={feature.text}
-                    className="min-h-[88px] border-[#D8E2EC] bg-white py-0 shadow-md"
-                  >
-                    <CardContent className="flex h-full items-center gap-3 px-5 py-4">
-                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--landing-orange)]/10 text-[var(--landing-orange)]">
-                        <feature.icon className="size-[18px]" />
-                      </div>
-                      <p className="text-[17px] font-medium leading-snug text-[var(--landing-navy)]">
-                        {feature.text}
+                      <p className="mt-1.5 text-[15px] font-medium leading-snug text-[#5A6B7D]">
+                        {feature.description}
                       </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
 
             <p className="mx-auto mt-10 max-w-2xl text-center text-[17px] font-semibold text-[var(--landing-navy)] sm:mt-12 sm:text-[19px] lg:mt-10 lg:max-w-3xl lg:text-[20px]">
-              So your team can follow up while the interest is still there.
+              So your team can follow up while the student is still interested.
             </p>
           </div>
         </section>
