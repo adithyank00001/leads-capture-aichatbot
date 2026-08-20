@@ -80,83 +80,85 @@ const demoHighlights = [
 const steps = [
   {
     number: "1",
-    title: "Connect Your Website in Minutes",
+    title: "Add Your AI Counselor to Your Website",
+    description: "Get it running on your website in minutes.",
   },
   {
     number: "2",
-    title: "Customize Your AI Sales Assistant",
-    optionalSuffix: "(Optional)",
+    title: "Customize Your AI Counselor",
+    description: "Choose what to ask, qualify, and collect from students",
   },
   {
     number: "3",
-    title: "Start Capturing Leads",
+    title: "Start Capturing Student Leads",
+    description:
+      "Your AI counselor starts engaging with students 24/7 to qualify and collect their details.",
   },
 ] as const;
 
 const comparisonRows = [
   {
-    without: "Interested visitors leave anonymous",
-    with: "Turn interested visitors into contactable leads",
+    without:
+      "Students leave anonymously, taking potential enrollments to competitors.",
+    with: "Capture their WhatsApp number while their interest is high.",
   },
   {
-    without: "No contact details = Lost Revenue",
-    with: "Get their contact details = Revenue Potential",
-    withPrefix: "Get their contact details =",
-    withSuffixStack: ["Revenue", "Potential"],
+    without: "Students ready to enquire can slip away after office hours.",
+    with: "Your AI counselor captures and qualifies them 24/7.",
   },
   {
-    without: "Opportunities disappear when visitors leave",
-    with: "Capture prospects while their interest is fresh",
+    without: "Counselors follow up cold, with no idea what the student wants.",
+    with: "Counselors follow up warm, knowing what the student wants.",
   },
   {
-    without: "Your team has little or no context",
-    with: "Know what prospects want before following up",
-  },
-  {
-    without: "Leads can be missed outside working hours",
-    with: "Capture leads 24/7",
-  },
-  {
-    without: "Recurring software costs add up",
-    withPrefix: "Pay",
+    without: "Endless monthly fees for lead-capturing chat tools.",
+    withPrefix: "A one-time",
     withPrice: true,
-    withSuffix: "once. Use it for life.",
+    withSuffix: "payment to capture student leads for life.",
   },
 ] as const;
 
 const pricingFeatures = [
-  "Turn More Visitors Into Leads",
-  "Collect Contact Details First",
-  "Capture Leads 24/7",
-  "Understand Buyer Intent",
-  "Handle Questions & Objections",
-  "Send Leads + Context to Your Sales Team",
+  "Generate More Qualified Student Leads",
+  "Capture Their Details While They're Still Interested",
+  "Qualify Students Automatically",
+  "Know What Each Student Is Looking For Before You Follow Up",
+  "Capture & Qualify Leads 24/7",
 ] as const;
 
 const testimonials = [
   {
     quote:
-      "I was a bit skeptical at first because we already had ways for people to contact us, but surprisingly, we started getting more leads than before. For the price, it\u2019s really worth it. Highly recommend.",
-    highlights: ["more leads than before", "Highly recommend."],
+      "Honestly, I wasn\u2019t sure at first. We were already getting enquiries from our website, so I didn\u2019t expect a huge difference. But after adding the AI counselor, we started getting more student leads than before. For AED 369, I\u2019d say it\u2019s definitely worth it.",
+    highlights: [
+      "we started getting",
+      "more student leads than before",
+      "definitely worth it.",
+    ],
     name: "Zain Khan",
     role: "VERIFIED CUSTOMER",
     rating: 5,
   },
   {
     quote:
-      "I thought it would be just another chatbot, but the useful part is getting the potential client\u2019s contact details first. We can also see what they were looking for from their chat with the AI, so our sales team can follow up with better context.",
+      "The best part for us is that we don\u2019t just get the student\u2019s contact details. We can actually see what they were asking about and what they\u2019re interested in. So when our counselor calls them, we already have an idea of what they want.",
     highlights: [
-      "getting the potential client\u2019s contact details first.",
-      "follow up with better context.",
+      "The best part for us is",
+      "We can actually see what they were asking about and what they\u2019re interested in.",
     ],
     name: "Sara Zaabi",
     role: "VERIFIED CUSTOMER",
-    rating: 4.5,
+    rating: 5,
   },
   {
     quote:
-      "I expected the setup to be complicated, but it was actually very straightforward. Once it was live, we started getting more contactable prospects from the website. That alone made it worth it.",
-    highlights: ["setup", "actually very straightforward.", "worth it"],
+      "I honestly thought the setup would be a bit complicated, but it was simple. We got it running on our website pretty quickly. Even when we\u2019re not in the office, the AI can talk to them and collect their details.",
+    highlights: [
+      "setup",
+      "was simple",
+      "Even when we\u2019re not in the office",
+      "AI can talk to them and collect their details",
+    ],
     name: "Hamad Shamsi",
     role: "VERIFIED CUSTOMER",
     rating: 5,
@@ -274,16 +276,15 @@ function AverageRatingSummary({ className }: { className?: string }) {
       )}
     >
       <div className="flex items-center gap-0.5">
-        {Array.from({ length: 4 }).map((_, index) => (
+        {Array.from({ length: 5 }).map((_, index) => (
           <Star
             key={index}
             className="size-5 fill-[var(--landing-orange)] text-[var(--landing-orange)]"
           />
         ))}
-        <HalfStar className="size-5" />
       </div>
       <p className="text-[15px] text-white/75 sm:text-[17px]">
-        <span className="font-bold text-white">4.5 / 5</span> Average Rating.
+        <span className="font-bold text-white">4.9</span>/5 from customers
       </p>
     </div>
   );
@@ -318,7 +319,7 @@ function QuoteWithHighlights({
     nodes.push(
       <span
         key={`${phrase}-${start}`}
-        className="text-[18px] font-semibold text-[var(--landing-orange)] sm:text-[21px] lg:text-[17px]"
+        className="text-[17px] font-semibold text-[var(--landing-orange)] sm:text-[21px] lg:text-[17px]"
       >
         {phrase}
       </span>,
@@ -503,7 +504,8 @@ export function SalesLandingPage({
                           questions
                         </HeroCheckPoint>
                         <HeroCheckPoint>
-                          <strong className="font-bold">Qualify</strong> students
+                          <strong className="font-bold">Qualify</strong>{" "}
+                          students
                         </HeroCheckPoint>
                         <HeroCheckPoint>
                           <strong className="font-bold">Capture</strong> their
@@ -603,8 +605,11 @@ export function SalesLandingPage({
               </div>
 
               <p className="mt-6 text-[16px] font-medium leading-relaxed text-white/85 sm:text-[17px] lg:mt-8 lg:text-[18px]">
-                But if they can&apos;t get instant answers, they can still leave
-                your website without making an enquiry.
+                But if they can&apos;t get instant answers, they can still{" "}
+                <span className="font-semibold italic text-[var(--landing-orange)]">
+                  leave your website
+                </span>{" "}
+                without making an enquiry.
               </p>
 
               <p className="mt-5 border-l-4 border-[var(--landing-orange)] pl-4 text-[17px] font-bold leading-snug text-white sm:pl-5 sm:text-[19px] lg:mx-auto lg:mt-8 lg:max-w-[780px] lg:border-l-0 lg:border-t-4 lg:px-8 lg:py-5 lg:pl-8 lg:text-center lg:text-[22px] lg:font-extrabold lg:leading-[1.35] lg:tracking-tight">
@@ -706,13 +711,10 @@ export function SalesLandingPage({
           >
             <div className="mx-auto max-w-3xl text-center">
               <SectionHeading onDark className="text-[28px] lg:text-[38px]">
+                What Study Abroad Agency{" "}
                 <span className="text-[var(--landing-orange)]">
-                  Real Feedback
-                </span>{" "}
-                From
-                <br className="lg:hidden" />
-                <span className="hidden lg:inline"> </span>
-                Real Estate Pros
+                  Owners Are Saying
+                </span>
               </SectionHeading>
 
               <AverageRatingSummary className="mt-6 sm:mt-8" />
@@ -726,7 +728,7 @@ export function SalesLandingPage({
                 >
                   <CardContent className="flex flex-1 flex-col space-y-4 p-5 sm:p-6 lg:p-7 lg:space-y-5">
                     <FiveStarRating rating={testimonial.rating} />
-                    <p className="flex-1 text-[18px] leading-[27px] text-[#3F4F5F] sm:text-[21px] sm:leading-8 lg:text-[17px] lg:leading-[26px]">
+                    <p className="flex-1 text-[17px] leading-[26px] text-[#3F4F5F] sm:text-[21px] sm:leading-8 lg:text-[17px] lg:leading-[26px]">
                       <QuoteWithHighlights
                         quote={testimonial.quote}
                         highlights={
@@ -749,12 +751,19 @@ export function SalesLandingPage({
               ))}
             </div>
 
-            <div className="mx-auto mt-10 max-w-3xl text-left sm:mt-12 lg:mt-10 lg:text-center">
+            <div className="mx-auto mt-10 flex max-w-3xl flex-col items-center text-center sm:mt-12 lg:mt-10">
               {isPublicDemoEnabled ? (
-                <p className="border-l-4 border-[var(--landing-orange)] pl-4 text-[17px] font-bold leading-snug text-white sm:pl-5 sm:text-[19px] lg:mx-auto lg:max-w-2xl lg:border-l-0 lg:pl-0 lg:text-[19px]">
+                <p className="mb-8 w-full border-l-4 border-[var(--landing-orange)] pl-4 text-left text-[17px] font-bold leading-snug text-white sm:mb-10 sm:pl-5 sm:text-[19px] lg:mb-10 lg:max-w-2xl lg:border-l-0 lg:pl-0 lg:text-center lg:text-[19px]">
                   Now imagine this working on your website.
                 </p>
               ) : null}
+
+              <p className="text-balance text-[22px] font-bold leading-snug text-white sm:text-[25px] lg:text-[28px]">
+                Want More Qualified Student Leads?
+              </p>
+              <div className="mt-5 w-full max-w-sm sm:mt-6">
+                <CtaButton className="w-full" {...marketingCta} />
+              </div>
             </div>
           </div>
         </section>
@@ -813,7 +822,7 @@ export function SalesLandingPage({
           >
             <div className="mx-auto max-w-3xl text-center">
               <SectionHeading className="lg:text-[38px]">
-                Start Capturing Leads in{" "}
+                Start Capturing Qualified Student Leads in{" "}
                 <span className="text-[var(--landing-orange)]">
                   3 Simple Steps
                 </span>
@@ -823,22 +832,19 @@ export function SalesLandingPage({
             <div className="mx-auto mt-10 flex max-w-2xl flex-col items-center gap-2 sm:mt-12 lg:mt-10 lg:max-w-none lg:flex-row lg:items-stretch lg:gap-4">
               {steps.map((step, index) => (
                 <Fragment key={step.number}>
-                  <Card className="h-full w-full border-[#D8E2EC] bg-white shadow-sm lg:min-h-[200px] lg:flex-1 lg:shadow-md">
-                    <CardContent className="flex h-full items-center gap-4 p-5 sm:p-6 lg:flex-col lg:justify-center lg:px-6 lg:py-8 lg:text-center">
+                  <Card className="h-full w-full border-[#D8E2EC] bg-white py-0 shadow-sm lg:min-h-[200px] lg:flex-1 lg:shadow-md">
+                    <CardContent className="flex h-full items-center gap-4 px-5 py-3 sm:px-6 sm:py-4 lg:flex-col lg:justify-center lg:px-6 lg:py-6 lg:text-center">
                       <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--landing-orange)] text-[19px] font-bold text-white lg:size-14 lg:text-[22px]">
                         {step.number}
                       </div>
-                      <h3 className="text-[17px] font-semibold text-[var(--landing-navy)] sm:text-[19px] lg:text-[18px]">
-                        {step.title}
-                        {"optionalSuffix" in step && step.optionalSuffix ? (
-                          <>
-                            {" "}
-                            <span className="font-medium text-[#8B9AAB]">
-                              {step.optionalSuffix}
-                            </span>
-                          </>
-                        ) : null}
-                      </h3>
+                      <div className="min-w-0">
+                        <h3 className="text-[17px] font-bold text-[var(--landing-navy)] sm:text-[19px] lg:text-[18px]">
+                          {step.title}
+                        </h3>
+                        <p className="mt-1.5 text-[16px] font-medium leading-snug text-[#5A6B7D] lg:mx-auto lg:mt-2 lg:max-w-[18rem]">
+                          {step.description}
+                        </p>
+                      </div>
                     </CardContent>
                   </Card>
                   {index < steps.length - 1 ? (
@@ -869,10 +875,8 @@ export function SalesLandingPage({
             <div className="mx-auto max-w-3xl text-center">
               <SectionHeading className="text-[28px] lg:text-[38px]">
                 <span className="text-[var(--landing-orange)]">Without</span>{" "}
-                vs. <span className="text-[var(--landing-orange)]">With</span>
-                <br className="lg:hidden" />
-                <span className="hidden lg:inline"> </span>
-                Our AI Sales Assistant
+                vs. <span className="text-[var(--landing-orange)]">With</span>{" "}
+                an AI Counselor
               </SectionHeading>
             </div>
 
@@ -896,15 +900,10 @@ export function SalesLandingPage({
                   </div>
                   <div className="flex min-h-[72px] items-center gap-3 border-b border-[#D8E2EC] bg-[#EFF6FF] px-6 py-5 last:border-b-0">
                     <Check
-                      className="size-5 shrink-0 text-[#3B82F6]"
+                      className="size-5 shrink-0 text-[#16A34A]"
                       strokeWidth={2.5}
                     />
-                    {"withSuffixStack" in row && row.withSuffixStack ? (
-                      <p className="text-[17px] font-bold leading-snug text-[var(--landing-navy)]">
-                        {row.withPrefix} {row.withSuffixStack[0]}{" "}
-                        {row.withSuffixStack[1]}
-                      </p>
-                    ) : "withPrice" in row && row.withPrice ? (
+                    {"withPrice" in row && row.withPrice ? (
                       <p className="text-[17px] font-bold leading-snug text-[var(--landing-navy)]">
                         {row.withPrefix}{" "}
                         <FormattedPrice
@@ -939,24 +938,10 @@ export function SalesLandingPage({
                   </div>
                   <div className="flex items-center gap-3 bg-[#EFF6FF] px-4 py-4 sm:px-5 sm:py-5">
                     <Check
-                      className="size-5 shrink-0 text-[#3B82F6]"
+                      className="size-5 shrink-0 text-[#16A34A]"
                       strokeWidth={2.5}
                     />
-                    {"withSuffixStack" in row && row.withSuffixStack ? (
-                      <div className="flex min-w-0 flex-1 items-center gap-2">
-                        <span className="text-[15px] font-bold leading-snug text-[var(--landing-navy)] sm:text-[17px]">
-                          {row.withPrefix}
-                        </span>
-                        <span className="shrink-0 text-[15px] font-bold leading-tight text-[var(--landing-navy)] sm:text-[17px]">
-                          <span className="block">
-                            {row.withSuffixStack[0]}
-                          </span>
-                          <span className="block">
-                            {row.withSuffixStack[1]}
-                          </span>
-                        </span>
-                      </div>
-                    ) : "withPrice" in row && row.withPrice ? (
+                    {"withPrice" in row && row.withPrice ? (
                       <p className="text-[15px] font-bold leading-snug text-[var(--landing-navy)] sm:text-[17px]">
                         {row.withPrefix}{" "}
                         <FormattedPrice
@@ -990,7 +975,7 @@ export function SalesLandingPage({
           >
             <div className="mx-auto max-w-3xl text-center">
               <SectionHeading onDark className="text-[28px] lg:text-[40px]">
-                Stop Losing Potential Leads for Just{" "}
+                Stop Losing Potential Students for Just{" "}
                 <span className="text-[#FC9018]">
                   <FormattedPrice
                     amount={publicConfig.lifetimeAccessPriceUsd}
@@ -1029,8 +1014,8 @@ export function SalesLandingPage({
                   <div className="flex flex-col items-center gap-2 text-center sm:gap-3 lg:justify-center lg:gap-4 lg:px-1 lg:py-2">
                     <Separator className="bg-[#D8E2EC] lg:hidden" />
 
-                    <p className="text-[17px] font-semibold text-[var(--landing-navy)] sm:text-[19px] lg:text-[22px] lg:leading-snug">
-                      Capture More Leads Without Another Monthly Bill.
+                    <p className="mt-3 text-[17px] font-semibold text-[var(--landing-navy)] sm:mt-4 sm:text-[19px] lg:mt-0 lg:text-[22px] lg:leading-snug">
+                      Capture More Student Leads Without Another Monthly Bill.
                     </p>
                     <div className="flex w-full flex-col items-center gap-3 lg:gap-4">
                       <RecentPurchasesSocialProof className="lg:text-[16px]" />

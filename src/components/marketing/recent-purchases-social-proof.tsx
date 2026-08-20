@@ -23,7 +23,7 @@ export function RecentPurchasesSocialProof({
       >
         {count}
       </span>{" "}
-      real estate pros bought in the{" "}
+      customers purchased in the{" "}
       <span className="font-bold text-[var(--landing-orange)]">last 24h</span>
     </p>
   );
