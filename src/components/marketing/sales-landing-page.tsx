@@ -21,9 +21,14 @@ import {
   DemoChatSection,
   DemoTryButton,
 } from "@/components/marketing/demo-chat/demo-chat-section";
-import { RecentPurchasesSocialProof } from "@/components/marketing/recent-purchases-social-proof";
 import { StickyDesktopCta } from "@/components/marketing/sticky-desktop-cta";
 import { StickyMobileCta } from "@/components/marketing/sticky-mobile-cta";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Card, CardContent } from "@/components/ui/card";
 import { FormattedPrice } from "@/components/ui/formatted-price";
 import { Separator } from "@/components/ui/separator";
@@ -126,6 +131,36 @@ const pricingFeatures = [
   "Capture & Qualify Leads 24/7",
 ] as const;
 
+const faqItems = [
+  {
+    question:
+      "Will the AI give students incorrect information about visas or university fees?",
+    answer:
+      "Absolutely not. Our AI never guesses — we trained it that way. It automatically learns directly from your website's existing content and any additional information you provide in the dashboard. If a student asks a highly complex question that isn't covered in your materials, the AI will not invent an answer. Instead, it will politely provide your agency's direct contact details and guide the student to speak directly with your human counselors.",
+  },
+  {
+    question: "Do I need a developer or IT team to install this?",
+    answer:
+      "Not at all. If you can copy and paste, you can install this. We provide a small script that you simply paste into your website—regardless of whether you use WordPress, Wix, Squarespace, or a custom-built site. It takes less than two minutes. And if you have any doubts or need a hand, our technical team is always available to help and guide you through the process step-by-step.",
+  },
+  {
+    question:
+      "If this is a lifetime deal, who pays for the ongoing AI costs? Are there hidden fees?",
+    answer:
+      "There are zero hidden fees and no monthly subscriptions. Here is how we do it: Unlike generic AI tools (which use massive, expensive computing power to write essays or code), our AI is highly specialized strictly for student admissions and lead capture. Because it is highly optimized for this one specific task, the computing cost per conversation is microscopic—literally fractions of a penny. We process thousands of these lightweight interactions daily, allowing us to easily absorb this tiny cost into your one-time payment.",
+  },
+  {
+    question: "Where do my counselors actually access the captured student leads?",
+    answer:
+      "All your qualified student leads and complete chat transcripts are securely stored in your centralized AI Dashboard. Instead of losing high-value student phone numbers in a messy folder, your team gets one clean, organized portal. Your counselors can instantly see the newest qualified students, view their target countries, and start following up.",
+  },
+  {
+    question: "Can I customize what information the AI asks the student for?",
+    answer:
+      "Yes. You can program the AI to ask mandatory qualifying questions—such as their target country, desired intake date, and academic background—before it collects their contact details.",
+  },
+] as const;
+
 const testimonials = [
   {
     quote:
@@ -223,18 +258,28 @@ function GuaranteeShield({ className }: { className?: string }) {
 function MoneyBackGuarantee({
   className,
   centered = false,
+  onDark = false,
 }: {
   className?: string;
   centered?: boolean;
+  onDark?: boolean;
 }) {
   return (
     <div
       className={cn(
-        "relative w-full rounded-xl border border-[#86EFAC] bg-[#F0FDF4] px-1.5 pb-3 pt-5 sm:px-2",
+        "relative w-full rounded-xl border px-1.5 pb-3 pt-5 sm:px-2",
+        onDark
+          ? "border-[#4ADE80]/45 bg-transparent"
+          : "border-[#86EFAC] bg-[#F0FDF4]",
         className,
       )}
     >
-      <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 bg-[#F0FDF4] px-1.5">
+      <div
+        className={cn(
+          "absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 px-1.5",
+          onDark ? "bg-[var(--landing-navy)]" : "bg-[#F0FDF4]",
+        )}
+      >
         <GuaranteeShield />
       </div>
 
@@ -244,13 +289,28 @@ function MoneyBackGuarantee({
           centered ? "text-center" : "text-left",
         )}
       >
-        <p className="whitespace-nowrap text-[17px] font-bold uppercase leading-tight text-[#16A34A]">
+        <p
+          className={cn(
+            "whitespace-nowrap text-[17px] font-bold uppercase leading-tight",
+            onDark ? "text-[#86EFAC]" : "text-[#16A34A]",
+          )}
+        >
           100% Money-Back Guarantee
         </p>
-        <p className="whitespace-nowrap text-[15px] font-medium italic leading-snug text-[#16A34A]">
+        <p
+          className={cn(
+            "whitespace-nowrap text-[15px] font-medium italic leading-snug",
+            onDark ? "text-[#86EFAC]/90" : "text-[#16A34A]",
+          )}
+        >
           No lead in 30 days? Get full refund.
         </p>
-        <p className="whitespace-nowrap text-[16px] font-bold uppercase leading-snug text-[#16A34A]">
+        <p
+          className={cn(
+            "whitespace-nowrap text-[16px] font-bold uppercase leading-snug",
+            onDark ? "text-[#86EFAC]" : "text-[#16A34A]",
+          )}
+        >
           No questions asked
         </p>
       </div>
@@ -697,6 +757,20 @@ export function SalesLandingPage({
             <p className="mx-auto mt-10 max-w-2xl text-center text-[17px] font-semibold text-[var(--landing-navy)] sm:mt-12 sm:text-[19px] lg:mt-10 lg:max-w-3xl lg:text-[20px]">
               So your team can follow up while the student is still interested.
             </p>
+
+            <div className="mx-auto mt-10 max-w-4xl overflow-hidden rounded-xl sm:mt-12 lg:mt-10 lg:max-w-[960px]">
+              <video
+                src="/solution-demo.mp4"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                aria-hidden
+                tabIndex={-1}
+                className="pointer-events-none block h-auto w-full"
+              />
+            </div>
           </div>
         </section>
 
@@ -1018,7 +1092,6 @@ export function SalesLandingPage({
                       Capture More Student Leads Without Another Monthly Bill.
                     </p>
                     <div className="flex w-full flex-col items-center gap-3 lg:gap-4">
-                      <RecentPurchasesSocialProof className="lg:text-[16px]" />
                       <CtaButton
                         className="w-full sm:w-auto lg:w-full lg:[&_a]:px-7 lg:[&_a]:py-4 lg:[&_a]:text-[20px]"
                         showDiscountBadge={!hasLifetimeAccess}
@@ -1038,6 +1111,98 @@ export function SalesLandingPage({
                 </div>
               </CardContent>
             </Card>
+          </div>
+        </section>
+
+        {/* FAQ — below sticky CTAs (z-[120]) so floating CTA stays on top */}
+        <section
+          id="landing-faq"
+          className="relative z-[110] bg-white"
+        >
+          <div
+            className={cn(
+              "mx-auto max-w-6xl px-4 pt-16 pb-12 sm:px-6 sm:pt-20 sm:pb-16",
+              DESKTOP_CONTAINER,
+              DESKTOP_SECTION,
+            )}
+          >
+            <div className="mx-auto max-w-3xl text-center">
+              <SectionHeading className="text-[28px] text-[var(--landing-orange)] lg:text-[38px]">
+                FAQ
+              </SectionHeading>
+            </div>
+
+            <Accordion
+              type="single"
+              collapsible
+              className="mx-auto mt-6 max-w-3xl gap-0 rounded-xl border border-[#D8E2EC] bg-white px-4 sm:mt-6 sm:px-6 lg:mt-6 lg:max-w-4xl"
+            >
+              {faqItems.map((item, index) => (
+                <AccordionItem
+                  key={item.question}
+                  value={`faq-${index}`}
+                  className="border-[#D8E2EC]"
+                >
+                  <AccordionTrigger className="py-5 text-[16px] font-semibold text-[var(--landing-navy)] hover:no-underline sm:text-[17px] lg:text-[18px] **:data-[slot=accordion-trigger-icon]:text-[var(--landing-navy)]/55">
+                    {item.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-5 text-[15px] leading-relaxed text-[#5B6B7C] sm:text-[16px]">
+                    <p>{item.answer}</p>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </section>
+
+        {/* Final CTA — z-[130] hides sticky mobile CTA and demo chat launcher */}
+        <section
+          id="landing-final-cta"
+          className="relative z-[130] bg-[var(--landing-navy)]"
+        >
+          <div
+            className={cn(
+              "mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20",
+              DESKTOP_CONTAINER,
+              DESKTOP_SECTION,
+            )}
+          >
+            <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
+              <SectionHeading onDark className="text-[28px] lg:text-[38px]">
+                Just{" "}
+                <span className="text-[var(--landing-orange)]">ONE</span> Extra
+                Student Pays For This AI Forever.
+              </SectionHeading>
+              <p className="mt-5 max-w-2xl text-[17px] font-medium leading-relaxed text-white/80 sm:mt-6 sm:text-[18px] lg:text-[19px]">
+                <strong className="font-bold text-white">
+                  Stop losing leads to competitors after hours.
+                </strong>{" "}
+                Let your AI counselor capture student details 24/7.
+              </p>
+
+              <div className="mt-8 flex w-full max-w-md flex-col items-center gap-3 sm:mt-10 lg:mt-10">
+                <CtaButton
+                  className="w-full sm:w-auto lg:w-full lg:[&_a]:px-7 lg:[&_a]:py-4 lg:[&_a]:text-[20px]"
+                  showDiscountBadge={!hasLifetimeAccess}
+                  size="large"
+                  {...marketingCta}
+                  label={
+                    hasLifetimeAccess
+                      ? marketingCta.label
+                      : "Start Capturing Leads Risk-Free"
+                  }
+                  showPrice={false}
+                />
+                <p className="mb-1 pt-1 text-[13px] font-bold uppercase tracking-wide text-[#86EFAC] lg:text-[14px]">
+                  Try It Risk-Free
+                </p>
+                <MoneyBackGuarantee
+                  centered
+                  onDark
+                  className="lg:[&_p:first-child]:text-[18px]"
+                />
+              </div>
+            </div>
           </div>
         </section>
 
