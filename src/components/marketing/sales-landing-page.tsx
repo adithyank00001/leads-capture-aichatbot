@@ -500,8 +500,11 @@ function LandingFadeSeparator() {
 
 export function SalesLandingPage({
   hasLifetimeAccess = false,
+  showSolutionVideo = true,
 }: {
   hasLifetimeAccess?: boolean;
+  /** Mobile looping demo under the Solution section. Off for AB-test variants. */
+  showSolutionVideo?: boolean;
 }) {
   const marketingCta = resolveMarketingCta(hasLifetimeAccess);
 
@@ -758,19 +761,21 @@ export function SalesLandingPage({
               So your team can follow up while the student is still interested.
             </p>
 
-            <div className="mx-auto mt-10 max-w-4xl overflow-hidden rounded-xl sm:mt-12 lg:mt-10 lg:max-w-[960px]">
-              <video
-                src="/solution-demo.mp4"
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="metadata"
-                aria-hidden
-                tabIndex={-1}
-                className="pointer-events-none block h-auto w-full"
-              />
-            </div>
+            {showSolutionVideo ? (
+              <div className="mx-auto mt-10 max-w-4xl overflow-hidden rounded-xl sm:mt-12 lg:hidden">
+                <video
+                  src="/solution-demo.mp4"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  aria-hidden
+                  tabIndex={-1}
+                  className="pointer-events-none block h-auto w-full"
+                />
+              </div>
+            ) : null}
           </div>
         </section>
 
