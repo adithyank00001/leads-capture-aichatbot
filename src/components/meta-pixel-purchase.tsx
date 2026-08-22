@@ -7,22 +7,36 @@ import { track } from "@/lib/fbpixel";
 
 const PURCHASE_TRACK_KEY = "leady_meta_pixel_purchase";
 
-export function MetaPixelPurchase() {
+type MetaPixelPurchaseProps = {
+  eventId: string;
+};
+
+export function MetaPixelPurchase({ eventId }: MetaPixelPurchaseProps) {
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
 
-    if (window.sessionStorage.getItem(PURCHASE_TRACK_KEY) === "1") {
+    const trimmedEventId = eventId.trim();
+    if (!trimmedEventId) {
       return;
     }
 
-    track("Purchase", {
-      value: publicConfig.lifetimeAccessPriceUsd,
-      currency: "USD",
-    });
-    window.sessionStorage.setItem(PURCHASE_TRACK_KEY, "1");
-  }, []);
+    const storageKey = `${PURCHASE_TRACK_KEY}:${trimmedEventId}`;
+    if (window.sessionStorage.getItem(storageKey) === "1") {
+      return;
+    }
+
+    track(
+      "Purchase",
+      {
+        value: publicConfig.lifetimeAccessPriceUsd,
+        currency: "USD",
+      },
+      { eventID: trimmedEventId },
+    );
+    window.sessionStorage.setItem(storageKey, "1");
+  }, [eventId]);
 
   return null;
 }

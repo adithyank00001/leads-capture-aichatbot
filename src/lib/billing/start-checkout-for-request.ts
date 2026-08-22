@@ -8,6 +8,7 @@ import {
   createAuthenticatedCheckoutSession,
   createGuestCheckoutSession,
 } from "@/lib/billing/create-checkout-session";
+import { getMetaAttributionFromRequest } from "@/lib/meta/attribution";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/admin";
 import { ApiValidationError } from "@/lib/validation/errors";
@@ -27,6 +28,7 @@ export async function startCheckoutForRequest(
   request: Request,
 ): Promise<StartCheckoutForRequestResult> {
   const origin = getRequestOrigin(request);
+  const attribution = getMetaAttributionFromRequest(request);
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -49,6 +51,7 @@ export async function startCheckoutForRequest(
       userId: user.id,
       email: user.email,
       origin,
+      attribution,
     });
 
     if (!session.checkout_url) {
@@ -65,7 +68,7 @@ export async function startCheckoutForRequest(
     };
   }
 
-  const session = await createGuestCheckoutSession({ origin });
+  const session = await createGuestCheckoutSession({ origin, attribution });
 
   if (!session.checkout_url) {
     throw new ApiValidationError(

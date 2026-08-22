@@ -6,6 +6,7 @@ import { getCustomerAccess } from "@/lib/auth/access";
 import { requireAuthUser } from "@/lib/auth/dashboard";
 import { createAuthenticatedCheckoutSession } from "@/lib/billing/create-checkout-session";
 import { getRequestOrigin } from "@/lib/auth/oauth";
+import { getMetaAttributionFromRequest } from "@/lib/meta/attribution";
 import type { Database } from "@/lib/supabase/admin";
 
 export async function GET(request: Request) {
@@ -53,6 +54,7 @@ export async function POST(request: Request) {
       userId: user.id,
       email: user.email,
       origin,
+      attribution: getMetaAttributionFromRequest(request),
     });
 
     if (!session.checkout_url) {

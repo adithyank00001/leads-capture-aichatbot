@@ -4,6 +4,10 @@ import DodoPayments from "dodopayments";
 
 import { getDodoConfig } from "@/lib/billing/dodo-config";
 import { DODO_CHECKOUT_CUSTOMIZATION } from "@/lib/billing/dodo-checkout-theme";
+import {
+  metaAttributionToMetadata,
+  type MetaAttribution,
+} from "@/lib/meta/attribution";
 
 function createDodoClient() {
   const dodo = getDodoConfig();
@@ -30,15 +34,19 @@ export async function createAuthenticatedCheckoutSession(input: {
   userId: string;
   email: string;
   origin: string;
+  attribution?: MetaAttribution;
 }) {
   const dodo = getDodoConfig();
   const client = createDodoClient();
   const appOrigin = input.origin.replace(/\/+$/, "");
+  const attributionMeta = input.attribution
+    ? metaAttributionToMetadata(input.attribution)
+    : {};
 
   return client.checkoutSessions.create({
     product_cart: [{ product_id: dodo.productId, quantity: 1 }],
     customer: { email: input.email },
-    metadata: { user_id: input.userId },
+    metadata: { user_id: input.userId, ...attributionMeta },
     return_url: `${appOrigin}/checkout/success`,
     cancel_url: `${appOrigin}/checkout/cancel`,
     customization: DODO_CHECKOUT_CUSTOMIZATION,
@@ -50,14 +58,20 @@ export async function createAuthenticatedCheckoutSession(input: {
   });
 }
 
-export async function createGuestCheckoutSession(input: { origin: string }) {
+export async function createGuestCheckoutSession(input: {
+  origin: string;
+  attribution?: MetaAttribution;
+}) {
   const dodo = getDodoConfig();
   const client = createDodoClient();
   const appOrigin = input.origin.replace(/\/+$/, "");
+  const attributionMeta = input.attribution
+    ? metaAttributionToMetadata(input.attribution)
+    : {};
 
   return client.checkoutSessions.create({
     product_cart: [{ product_id: dodo.productId, quantity: 1 }],
-    metadata: { flow: "guest" },
+    metadata: { flow: "guest", ...attributionMeta },
     return_url: `${appOrigin}/thank-you`,
     cancel_url: `${appOrigin}/checkout/cancel`,
     customization: DODO_CHECKOUT_CUSTOMIZATION,
@@ -70,6 +84,7 @@ export async function createLifetimeCheckoutSession(input: {
   userId: string;
   email: string;
   origin: string;
+  attribution?: MetaAttribution;
 }) {
   return createAuthenticatedCheckoutSession(input);
 }

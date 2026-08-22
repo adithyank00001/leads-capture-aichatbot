@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getCustomerAccess } from "@/lib/auth/access";
+import { getCustomerByUserId } from "@/lib/db/customers";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -25,12 +26,13 @@ export default async function CheckoutSuccessPage() {
     redirect("/login");
   }
 
-  const access = await getCustomerAccess(
-    supabase as SupabaseClient<Database>,
-    user.id,
-  );
+  const client = supabase as SupabaseClient<Database>;
+  const access = await getCustomerAccess(client, user.id);
 
   if (access.hasLifetimeAccess) {
+    const customer = await getCustomerByUserId(client, user.id);
+    const paymentEventId = customer?.dodo_payment_id?.trim() || null;
+
     return (
       <div className="relative min-h-screen bg-background">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,oklch(0.52_0.19_252/0.12),transparent_55%)]" />
@@ -46,7 +48,9 @@ export default async function CheckoutSuccessPage() {
               <Button asChild className="w-full" size="lg">
                 <Link href="/dashboard">Go to dashboard</Link>
               </Button>
-              <MetaPixelPurchase />
+              {paymentEventId ? (
+                <MetaPixelPurchase eventId={paymentEventId} />
+              ) : null}
             </CardContent>
           </Card>
         </div>

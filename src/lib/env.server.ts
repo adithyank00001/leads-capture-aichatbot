@@ -59,6 +59,8 @@ export const serverEnv = {
     readOptionalEnv("DODO_PAYMENTS_ENVIRONMENT") ?? "test_mode",
   dodoLtdProductId: readOptionalEnv("DODO_LTD_PRODUCT_ID"),
   dodoPaymentsReturnUrl: readOptionalEnv("DODO_PAYMENTS_RETURN_URL"),
+  metaCapiAccessToken: readOptionalEnv("META_CAPI_ACCESS_TOKEN"),
+  metaCapiTestEventCode: readOptionalEnv("META_CAPI_TEST_EVENT_CODE"),
   demoSystemPrompt: readOptionalEnv("DEMO_SYSTEM_PROMPT"),
   demoRateLimitSessionPerMin: readIntEnv("DEMO_RATE_LIMIT_SESSION_PER_MIN", 10),
   demoRateLimitIpPerMin: readIntEnv("DEMO_RATE_LIMIT_IP_PER_MIN", 40),

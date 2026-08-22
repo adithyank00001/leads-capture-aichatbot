@@ -11,9 +11,19 @@ export const pageview = () => {
   window.fbq?.("track", "PageView");
 };
 
+export type TrackEventOptions = {
+  eventID?: string;
+};
+
 export const track = (
   name: string,
   options: Record<string, unknown> = {},
+  eventOptions: TrackEventOptions = {},
 ) => {
+  if (eventOptions.eventID) {
+    window.fbq?.("track", name, options, { eventID: eventOptions.eventID });
+    return;
+  }
+
   window.fbq?.("track", name, options);
 };

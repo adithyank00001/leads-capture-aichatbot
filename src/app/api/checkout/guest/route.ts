@@ -2,11 +2,15 @@ import { apiError, apiSuccess } from "@/lib/api-response";
 import { handleRouteError } from "@/lib/api/request";
 import { getRequestOrigin } from "@/lib/auth/oauth";
 import { createGuestCheckoutSession } from "@/lib/billing/create-checkout-session";
+import { getMetaAttributionFromRequest } from "@/lib/meta/attribution";
 
 export async function POST(request: Request) {
   try {
     const origin = getRequestOrigin(request);
-    const session = await createGuestCheckoutSession({ origin });
+    const session = await createGuestCheckoutSession({
+      origin,
+      attribution: getMetaAttributionFromRequest(request),
+    });
 
     if (!session.checkout_url) {
       return apiError(

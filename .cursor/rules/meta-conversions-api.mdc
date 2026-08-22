@@ -1,0 +1,29 @@
+---
+description: Require reading Meta Conversions API docs before any CAPI/Pixel server work
+globs: src/components/meta-pixel*.tsx,src/lib/fbpixel.ts,**/meta/**,**/conversions-api/**
+alwaysApply: false
+---
+
+# Meta Conversions API — read docs first
+
+Before writing or changing Meta Conversions API (server-side events) or related tracking code, **fetch and read the live Meta docs**. Do not rely on memory alone.
+
+## Required starting point
+
+- [Conversions API overview](https://developers.facebook.com/documentation/ads-commerce/conversions-api)
+
+## Follow these pages as needed
+
+1. [Get Started](https://developers.facebook.com/documentation/ads-commerce/conversions-api/get-started)
+2. [Using the API](https://developers.facebook.com/documentation/ads-commerce/conversions-api/using-the-api) (POST requests, batching, event time)
+3. [Verifying setup](https://developers.facebook.com/documentation/ads-commerce/conversions-api/verifying-setup)
+4. [API Parameters](https://developers.facebook.com/documentation/ads-commerce/conversions-api/parameters)
+5. [Best practices](https://developers.facebook.com/documentation/ads-commerce/conversions-api/best-practices)
+6. [Payload Helper](https://developers.facebook.com/documentation/ads-commerce/conversions-api/payload-helper)
+7. [Troubleshooting](https://developers.facebook.com/documentation/ads-commerce/conversions-api/support)
+
+## Rule
+
+- Open the overview, then open the linked pages that match the task.
+- Match Meta’s current payload shape, parameters, and verification steps.
+- Prefer Meta’s docs over older blog posts or outdated examples.

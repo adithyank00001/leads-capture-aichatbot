@@ -88,7 +88,7 @@ export default async function ThankYouPage({ searchParams }: ThankYouPageProps) 
           </Link>
         </p>
 
-        <MetaPixelPurchase />
+        <MetaPixelPurchase eventId={verification.paymentId} />
       </div>
     </div>
   );
