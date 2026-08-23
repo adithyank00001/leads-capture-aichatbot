@@ -6,6 +6,7 @@ import { publicConfig } from "@/lib/config";
 import { serverEnv } from "@/lib/env.server";
 import { FB_PIXEL_ID } from "@/lib/fbpixel";
 import {
+  getMetaAttributionFromRequest,
   metaAttributionFromMetadata,
   type MetaAttribution,
 } from "@/lib/meta/attribution";
@@ -183,7 +184,9 @@ export async function sendCapiEvent(input: SendCapiEventInput): Promise<void> {
 export type SendPurchaseEventInput = {
   paymentId: string;
   email?: string | null;
-  metadata: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+  attribution?: MetaAttribution;
+  eventSourceUrl?: string;
   eventTimeSeconds?: number;
 };
 
@@ -194,12 +197,16 @@ export type SendPurchaseEventInput = {
 export async function sendPurchaseEvent(
   input: SendPurchaseEventInput,
 ): Promise<void> {
-  const attribution = metaAttributionFromMetadata(input.metadata);
+  const metadata = input.metadata ?? {};
+  const attribution =
+    input.attribution ?? metaAttributionFromMetadata(metadata);
 
   await sendCapiEvent({
     eventName: "Purchase",
     eventId: input.paymentId,
-    eventSourceUrl: resolvePurchaseEventSourceUrl(input.metadata),
+    eventSourceUrl:
+      input.eventSourceUrl?.trim() ||
+      resolvePurchaseEventSourceUrl(metadata),
     email: input.email,
     attribution,
     customData: {
@@ -212,16 +219,45 @@ export async function sendPurchaseEvent(
 }
 
 /**
- * Fire-and-forget Purchase for an LTD payment webhook.
- * Safe to call after grant — never rejects.
+ * Send Purchase CAPI using live page request cookies/IP/UA (thank-you / success backup).
+ * Never throws.
  */
-export function trackLtdPurchaseFromPayment(input: {
+export async function sendPurchaseEventFromPageRequest(input: {
+  paymentId: string;
+  email?: string | null;
+  eventSourceUrl: string;
+  requestHeaders: Headers;
+}): Promise<void> {
+  const paymentId = input.paymentId.trim();
+  if (!paymentId) {
+    return;
+  }
+
+  const origin = serverEnv.appUrl.replace(/\/+$/, "") || "http://localhost:3000";
+  const request = new Request(origin, {
+    headers: input.requestHeaders,
+  });
+  const attribution = getMetaAttributionFromRequest(request);
+
+  await sendPurchaseEvent({
+    paymentId,
+    email: input.email,
+    attribution,
+    eventSourceUrl: input.eventSourceUrl,
+  });
+}
+
+/**
+ * LTD Purchase for payment webhooks.
+ * Awaits Meta send; never throws (errors swallowed in sendPurchaseEvent).
+ */
+export async function trackLtdPurchaseFromPayment(input: {
   paymentId: string;
   email?: string | null;
   metadata: Record<string, unknown>;
   productCart?: Array<{ product_id: string; quantity: number }> | null;
   expectedProductId: string;
-}): void {
+}): Promise<void> {
   const cart = input.productCart;
   if (cart?.length) {
     const isLtd = cart.some(
@@ -232,7 +268,7 @@ export function trackLtdPurchaseFromPayment(input: {
     }
   }
 
-  void sendPurchaseEvent({
+  await sendPurchaseEvent({
     paymentId: input.paymentId,
     email: input.email,
     metadata: input.metadata,

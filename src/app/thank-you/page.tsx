@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { LoginForm } from "@/components/dashboard/login-form";
@@ -6,6 +7,8 @@ import { MetaPixelPurchase } from "@/components/meta-pixel-purchase";
 import { claimPendingLifetimePurchase } from "@/lib/billing/claim-pending-purchase";
 import { verifyThankYouPayment } from "@/lib/billing/verify-thank-you-payment";
 import { getCustomerAccess } from "@/lib/auth/access";
+import { serverEnv } from "@/lib/env.server";
+import { sendPurchaseEventFromPageRequest } from "@/lib/meta/capi";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -29,6 +32,16 @@ export default async function ThankYouPage({ searchParams }: ThankYouPageProps) 
   if (!verification.ok) {
     redirect("/checkout");
   }
+
+  // Backup Purchase CAPI with live UA/cookies — before any dashboard redirect.
+  const requestHeaders = await headers();
+  const appOrigin = serverEnv.appUrl.replace(/\/+$/, "");
+  await sendPurchaseEventFromPageRequest({
+    paymentId: verification.paymentId,
+    email: verification.email,
+    eventSourceUrl: `${appOrigin}/thank-you`,
+    requestHeaders,
+  });
 
   const supabase = await createServerSupabaseClient();
   const {

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { MetaPixelPurchase } from "@/components/meta-pixel-purchase";
@@ -12,6 +13,8 @@ import {
 } from "@/components/ui/card";
 import { getCustomerAccess } from "@/lib/auth/access";
 import { getCustomerByUserId } from "@/lib/db/customers";
+import { serverEnv } from "@/lib/env.server";
+import { sendPurchaseEventFromPageRequest } from "@/lib/meta/capi";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -32,6 +35,17 @@ export default async function CheckoutSuccessPage() {
   if (access.hasLifetimeAccess) {
     const customer = await getCustomerByUserId(client, user.id);
     const paymentEventId = customer?.dodo_payment_id?.trim() || null;
+
+    if (paymentEventId) {
+      const requestHeaders = await headers();
+      const appOrigin = serverEnv.appUrl.replace(/\/+$/, "");
+      await sendPurchaseEventFromPageRequest({
+        paymentId: paymentEventId,
+        email: user.email ?? customer?.email ?? null,
+        eventSourceUrl: `${appOrigin}/checkout/success`,
+        requestHeaders,
+      });
+    }
 
     return (
       <div className="relative min-h-screen bg-background">

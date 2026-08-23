@@ -1,5 +1,5 @@
 import { Webhooks } from "@dodopayments/nextjs";
-import { NextResponse, type NextRequest } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
 
 import { grantLifetimeAccessFromPayment } from "@/lib/billing/lifetime-access";
 import { serverEnv } from "@/lib/env.server";
@@ -38,13 +38,16 @@ function getWebhookHandler() {
 
       const productId = serverEnv.dodoLtdProductId;
       if (productId) {
-        trackLtdPurchaseFromPayment({
-          paymentId: payment.payment_id,
-          email: payment.customer.email,
-          metadata: payment.metadata,
-          productCart: payment.product_cart,
-          expectedProductId: productId,
-        });
+        // Dodo-safe: return 2xx quickly; after() keeps Meta work alive on Vercel.
+        after(() =>
+          trackLtdPurchaseFromPayment({
+            paymentId: payment.payment_id,
+            email: payment.customer.email,
+            metadata: payment.metadata,
+            productCart: payment.product_cart,
+            expectedProductId: productId,
+          }),
+        );
       }
     },
   });
