@@ -2,33 +2,68 @@
 
 import Script from "next/script";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 
-import { FB_PIXEL_ID, pageview } from "@/lib/fbpixel";
+import { FB_PIXEL_ID } from "@/lib/fbpixel";
+import { trackPageView } from "@/lib/meta/browser-track";
+import { isPublicMetaPagePath } from "@/lib/meta/public-pages";
 
-function PixelTracker() {
+function PixelTracker({ pixelReady }: { pixelReady: boolean }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const firstLoad = useRef(true);
+  const lastKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (pathname.startsWith("/embed") || pathname.startsWith("/auth")) {
+    if (!pixelReady || !isPublicMetaPagePath(pathname)) {
       return;
     }
 
-    if (firstLoad.current) {
-      firstLoad.current = false;
+    const key = `${pathname}?${searchParams.toString()}`;
+    if (lastKeyRef.current === key) {
       return;
     }
 
-    pageview();
-  }, [pathname, searchParams]);
+    lastKeyRef.current = key;
+    trackPageView();
+  }, [pathname, searchParams, pixelReady]);
 
   return null;
 }
 
 export function MetaPixel() {
   const pathname = usePathname();
+  const [pixelReady, setPixelReady] = useState(false);
+
+  const markReady = useCallback(() => {
+    setPixelReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (typeof window.fbq === "function") {
+      setPixelReady(true);
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      if (typeof window.fbq === "function") {
+        setPixelReady(true);
+        window.clearInterval(intervalId);
+      }
+    }, 50);
+
+    const timeoutId = window.setTimeout(() => {
+      window.clearInterval(intervalId);
+    }, 5000);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.clearTimeout(timeoutId);
+    };
+  }, []);
 
   if (!FB_PIXEL_ID || pathname.startsWith("/embed")) {
     return null;
@@ -36,7 +71,11 @@ export function MetaPixel() {
 
   return (
     <>
-      <Script id="meta-pixel" strategy="afterInteractive">
+      <Script
+        id="meta-pixel"
+        strategy="afterInteractive"
+        onLoad={markReady}
+      >
         {`!function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -45,20 +84,10 @@ n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];
 s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '${FB_PIXEL_ID}');
-fbq('track', 'PageView');`}
+fbq('init', '${FB_PIXEL_ID}');`}
       </Script>
-      <noscript>
-        <img
-          height="1"
-          width="1"
-          style={{ display: "none" }}
-          src={`https://www.facebook.com/tr?id=${FB_PIXEL_ID}&ev=PageView&noscript=1`}
-          alt=""
-        />
-      </noscript>
       <Suspense fallback={null}>
-        <PixelTracker />
+        <PixelTracker pixelReady={pixelReady} />
       </Suspense>
     </>
   );

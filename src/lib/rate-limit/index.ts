@@ -54,6 +54,7 @@ const chatIpLimiter = createLimiter(30, "1 m");
 const chatBotDailyLimiter = createLimiter(200, "1 d");
 const leadIpLimiter = createLimiter(20, "1 m");
 const leadBotDailyLimiter = createLimiter(50, "1 d");
+const metaEventsIpLimiter = createLimiter(60, "1 m");
 
 let demoSessionLimiter: Ratelimit | null = null;
 let demoIpLimiter: Ratelimit | null = null;
@@ -144,6 +145,11 @@ export async function assertLeadRateLimits(request: Request, botId: string) {
 
   await assertLimit(leadIpLimiter, `lead:ip:${ip}`);
   await assertLimit(leadBotDailyLimiter, `lead:bot:${botId}`);
+}
+
+export async function assertMetaEventsRateLimits(request: Request) {
+  const ip = getClientIp(request);
+  await assertLimitFailOpen(metaEventsIpLimiter, `meta:events:ip:${ip}`);
 }
 
 export async function assertDemoRateLimits(

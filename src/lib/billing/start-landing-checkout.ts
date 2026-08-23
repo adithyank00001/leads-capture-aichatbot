@@ -1,3 +1,5 @@
+import { trackInitiateCheckout } from "@/lib/meta/browser-track";
+
 const CHECKOUT_FALLBACK = "/checkout?error=checkout_failed";
 const PENDING_DODO_CHECKOUT_KEY = "pending-dodo-checkout-url";
 const CHECKOUT_CANCEL_PATH = "/checkout/cancel";
@@ -38,6 +40,8 @@ export function goToDodoCheckout(checkoutUrl: string) {
     window.location.assign(CHECKOUT_FALLBACK);
     return;
   }
+
+  trackInitiateCheckout();
 
   if (isOnCheckoutCancelPage()) {
     window.location.assign(checkoutUrl);

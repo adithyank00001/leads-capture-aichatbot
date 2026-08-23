@@ -12,6 +12,16 @@ import {
 
 const GRAPH_API_VERSION = "v22.0";
 
+export const CLIENT_FORWARDABLE_CAPI_EVENTS = [
+  "PageView",
+  "InitiateCheckout",
+] as const;
+
+export type ClientForwardableCapiEvent =
+  (typeof CLIENT_FORWARDABLE_CAPI_EVENTS)[number];
+
+export type CapiEventName = ClientForwardableCapiEvent | "Purchase";
+
 function hashEmail(email: string | null | undefined): string | undefined {
   if (!email) {
     return undefined;
@@ -25,7 +35,9 @@ function hashEmail(email: string | null | undefined): string | undefined {
   return createHash("sha256").update(normalized).digest("hex");
 }
 
-function resolveEventSourceUrl(metadata: Record<string, unknown>): string {
+function resolvePurchaseEventSourceUrl(
+  metadata: Record<string, unknown>,
+): string {
   const origin = serverEnv.appUrl.replace(/\/+$/, "");
   const userId = metadata.user_id;
 
@@ -62,52 +74,65 @@ function buildUserData(input: {
   return userData;
 }
 
-export type SendPurchaseEventInput = {
-  paymentId: string;
+export type SendCapiEventInput = {
+  eventName: CapiEventName;
+  eventId: string;
+  eventSourceUrl: string;
   email?: string | null;
-  metadata: Record<string, unknown>;
+  attribution: MetaAttribution;
+  customData?: Record<string, unknown>;
   eventTimeSeconds?: number;
 };
 
 /**
- * Send a Purchase event to Meta Conversions API.
- * Never throws — failures are logged so payments/webhooks stay safe.
+ * Send any website event to Meta Conversions API.
+ * Never throws — failures are logged only.
  */
-export async function sendPurchaseEvent(
-  input: SendPurchaseEventInput,
-): Promise<void> {
+export async function sendCapiEvent(input: SendCapiEventInput): Promise<void> {
   try {
     const accessToken = serverEnv.metaCapiAccessToken;
-    if (!accessToken || !FB_PIXEL_ID) {
+    const eventId = input.eventId.trim();
+    const eventSourceUrl = input.eventSourceUrl.trim();
+
+    if (!accessToken || !FB_PIXEL_ID || !eventId || !eventSourceUrl) {
       return;
     }
 
-    const attribution = metaAttributionFromMetadata(input.metadata);
     const userData = buildUserData({
       email: input.email,
-      attribution,
+      attribution: input.attribution,
     });
+
+    if (!userData.client_user_agent) {
+      console.error(
+        JSON.stringify({
+          level: "error",
+          route: "meta/capi",
+          category: "unknown",
+          message: `Meta CAPI ${input.eventName}: missing client_user_agent (sending anyway)`,
+          timestamp: new Date().toISOString(),
+        }),
+      );
+    }
+
+    const eventPayload: Record<string, unknown> = {
+      event_name: input.eventName,
+      event_time: input.eventTimeSeconds ?? Math.floor(Date.now() / 1000),
+      event_id: eventId,
+      action_source: "website",
+      event_source_url: eventSourceUrl,
+      user_data: userData,
+    };
+
+    if (input.customData && Object.keys(input.customData).length > 0) {
+      eventPayload.custom_data = input.customData;
+    }
 
     const body: {
       data: Array<Record<string, unknown>>;
       test_event_code?: string;
     } = {
-      data: [
-        {
-          event_name: "Purchase",
-          event_time:
-            input.eventTimeSeconds ?? Math.floor(Date.now() / 1000),
-          event_id: input.paymentId,
-          action_source: "website",
-          event_source_url: resolveEventSourceUrl(input.metadata),
-          user_data: userData,
-          custom_data: {
-            value: publicConfig.lifetimeAccessPriceUsd,
-            currency: "USD",
-            order_id: input.paymentId,
-          },
-        },
-      ],
+      data: [eventPayload],
     };
 
     const testCode = serverEnv.metaCapiTestEventCode;
@@ -133,14 +158,16 @@ export async function sendPurchaseEvent(
           level: "error",
           route: "meta/capi",
           category: "unknown",
-          message: `Meta CAPI Purchase failed: ${response.status} ${errorText.slice(0, 300)}`,
+          message: `Meta CAPI ${input.eventName} failed: ${response.status} ${errorText.slice(0, 300)}`,
           timestamp: new Date().toISOString(),
         }),
       );
     }
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Meta CAPI Purchase failed.";
+      error instanceof Error
+        ? error.message
+        : `Meta CAPI ${input.eventName} failed.`;
     console.error(
       JSON.stringify({
         level: "error",
@@ -151,6 +178,37 @@ export async function sendPurchaseEvent(
       }),
     );
   }
+}
+
+export type SendPurchaseEventInput = {
+  paymentId: string;
+  email?: string | null;
+  metadata: Record<string, unknown>;
+  eventTimeSeconds?: number;
+};
+
+/**
+ * Send a Purchase event to Meta Conversions API.
+ * Never throws — failures are logged so payments/webhooks stay safe.
+ */
+export async function sendPurchaseEvent(
+  input: SendPurchaseEventInput,
+): Promise<void> {
+  const attribution = metaAttributionFromMetadata(input.metadata);
+
+  await sendCapiEvent({
+    eventName: "Purchase",
+    eventId: input.paymentId,
+    eventSourceUrl: resolvePurchaseEventSourceUrl(input.metadata),
+    email: input.email,
+    attribution,
+    customData: {
+      value: publicConfig.lifetimeAccessPriceUsd,
+      currency: "USD",
+      order_id: input.paymentId,
+    },
+    eventTimeSeconds: input.eventTimeSeconds,
+  });
 }
 
 /**
@@ -166,7 +224,9 @@ export function trackLtdPurchaseFromPayment(input: {
 }): void {
   const cart = input.productCart;
   if (cart?.length) {
-    const isLtd = cart.some((item) => item.product_id === input.expectedProductId);
+    const isLtd = cart.some(
+      (item) => item.product_id === input.expectedProductId,
+    );
     if (!isLtd) {
       return;
     }

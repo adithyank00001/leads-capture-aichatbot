@@ -7,7 +7,12 @@ declare global {
   }
 }
 
-export const pageview = () => {
+export const pageview = (eventID?: string) => {
+  if (eventID) {
+    window.fbq?.("track", "PageView", {}, { eventID });
+    return;
+  }
+
   window.fbq?.("track", "PageView");
 };
 
