@@ -1,5 +1,6 @@
 import { publicConfig } from "@/lib/config";
 import { track } from "@/lib/fbpixel";
+import { getMetaPageContentName } from "@/lib/meta/public-pages";
 
 export type BrowserTrackableEvent = "PageView" | "InitiateCheckout";
 
@@ -20,6 +21,26 @@ function currentPageUrl(): string {
   }
 
   return window.location.href;
+}
+
+function resolvePathnameForPageView(eventSourceUrl?: string): string {
+  const trimmed = eventSourceUrl?.trim();
+  if (trimmed) {
+    try {
+      if (trimmed.startsWith("/")) {
+        return trimmed.split("?")[0]?.split("#")[0] || "/";
+      }
+      return new URL(trimmed).pathname || "/";
+    } catch {
+      // fall through to window
+    }
+  }
+
+  if (typeof window !== "undefined") {
+    return window.location.pathname || "/";
+  }
+
+  return "/";
 }
 
 /**
@@ -65,7 +86,11 @@ export function trackPixelAndCapi(
 }
 
 export function trackPageView(eventSourceUrl?: string): void {
-  trackPixelAndCapi("PageView", {}, eventSourceUrl);
+  const contentName = getMetaPageContentName(
+    resolvePathnameForPageView(eventSourceUrl),
+  );
+  const params = contentName ? { content_name: contentName } : {};
+  trackPixelAndCapi("PageView", params, eventSourceUrl);
 }
 
 export function trackInitiateCheckout(eventSourceUrl?: string): void {
