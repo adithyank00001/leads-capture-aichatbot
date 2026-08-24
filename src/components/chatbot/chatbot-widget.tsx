@@ -1,10 +1,14 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { ChatInterface } from "@/components/chatbot/chat-interface";
 import { ChatLauncher } from "@/components/chatbot/chat-launcher";
+import {
+  ChatLauncherHint,
+  type LauncherHintPhase,
+} from "@/components/chatbot/chat-launcher-hint";
 import { WidgetThemeProvider } from "@/components/chatbot/widget-theme-provider";
 import type { BusinessDisplay } from "@/lib/business/display";
 import { getApiPath } from "@/lib/config";
@@ -18,6 +22,9 @@ import { getOrCreateSessionId } from "@/lib/session/client";
 import type { WidgetSettings } from "@/lib/widget/types";
 
 const PARENT_PAGE_MESSAGE_TYPE = "chatbot-parent-page";
+const LIVE_HINT_TEXT = "May I help you?";
+const LIVE_HINT_DELAY_MS = 10_000;
+const LIVE_HINT_ENTER_MS = 500;
 
 type ChatbotWidgetProps = {
   botId: string;
@@ -45,6 +52,9 @@ export function ChatbotWidget({
   const [isTopLevel, setIsTopLevel] = useState(false);
   const [parentPageUrl, setParentPageUrlState] = useState<string | null>(null);
   const [allowedDomains, setAllowedDomains] = useState<string[]>([]);
+  const [hintPhase, setHintPhase] = useState<LauncherHintPhase>("idle");
+  const hintUnlockedRef = useRef(false);
+  const hintTimersRef = useRef<number[]>([]);
 
   useEffect(() => {
     const topLevel = window.self === window.top;
@@ -60,8 +70,56 @@ export function ChatbotWidget({
   }, [botId]);
 
   useEffect(() => {
-    postWidgetResize(isOpen ? "panel" : "launcher");
+    // Closed state always uses the large transparent launcher frame so the
+    // round button is never clipped by a tiny circular iframe.
+    postWidgetResize(isOpen ? "panel" : "launcher-hint");
   }, [isOpen]);
+
+  useEffect(() => {
+    function clearHintTimers() {
+      hintTimersRef.current.forEach((timer) => {
+        window.clearTimeout(timer);
+      });
+      hintTimersRef.current = [];
+    }
+
+    if (isOpen || isTopLevel) {
+      clearHintTimers();
+      setHintPhase("idle");
+      return;
+    }
+
+    if (hintUnlockedRef.current) {
+      setHintPhase("visible");
+      return;
+    }
+
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    const delayTimer = window.setTimeout(() => {
+      hintUnlockedRef.current = true;
+
+      if (reducedMotion) {
+        setHintPhase("visible");
+        return;
+      }
+
+      setHintPhase("enter");
+      hintTimersRef.current.push(
+        window.setTimeout(() => {
+          setHintPhase("visible");
+        }, LIVE_HINT_ENTER_MS),
+      );
+    }, LIVE_HINT_DELAY_MS);
+
+    hintTimersRef.current.push(delayTimer);
+
+    return () => {
+      clearHintTimers();
+    };
+  }, [isOpen, isTopLevel]);
 
   useEffect(() => {
     let cancelled = false;
@@ -162,8 +220,8 @@ export function ChatbotWidget({
 
   if (!sessionId) {
     return (
-      <div className="flex h-full items-center justify-center text-sm text-zinc-500">
-        Loading chatbot…
+      <div className="flex h-full w-full items-end justify-end bg-transparent">
+        <div className="size-14 animate-pulse rounded-full bg-zinc-200/80" />
       </div>
     );
   }
@@ -171,7 +229,16 @@ export function ChatbotWidget({
   return (
     <WidgetThemeProvider settings={widgetSettings}>
       {!isOpen ? (
-        <ChatLauncher onOpen={handleOpen} />
+        <div className="relative flex h-full w-full items-end justify-end bg-transparent">
+          <div className="relative size-14 shrink-0">
+            <ChatLauncherHint
+              text={LIVE_HINT_TEXT}
+              onOpen={handleOpen}
+              phase={hintPhase}
+            />
+            <ChatLauncher onOpen={handleOpen} />
+          </div>
+        </div>
       ) : (
         <ChatInterface
           botId={botId}

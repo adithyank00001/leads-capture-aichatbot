@@ -4,7 +4,8 @@
   var WIDGET_ROOT_ID = "chatbot-mvp-root";
   var GLOBAL_NAME = "ChatbotMvp";
   var RESIZE_MESSAGE_TYPE = "chatbot-widget-resize";
-  var LAUNCHER_SIZE = 56;
+  var LAUNCHER_HINT_WIDTH = 280;
+  var LAUNCHER_HINT_HEIGHT = 140;
 
   if (window[GLOBAL_NAME] && window[GLOBAL_NAME].loaded) {
     return;
@@ -56,23 +57,29 @@
     }
   }
 
+  // Closed widget: always a transparent box big enough for the button + hint bubble.
+  // Do not use a tiny circular iframe — it clips the page and looks broken.
   function applyLauncherStyles(container, iframe) {
     setBox(container, {
-      width: LAUNCHER_SIZE + "px",
-      height: LAUNCHER_SIZE + "px",
-      "max-width": LAUNCHER_SIZE + "px",
-      "max-height": LAUNCHER_SIZE + "px",
-      "min-width": LAUNCHER_SIZE + "px",
-      "min-height": LAUNCHER_SIZE + "px",
-      overflow: "hidden",
+      width: LAUNCHER_HINT_WIDTH + "px",
+      height: LAUNCHER_HINT_HEIGHT + "px",
+      "max-width": "min(100vw - 32px, " + LAUNCHER_HINT_WIDTH + "px)",
+      "max-height": LAUNCHER_HINT_HEIGHT + "px",
+      "min-width": "180px",
+      "min-height": LAUNCHER_HINT_HEIGHT + "px",
+      overflow: "visible",
     });
     setBox(iframe, {
       width: "100%",
       height: "100%",
-      "border-radius": "9999px",
+      "border-radius": "0",
       "box-shadow": "none",
       background: "transparent",
     });
+  }
+
+  function applyLauncherHintStyles(container, iframe) {
+    applyLauncherStyles(container, iframe);
   }
 
   function applyPanelStyles(container, iframe) {
@@ -201,6 +208,11 @@
         return;
       }
 
+      if (event.data.mode === "launcher-hint") {
+        applyLauncherHintStyles(container, iframe);
+        return;
+      }
+
       if (event.data.mode === "panel") {
         applyPanelStyles(container, iframe);
       }
@@ -247,7 +259,7 @@
       }
 
       window[GLOBAL_NAME] = {
-        version: "0.1.0",
+        version: "0.1.2",
         loaded: true,
         status: "ready",
         botId: widget.botId,

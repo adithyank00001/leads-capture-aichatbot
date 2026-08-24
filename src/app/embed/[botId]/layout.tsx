@@ -3,5 +3,10 @@ export default function EmbedLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <div className="h-dvh bg-transparent">{children}</div>;
+  return (
+    <>
+      <style>{`html, body { background: transparent !important; }`}</style>
+      <div className="h-dvh bg-transparent">{children}</div>
+    </>
+  );
 }
