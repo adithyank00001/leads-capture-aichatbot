@@ -33,7 +33,7 @@ export function getRequestOrigin(request: Request) {
   return origin;
 }
 
-export function buildOAuthCallbackUrl(origin: string, nextPath?: string) {
-  const safeNext = getSafeOAuthNextPath(nextPath);
-  return `${origin.replace(/\/+$/, "")}/auth/callback?next=${encodeURIComponent(safeNext)}`;
+export function buildOAuthCallbackUrl(origin: string, _nextPath?: string) {
+  // Must match Supabase Redirect URLs exactly (no ?next=...).
+  return `${origin.replace(/\/+$/, "")}/auth/callback`;
 }
