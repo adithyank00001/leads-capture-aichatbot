@@ -148,7 +148,7 @@ const faqItems = [
     question:
       "If this is a lifetime deal, who pays for the ongoing AI costs? Are there hidden fees?",
     answer:
-      "There are zero hidden fees and no monthly subscriptions. Here is how we do it: Unlike generic AI tools (which use massive, expensive computing power to write essays or code), our AI is highly specialized strictly for student admissions and lead capture. Because it is highly optimized for this one specific task, the computing cost per conversation is microscopic—literally fractions of a penny. We process thousands of these lightweight interactions daily, allowing us to easily absorb this tiny cost into your one-time payment.",
+      "There are zero hidden fees and no monthly subscriptions. Here is how we do it: Unlike generic AI tools (which use massive, expensive computing power to write essays or code), our AI is highly specialized strictly for student admissions and lead capture. Because it is highly optimized for this one specific task, the computing cost per conversation is microscopic—literally fractions of a penny. This efficiency allows us to comfortably cover typical enrollment volumes of up to 500 messages every single month, easily absorbing this tiny cost into your one-time payment.",
   },
   {
     question: "Where do my counselors actually access the captured student leads?",
@@ -1200,7 +1200,7 @@ export function SalesLandingPage({
 
               <div className="mt-8 flex w-full max-w-md flex-col items-center gap-3 sm:mt-10 lg:mt-10">
                 <CtaButton
-                  className="w-full sm:w-auto lg:w-full lg:[&_a]:px-7 lg:[&_a]:py-4 lg:[&_a]:text-[20px]"
+                  className="w-full sm:w-auto lg:w-full lg:[&_a]:px-8 lg:[&_a]:py-4 lg:[&_a]:text-[22px]"
                   showDiscountBadge={!hasLifetimeAccess}
                   size="large"
                   {...marketingCta}

@@ -90,23 +90,23 @@ export function CtaButton({
       ? "bg-gradient-to-b from-[#112437] to-[#1a334d] shadow-[0px_2px_10.1px_0px_#11243733] before:from-[#0d1c2b] before:to-[#1a334d] hover:shadow-[0px_2px_10.1px_0px_#11243744] hover:before:opacity-100"
       : "bg-gradient-to-b from-[#E36F02] to-[#FDA85A] shadow-[0px_2px_10.1px_0px_#FC7B0233] before:from-[#D96800] before:to-[#FC7B02] hover:shadow-[0px_2px_10.1px_0px_#FC7B0244] hover:before:opacity-100",
     isLarge
-      ? "rounded-[15px] px-6 py-3.5 text-[19px]"
+      ? "rounded-[15px] px-5 py-3.5 text-[18px] sm:px-7 sm:text-[20px]"
       : isCompact
         ? "rounded-[13px] px-3 py-2 text-[13px]"
-        : "rounded-[13px] px-4 py-2 text-[17px]",
+        : "rounded-[13px] px-4 py-2.5 text-[15px] sm:px-5 sm:text-[17px]",
     loading && "pointer-events-none opacity-90",
   );
 
   const labelContent = (
     <span
       className={cn(
-        "relative z-10 inline-flex items-center",
+        "relative z-10 inline-flex max-w-full items-center justify-center",
         priceBelow ? "flex-col gap-1" : isLarge ? "gap-2.5" : "gap-2",
       )}
     >
       {showPrice ? (
         <>
-          <span className="inline-flex items-center gap-2">
+          <span className="inline-flex min-w-0 items-center gap-2">
             <span className="whitespace-nowrap">{label}</span>
             {priceBelow ? (
               <ChevronRight
@@ -129,7 +129,9 @@ export function CtaButton({
         </>
       ) : (
         <>
-          <span className="whitespace-nowrap">{label}</span>
+          <span className="min-w-0 text-center leading-snug text-balance">
+            {label}
+          </span>
           <ChevronRight
             className={cn(
               "shrink-0",
