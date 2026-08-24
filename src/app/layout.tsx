@@ -8,6 +8,7 @@ import "./globals.css";
 //   GoogleTagManagerNoscript,
 // } from "@/components/marketing/google-tag-manager";
 import { MetaPixel } from "@/components/meta-pixel";
+import { MicrosoftClarity } from "@/components/microsoft-clarity";
 import { Toaster } from "@/components/ui/sonner";
 import { publicConfig } from "@/lib/config";
 
@@ -44,6 +45,7 @@ export default function RootLayout({
         {children}
         <Toaster richColors position="top-center" />
         <MetaPixel />
+        <MicrosoftClarity />
       </body>
     </html>
   );
