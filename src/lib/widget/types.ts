@@ -10,6 +10,8 @@ export type WidgetSettings = {
   botId: string;
   headerColor: string;
   accentColor: string;
+  launcherHintText: string;
+  launcherHintColor: string;
   leadFormEnabled: boolean;
   leadFields: LeadFieldConfig[];
   updatedAt: string;

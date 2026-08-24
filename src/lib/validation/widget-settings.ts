@@ -8,6 +8,7 @@ import { ApiValidationError } from "@/lib/validation/errors";
 
 const HEX_COLOR_PATTERN = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 const MAX_LABEL_LENGTH = 80;
+const MAX_LAUNCHER_HINT_TEXT_LENGTH = 80;
 const MIN_LEAD_FIELDS = 1;
 
 function normalizeHexColor(value: unknown, fieldName: string) {
@@ -178,6 +179,36 @@ export function parseLeadFieldsInput(
   return fields;
 }
 
+function parseLauncherHintText(value: unknown) {
+  if (typeof value !== "string") {
+    throw new ApiValidationError(
+      "INVALID_LAUNCHER_HINT_TEXT",
+      "launcherHintText must be a string.",
+      400,
+    );
+  }
+
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    throw new ApiValidationError(
+      "INVALID_LAUNCHER_HINT_TEXT",
+      "Bubble text cannot be empty.",
+      400,
+    );
+  }
+
+  if (trimmed.length > MAX_LAUNCHER_HINT_TEXT_LENGTH) {
+    throw new ApiValidationError(
+      "INVALID_LAUNCHER_HINT_TEXT",
+      `Bubble text must be ${MAX_LAUNCHER_HINT_TEXT_LENGTH} characters or less.`,
+      400,
+    );
+  }
+
+  return trimmed;
+}
+
 export function parseWidgetSettingsPayload(body: unknown) {
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     throw new ApiValidationError(
@@ -193,6 +224,11 @@ export function parseWidgetSettingsPayload(body: unknown) {
   return {
     headerColor: normalizeHexColor(payload.headerColor, "headerColor"),
     accentColor: normalizeHexColor(payload.accentColor, "accentColor"),
+    launcherHintText: parseLauncherHintText(payload.launcherHintText),
+    launcherHintColor: normalizeHexColor(
+      payload.launcherHintColor,
+      "launcherHintColor",
+    ),
     leadFormEnabled,
     leadFields: parseLeadFieldsInput(payload.leadFields, { leadFormEnabled }),
   };

@@ -12,6 +12,8 @@ function mapRow(
   row: {
     header_color: string;
     accent_color: string;
+    launcher_hint_text: string;
+    launcher_hint_color: string;
     lead_form_enabled: boolean;
     lead_fields: unknown;
     updated_at: string;
@@ -21,11 +23,16 @@ function mapRow(
     botId,
     headerColor: row.header_color,
     accentColor: row.accent_color,
+    launcherHintText: row.launcher_hint_text,
+    launcherHintColor: row.launcher_hint_color,
     leadFormEnabled: row.lead_form_enabled,
     leadFields: parseLeadFieldsFromDb(row.lead_fields, row.lead_form_enabled),
     updatedAt: row.updated_at,
   };
 }
+
+const SETTINGS_SELECT =
+  "header_color, accent_color, launcher_hint_text, launcher_hint_color, lead_form_enabled, lead_fields, updated_at";
 
 export async function getWidgetSettingsForBot(
   supabase: Client,
@@ -33,9 +40,7 @@ export async function getWidgetSettingsForBot(
 ): Promise<WidgetSettings | null> {
   const { data, error } = await supabase
     .from("bot_widget_settings")
-    .select(
-      "header_color, accent_color, lead_form_enabled, lead_fields, updated_at",
-    )
+    .select(SETTINGS_SELECT)
     .eq("bot_id", botId)
     .maybeSingle();
 
@@ -56,6 +61,8 @@ export async function upsertWidgetSettingsForBot(
   input: {
     headerColor: string;
     accentColor: string;
+    launcherHintText: string;
+    launcherHintColor: string;
     leadFormEnabled: boolean;
     leadFields: WidgetSettings["leadFields"];
   },
@@ -66,13 +73,13 @@ export async function upsertWidgetSettingsForBot(
       bot_id: botId,
       header_color: input.headerColor,
       accent_color: input.accentColor,
+      launcher_hint_text: input.launcherHintText,
+      launcher_hint_color: input.launcherHintColor,
       lead_form_enabled: input.leadFormEnabled,
       lead_fields: input.leadFields,
       updated_at: new Date().toISOString(),
     })
-    .select(
-      "header_color, accent_color, lead_form_enabled, lead_fields, updated_at",
-    )
+    .select(SETTINGS_SELECT)
     .single();
 
   if (error || !data) {
@@ -97,6 +104,8 @@ export async function ensureWidgetSettingsForBot(
   return upsertWidgetSettingsForBot(supabase, botId, {
     headerColor: defaults.headerColor,
     accentColor: defaults.accentColor,
+    launcherHintText: defaults.launcherHintText,
+    launcherHintColor: defaults.launcherHintColor,
     leadFormEnabled: defaults.leadFormEnabled,
     leadFields: defaults.leadFields,
   });

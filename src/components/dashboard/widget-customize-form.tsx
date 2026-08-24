@@ -52,6 +52,8 @@ export function WidgetCustomizeForm() {
   const [businessName, setBusinessName] = useState("Your business");
   const [headerColor, setHeaderColor] = useState("#075E54");
   const [accentColor, setAccentColor] = useState("#25D366");
+  const [launcherHintText, setLauncherHintText] = useState("May I help you?");
+  const [launcherHintColor, setLauncherHintColor] = useState("#E2E8EF");
   const [leadFormEnabled, setLeadFormEnabled] = useState(true);
   const [leadFields, setLeadFields] = useState<LeadFieldConfig[]>([]);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
@@ -90,6 +92,8 @@ export function WidgetCustomizeForm() {
 
         setHeaderColor(settings.headerColor);
         setAccentColor(settings.accentColor);
+        setLauncherHintText(settings.launcherHintText);
+        setLauncherHintColor(settings.launcherHintColor);
         setLeadFormEnabled(settings.leadFormEnabled);
         setLeadFields(settings.leadFields);
         setUpdatedAt(settings.updatedAt);
@@ -177,6 +181,8 @@ export function WidgetCustomizeForm() {
           body: JSON.stringify({
             headerColor,
             accentColor,
+            launcherHintText,
+            launcherHintColor,
             leadFormEnabled,
             leadFields,
           }),
@@ -190,6 +196,8 @@ export function WidgetCustomizeForm() {
       const settings = body.data.settings;
       setHeaderColor(settings.headerColor);
       setAccentColor(settings.accentColor);
+      setLauncherHintText(settings.launcherHintText);
+      setLauncherHintColor(settings.launcherHintColor);
       setLeadFormEnabled(settings.leadFormEnabled);
       setLeadFields(settings.leadFields);
       setUpdatedAt(settings.updatedAt);
@@ -213,6 +221,8 @@ export function WidgetCustomizeForm() {
   const previewSettings = {
     headerColor,
     accentColor,
+    launcherHintText,
+    launcherHintColor,
     leadFormEnabled,
     leadFields,
   };
@@ -222,8 +232,8 @@ export function WidgetCustomizeForm() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Customize chatbot</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Change colors and lead form fields. Visitors see updates without reinstalling
-          the embed code.
+          Change colors, the help bubble, and lead form fields. Visitors see
+          updates without reinstalling the embed code.
         </p>
       </div>
 
@@ -275,6 +285,48 @@ export function WidgetCustomizeForm() {
                   <Input
                     value={accentColor}
                     onChange={(event) => setAccentColor(event.target.value)}
+                    className="font-mono text-sm"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Help bubble</CardTitle>
+              <CardDescription>
+                The small message that appears above the chat button. Bubble text
+                color is chosen automatically so it stays easy to read.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="launcher-hint-text">Bubble text</Label>
+                <Input
+                  id="launcher-hint-text"
+                  value={launcherHintText}
+                  maxLength={80}
+                  onChange={(event) => setLauncherHintText(event.target.value)}
+                  placeholder="May I help you?"
+                />
+                <p className="text-xs text-muted-foreground">
+                  {launcherHintText.trim().length}/80 characters
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="launcher-hint-color">Bubble color</Label>
+                <div className="flex items-center gap-3">
+                  <Input
+                    id="launcher-hint-color"
+                    type="color"
+                    value={launcherHintColor}
+                    onChange={(event) => setLauncherHintColor(event.target.value)}
+                    className="h-10 w-16 p-1"
+                  />
+                  <Input
+                    value={launcherHintColor}
+                    onChange={(event) => setLauncherHintColor(event.target.value)}
                     className="font-mono text-sm"
                   />
                 </div>

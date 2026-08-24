@@ -4,8 +4,10 @@
   var WIDGET_ROOT_ID = "chatbot-mvp-root";
   var GLOBAL_NAME = "ChatbotMvp";
   var RESIZE_MESSAGE_TYPE = "chatbot-widget-resize";
-  var LAUNCHER_HINT_WIDTH = 280;
-  var LAUNCHER_HINT_HEIGHT = 140;
+  var VIEWPORT_MESSAGE_TYPE = "chatbot-parent-viewport";
+  var DESKTOP_MEDIA_QUERY = "(min-width: 1024px)";
+  var LAUNCHER_HINT_WIDTH = 320;
+  var LAUNCHER_HINT_HEIGHT = 160;
 
   if (window[GLOBAL_NAME] && window[GLOBAL_NAME].loaded) {
     return;
@@ -131,6 +133,10 @@
     } catch (heartbeatError) {}
   }
 
+  function isDesktopViewport() {
+    return window.matchMedia(DESKTOP_MEDIA_QUERY).matches;
+  }
+
   function createWidget(script) {
     var botId = resolveBotId(script);
     var baseUrl = getBaseUrl(script);
@@ -164,7 +170,9 @@
       "/embed/" +
       encodeURIComponent(botId) +
       "?parentUrl=" +
-      encodeURIComponent(window.location.href);
+      encodeURIComponent(window.location.href) +
+      "&viewport=" +
+      (isDesktopViewport() ? "desktop" : "mobile");
     iframe.style.cssText = [
       "width: 100%",
       "height: 100%",
@@ -175,6 +183,20 @@
     document.body.appendChild(container);
 
     applyLauncherStyles(container, iframe);
+
+    function postParentViewport() {
+      if (!iframe.contentWindow) {
+        return;
+      }
+
+      iframe.contentWindow.postMessage(
+        {
+          type: VIEWPORT_MESSAGE_TYPE,
+          desktop: isDesktopViewport(),
+        },
+        baseUrl,
+      );
+    }
 
     iframe.addEventListener("load", function () {
       if (!iframe.contentWindow) {
@@ -188,7 +210,15 @@
         },
         baseUrl,
       );
+      postParentViewport();
     });
+
+    var desktopQuery = window.matchMedia(DESKTOP_MEDIA_QUERY);
+    if (desktopQuery.addEventListener) {
+      desktopQuery.addEventListener("change", postParentViewport);
+    } else if (desktopQuery.addListener) {
+      desktopQuery.addListener(postParentViewport);
+    }
 
     window.addEventListener("message", function (event) {
       if (iframe.contentWindow && event.source !== iframe.contentWindow) {
@@ -259,7 +289,7 @@
       }
 
       window[GLOBAL_NAME] = {
-        version: "0.1.2",
+        version: "0.1.4",
         loaded: true,
         status: "ready",
         botId: widget.botId,

@@ -2,14 +2,22 @@
 
 import type { CSSProperties } from "react";
 
-import { getWidgetThemeVariables } from "@/lib/widget/contrast";
+import {
+  getWidgetThemeVariables,
+  pickReadableTextColor,
+} from "@/lib/widget/contrast";
 import type { LeadFieldConfig, WidgetSettings } from "@/lib/widget/types";
 
 type WidgetPreviewProps = {
   businessName: string;
   settings: Pick<
     WidgetSettings,
-    "headerColor" | "accentColor" | "leadFormEnabled" | "leadFields"
+    | "headerColor"
+    | "accentColor"
+    | "launcherHintText"
+    | "launcherHintColor"
+    | "leadFormEnabled"
+    | "leadFields"
   >;
 };
 
@@ -18,6 +26,7 @@ export function WidgetPreview({ businessName, settings }: WidgetPreviewProps) {
     settings.headerColor,
     settings.accentColor,
   );
+  const hintTextColor = pickReadableTextColor(settings.launcherHintColor);
 
   return (
     <div
@@ -75,7 +84,16 @@ export function WidgetPreview({ businessName, settings }: WidgetPreviewProps) {
           <p className="text-xs text-zinc-500">Chat only — no lead form</p>
         ) : null}
       </div>
-      <div className="flex justify-end bg-transparent p-3">
+      <div className="relative flex justify-end bg-zinc-50 p-3 pt-10">
+        <div
+          className="absolute bottom-14 right-12 max-w-[160px] rounded-full border border-black/10 px-3 py-1.5 text-[11px] font-semibold leading-snug shadow-sm"
+          style={{
+            backgroundColor: settings.launcherHintColor,
+            color: hintTextColor,
+          }}
+        >
+          {settings.launcherHintText}
+        </div>
         <div
           className="flex size-10 items-center justify-center rounded-full shadow-md"
           style={{

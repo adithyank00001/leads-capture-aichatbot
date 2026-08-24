@@ -42,7 +42,6 @@ const LAUNCHER_GAP_PX = 16;
 const HINT_VISIBLE_MS = 6000;
 const HINT_ENTER_MS = 500;
 const HINT_EXIT_MS = 350;
-const DEMO_HINT_TEXT = "See How It Captures a Lead";
 
 const DEMO_LAUNCHER_PULSE_EVENT = "demo-chat-pulse-launcher";
 const LAUNCHER_PULSE_MS = 1650;
@@ -347,12 +346,13 @@ export function DemoChatSection({
           >
             <div
               className={cn(
-                "relative size-14 shrink-0",
+                "relative size-14 shrink-0 lg:size-[4.5rem]",
                 launcherPulsing && "animate-demo-launcher-pulse",
               )}
             >
               <ChatLauncherHint
-                text={DEMO_HINT_TEXT}
+                text={demoWidgetSettings.launcherHintText}
+                backgroundColor={demoWidgetSettings.launcherHintColor}
                 onOpen={openChat}
                 phase={hintPhase}
               />

@@ -16,13 +16,13 @@ import {
   resolveParentPageUrl,
   setParentPageUrl,
 } from "@/lib/embed/parent-page";
-import { postWidgetResize } from "@/lib/embed/widget-messages";
+import { postWidgetResize, PARENT_VIEWPORT_MESSAGE_TYPE } from "@/lib/embed/widget-messages";
 import { isHostAllowed, normalizeDomain } from "@/lib/security/domain-shared";
 import { getOrCreateSessionId } from "@/lib/session/client";
 import type { WidgetSettings } from "@/lib/widget/types";
+import { cn } from "@/lib/utils";
 
 const PARENT_PAGE_MESSAGE_TYPE = "chatbot-parent-page";
-const LIVE_HINT_TEXT = "May I help you?";
 const LIVE_HINT_DELAY_MS = 10_000;
 const LIVE_HINT_ENTER_MS = 500;
 
@@ -53,8 +53,20 @@ export function ChatbotWidget({
   const [parentPageUrl, setParentPageUrlState] = useState<string | null>(null);
   const [allowedDomains, setAllowedDomains] = useState<string[]>([]);
   const [hintPhase, setHintPhase] = useState<LauncherHintPhase>("idle");
+  const [isDesktopLauncher, setIsDesktopLauncher] = useState(
+    () => searchParams.get("viewport") === "desktop",
+  );
   const hintUnlockedRef = useRef(false);
   const hintTimersRef = useRef<number[]>([]);
+
+  useEffect(() => {
+    const viewport = searchParams.get("viewport");
+    if (viewport === "desktop") {
+      setIsDesktopLauncher(true);
+    } else if (viewport === "mobile") {
+      setIsDesktopLauncher(false);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const topLevel = window.self === window.top;
@@ -172,11 +184,16 @@ export function ChatbotWidget({
     }
 
     function handleMessage(event: MessageEvent) {
-      if (
-        !event.data ||
-        typeof event.data !== "object" ||
-        event.data.type !== PARENT_PAGE_MESSAGE_TYPE
-      ) {
+      if (!event.data || typeof event.data !== "object") {
+        return;
+      }
+
+      if (event.data.type === PARENT_VIEWPORT_MESSAGE_TYPE) {
+        setIsDesktopLauncher(Boolean(event.data.desktop));
+        return;
+      }
+
+      if (event.data.type !== PARENT_PAGE_MESSAGE_TYPE) {
         return;
       }
 
@@ -221,7 +238,12 @@ export function ChatbotWidget({
   if (!sessionId) {
     return (
       <div className="flex h-full w-full items-end justify-end bg-transparent">
-        <div className="size-14 animate-pulse rounded-full bg-zinc-200/80" />
+        <div
+            className={cn(
+              "animate-pulse rounded-full bg-zinc-200/80 size-14",
+              isDesktopLauncher && "size-[4.5rem]",
+            )}
+          />
       </div>
     );
   }
@@ -230,13 +252,20 @@ export function ChatbotWidget({
     <WidgetThemeProvider settings={widgetSettings}>
       {!isOpen ? (
         <div className="relative flex h-full w-full items-end justify-end bg-transparent">
-          <div className="relative size-14 shrink-0">
+          <div
+            className={cn(
+              "relative shrink-0 size-14",
+              isDesktopLauncher && "size-[4.5rem]",
+            )}
+          >
             <ChatLauncherHint
-              text={LIVE_HINT_TEXT}
+              text={widgetSettings.launcherHintText}
+              backgroundColor={widgetSettings.launcherHintColor}
               onOpen={handleOpen}
               phase={hintPhase}
+              large={isDesktopLauncher}
             />
-            <ChatLauncher onOpen={handleOpen} />
+            <ChatLauncher onOpen={handleOpen} large={isDesktopLauncher} />
           </div>
         </div>
       ) : (

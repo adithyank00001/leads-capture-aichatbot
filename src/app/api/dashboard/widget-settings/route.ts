@@ -54,6 +54,8 @@ export async function PUT(request: Request) {
     const settings = await upsertWidgetSettingsForBot(supabase, bot.bot_id, {
       headerColor: input.headerColor,
       accentColor: input.accentColor,
+      launcherHintText: input.launcherHintText,
+      launcherHintColor: input.launcherHintColor,
       leadFormEnabled: input.leadFormEnabled,
       leadFields: input.leadFields,
     });

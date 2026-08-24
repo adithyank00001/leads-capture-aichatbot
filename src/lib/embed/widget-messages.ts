@@ -1,4 +1,5 @@
 export const WIDGET_RESIZE_MESSAGE_TYPE = "chatbot-widget-resize";
+export const PARENT_VIEWPORT_MESSAGE_TYPE = "chatbot-parent-viewport";
 
 export type WidgetResizeMode = "launcher" | "launcher-hint" | "panel";
 

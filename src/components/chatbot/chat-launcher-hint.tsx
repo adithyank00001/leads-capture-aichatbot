@@ -1,31 +1,48 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { pickReadableTextColor } from "@/lib/widget/contrast";
+import {
+  WIDGET_DEFAULT_LAUNCHER_HINT_COLOR,
+  WIDGET_DEFAULT_LAUNCHER_HINT_TEXT,
+} from "@/lib/widget/defaults";
 
 export type LauncherHintPhase = "idle" | "enter" | "visible" | "exit" | "done";
 
 type ChatLauncherHintProps = {
-  text: string;
+  text?: string;
+  backgroundColor?: string;
   onOpen: () => void;
   phase: LauncherHintPhase;
   ariaLabel?: string;
+  /** Force large size (used by embed when the parent page is desktop). */
+  large?: boolean;
 };
 
 export function ChatLauncherHint({
-  text,
+  text = WIDGET_DEFAULT_LAUNCHER_HINT_TEXT,
+  backgroundColor = WIDGET_DEFAULT_LAUNCHER_HINT_COLOR,
   onOpen,
   phase,
   ariaLabel,
+  large = false,
 }: ChatLauncherHintProps) {
   const expanded = phase === "enter" || phase === "visible";
   const isInteractive = expanded;
+  const textColor = pickReadableTextColor(backgroundColor);
 
   return (
     <button
       type="button"
       onClick={onOpen}
       className={cn(
-        "absolute bottom-[calc(100%+12px)] right-4 z-10 w-max max-w-[min(210px,calc(100vw-5.5rem))] origin-bottom-right overflow-visible text-left sm:right-6 sm:max-w-[230px]",
+        "absolute bottom-[calc(100%+12px)] z-10 w-max origin-bottom-right overflow-visible text-left",
+        // Sit further left of the button so it is not stuck to the right edge
+        "right-10 sm:right-12 lg:right-14",
+        large && "right-14",
+        "max-w-[min(210px,calc(100vw-5.5rem))] sm:max-w-[230px]",
+        "lg:max-w-[min(280px,calc(100vw-6rem))]",
+        large && "max-w-[min(280px,calc(100vw-6rem))]",
         "transition-[transform,opacity] will-change-transform",
         expanded
           ? "pointer-events-auto translate-x-0 translate-y-0 scale-100 opacity-100"
@@ -40,10 +57,28 @@ export function ChatLauncherHint({
       tabIndex={isInteractive ? 0 : -1}
       aria-label={ariaLabel ?? text}
     >
-      <span className="relative block overflow-visible rounded-3xl border border-black/10 bg-[#E2E8EF] px-3.5 py-2 text-[13px] font-semibold leading-snug tracking-tight text-[#112437] shadow-[0_0_0_0.5px_rgba(0,0,0,0.18),0_4px_14px_rgba(17,36,55,0.08)] sm:rounded-full sm:px-4 sm:py-2.5 sm:text-[14px] sm:whitespace-nowrap">
+      <span
+        className={cn(
+          "relative block overflow-visible rounded-3xl border border-black/10",
+          "px-3.5 py-2 text-[13px] font-semibold leading-snug tracking-tight",
+          "shadow-[0_0_0_0.5px_rgba(0,0,0,0.18),0_4px_14px_rgba(17,36,55,0.08)]",
+          "sm:rounded-full sm:px-4 sm:py-2.5 sm:text-[14px] sm:whitespace-nowrap",
+          "lg:px-5 lg:py-3 lg:text-[16px]",
+          large && "rounded-full px-5 py-3 text-[16px] whitespace-nowrap",
+        )}
+        style={{
+          backgroundColor,
+          color: textColor,
+        }}
+      >
         {text}
         <span
-          className="absolute bottom-0 right-3 block size-2.5 translate-x-0.5 translate-y-[48%] rotate-[28deg] border-b border-r border-black/10 bg-[#E2E8EF]"
+          className={cn(
+            "absolute bottom-0 right-3 block size-2.5 translate-x-0.5 translate-y-[48%] rotate-[28deg] border-b border-r border-black/10",
+            "lg:size-3 lg:right-4",
+            large && "size-3 right-4",
+          )}
+          style={{ backgroundColor }}
           aria-hidden
         />
       </span>

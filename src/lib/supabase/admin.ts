@@ -192,6 +192,8 @@ export type Database = {
           bot_id: string;
           header_color: string;
           accent_color: string;
+          launcher_hint_text: string;
+          launcher_hint_color: string;
           lead_form_enabled: boolean;
           lead_fields: Json;
           updated_at: string;
@@ -200,6 +202,8 @@ export type Database = {
           bot_id: string;
           header_color?: string;
           accent_color?: string;
+          launcher_hint_text?: string;
+          launcher_hint_color?: string;
           lead_form_enabled?: boolean;
           lead_fields?: Json;
           updated_at?: string;
@@ -208,6 +212,8 @@ export type Database = {
           bot_id?: string;
           header_color?: string;
           accent_color?: string;
+          launcher_hint_text?: string;
+          launcher_hint_color?: string;
           lead_form_enabled?: boolean;
           lead_fields?: Json;
           updated_at?: string;

@@ -18,6 +18,8 @@ export const demoWidgetSettings: WidgetSettings = {
   botId: "landing-demo",
   headerColor: "#112437",
   accentColor: "#FC7B02",
+  launcherHintText: "See How It Captures a Lead",
+  launcherHintColor: "#E2E8EF",
   leadFormEnabled: true,
   leadFields: [
     { id: "name", required: true, label: "Name" },
