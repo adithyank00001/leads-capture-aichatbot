@@ -64,7 +64,7 @@ export function LeadsMobileCard({
           onClick={() => onDelete(lead.id)}
           disabled={isDeleting}
         >
-          {isDeleting ? "Deleting…" : "Delete"}
+          {isDeleting ? "Removing…" : "Remove"}
         </Button>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Fragment } from "react";
 import {
@@ -173,6 +174,7 @@ const testimonials = [
     name: "Zain Khan",
     role: "VERIFIED CUSTOMER",
     rating: 5,
+    image: "/testimonials/review-zain-v2.webp",
   },
   {
     quote:
@@ -184,6 +186,7 @@ const testimonials = [
     name: "Sara Zaabi",
     role: "VERIFIED CUSTOMER",
     rating: 5,
+    image: "/testimonials/review-sara-v2.webp",
   },
   {
     quote:
@@ -197,6 +200,7 @@ const testimonials = [
     name: "Hamad Shamsi",
     role: "VERIFIED CUSTOMER",
     rating: 5,
+    image: "/testimonials/review-hamad-v2.webp",
   },
 ] as const;
 
@@ -817,13 +821,22 @@ export function SalesLandingPage({
                         }
                       />
                     </p>
-                    <div className="mt-auto">
-                      <p className="font-semibold text-[var(--landing-navy)]">
-                        {testimonial.name}
-                      </p>
-                      <p className="mt-1 text-[13px] font-bold uppercase tracking-wide text-[#3B82F6] sm:text-[15px]">
-                        {testimonial.role}
-                      </p>
+                    <div className="mt-auto flex items-center gap-3">
+                      <Image
+                        src={testimonial.image}
+                        alt={testimonial.name}
+                        width={48}
+                        height={48}
+                        className="size-12 shrink-0 rounded-full object-cover"
+                      />
+                      <div>
+                        <p className="font-semibold text-[var(--landing-navy)]">
+                          {testimonial.name}
+                        </p>
+                        <p className="mt-0.5 text-[13px] font-bold uppercase tracking-wide text-[#3B82F6] sm:text-[15px]">
+                          {testimonial.role}
+                        </p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

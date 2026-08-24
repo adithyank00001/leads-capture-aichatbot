@@ -2,7 +2,10 @@ import { apiError, apiSuccess } from "@/lib/api-response";
 import { requireDashboardApiUser } from "@/lib/auth/dashboard-session";
 import { getBotByCustomerId } from "@/lib/db/bots";
 import { getCustomerByUserId } from "@/lib/db/customers";
-import { deleteLeadByIdForBot } from "@/lib/db/leads";
+import {
+  deleteLeadByIdForBot,
+  purgeSoftDeletedLeadsOlderThanRetention,
+} from "@/lib/db/leads";
 import { handleRouteError } from "@/lib/api/request";
 import { ApiValidationError } from "@/lib/validation/errors";
 
@@ -14,6 +17,23 @@ type RouteContext = {
 
 export async function DELETE(_request: Request, context: RouteContext) {
   try {
+    try {
+      await purgeSoftDeletedLeadsOlderThanRetention();
+    } catch (purgeError) {
+      console.error(
+        JSON.stringify({
+          level: "error",
+          route: "dashboard/leads/[leadId]",
+          category: "unknown",
+          message:
+            purgeError instanceof Error
+              ? purgeError.message
+              : "Soft-deleted lead purge failed.",
+          timestamp: new Date().toISOString(),
+        }),
+      );
+    }
+
     const { leadId } = await context.params;
     const trimmedLeadId = leadId?.trim();
 

@@ -216,7 +216,7 @@ export function LeadsTable() {
                               onClick={() => openDeleteDialog(lead.id)}
                               disabled={deletingLeadId === lead.id}
                             >
-                              Delete
+                              Remove
                             </Button>
                           </div>
                         </TableCell>

@@ -39,11 +39,11 @@ export function DeleteLeadDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete lead?</DialogTitle>
+          <DialogTitle>Remove lead?</DialogTitle>
           <DialogDescription>
-            This will permanently delete{" "}
-            {leadName ? <strong>{leadName}</strong> : "this lead"} and all chat
-            messages. This cannot be undone.
+            This will remove{" "}
+            {leadName ? <strong>{leadName}</strong> : "this lead"} from your
+            list. You will not see it in the dashboard anymore.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2 sm:gap-0">
@@ -61,7 +61,7 @@ export function DeleteLeadDialog({
             onClick={() => void handleConfirm()}
             disabled={isDeleting || !leadId}
           >
-            {isDeleting ? "Deleting…" : "Delete lead"}
+            {isDeleting ? "Removing…" : "Remove lead"}
           </Button>
         </DialogFooter>
       </DialogContent>
