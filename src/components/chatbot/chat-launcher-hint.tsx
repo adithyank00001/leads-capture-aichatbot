@@ -59,7 +59,7 @@ export function ChatLauncherHint({
     >
       <span
         className={cn(
-          "relative block overflow-visible rounded-3xl border border-black/10",
+          "relative z-10 block overflow-visible rounded-3xl border border-black/10",
           "px-3.5 py-2 text-[13px] font-semibold leading-snug tracking-tight",
           "shadow-[0_0_0_0.5px_rgba(0,0,0,0.18),0_4px_14px_rgba(17,36,55,0.08)]",
           "sm:rounded-full sm:px-4 sm:py-2.5 sm:text-[14px] sm:whitespace-nowrap",
@@ -72,15 +72,6 @@ export function ChatLauncherHint({
         }}
       >
         {text}
-        <span
-          className={cn(
-            "absolute bottom-0 right-3 block size-2.5 translate-x-0.5 translate-y-[48%] rotate-[28deg] border-b border-r border-black/10",
-            "lg:size-3 lg:right-4",
-            large && "size-3 right-4",
-          )}
-          style={{ backgroundColor }}
-          aria-hidden
-        />
       </span>
     </button>
   );
