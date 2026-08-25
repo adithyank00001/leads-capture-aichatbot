@@ -31,6 +31,7 @@ function getWebhookHandler() {
         payment_id: payload.data.payment_id,
         metadata: payload.data.metadata,
         customer: payload.data.customer,
+        billing: payload.data.billing,
         product_cart: payload.data.product_cart ?? undefined,
       };
 
@@ -43,6 +44,8 @@ function getWebhookHandler() {
           trackLtdPurchaseFromPayment({
             paymentId: payment.payment_id,
             email: payment.customer.email,
+            name: payment.customer.name,
+            billing: payment.billing,
             metadata: payment.metadata,
             productCart: payment.product_cart,
             expectedProductId: productId,

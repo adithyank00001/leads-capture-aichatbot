@@ -1,5 +1,6 @@
 import { publicConfig } from "@/lib/config";
 import { track } from "@/lib/fbpixel";
+import { ensureBrowserFbcCookie } from "@/lib/meta/fbc";
 import { getMetaPageContentName } from "@/lib/meta/public-pages";
 
 export type BrowserTrackableEvent = "PageView" | "InitiateCheckout";
@@ -54,6 +55,13 @@ export function trackPixelAndCapi(
 ): string {
   const eventId = createEventId();
   const sourceUrl = eventSourceUrl?.trim() || currentPageUrl();
+
+  // Persist fbclid → _fbc before Pixel + CAPI so checkout/Purchase still match later.
+  try {
+    ensureBrowserFbcCookie();
+  } catch {
+    // Cookie write must never break tracking.
+  }
 
   try {
     track(eventName, params, { eventID: eventId });

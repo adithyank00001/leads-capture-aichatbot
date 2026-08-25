@@ -1,7 +1,5 @@
 import "server-only";
 
-import { createHash } from "node:crypto";
-
 import { publicConfig } from "@/lib/config";
 import { serverEnv } from "@/lib/env.server";
 import { FB_PIXEL_ID } from "@/lib/fbpixel";
@@ -10,6 +8,12 @@ import {
   metaAttributionFromMetadata,
   type MetaAttribution,
 } from "@/lib/meta/attribution";
+import {
+  buildHashedCustomerUserData,
+  metaCustomerInfoFromDodo,
+  type MetaBillingAddress,
+  type MetaCustomerInfo,
+} from "@/lib/meta/user-data";
 
 const GRAPH_API_VERSION = "v22.0";
 
@@ -22,19 +26,6 @@ export type ClientForwardableCapiEvent =
   (typeof CLIENT_FORWARDABLE_CAPI_EVENTS)[number];
 
 export type CapiEventName = ClientForwardableCapiEvent | "Purchase";
-
-function hashEmail(email: string | null | undefined): string | undefined {
-  if (!email) {
-    return undefined;
-  }
-
-  const normalized = email.trim().toLowerCase();
-  if (!normalized.includes("@")) {
-    return undefined;
-  }
-
-  return createHash("sha256").update(normalized).digest("hex");
-}
 
 function resolvePurchaseEventSourceUrl(
   metadata: Record<string, unknown>,
@@ -50,15 +41,19 @@ function resolvePurchaseEventSourceUrl(
 }
 
 function buildUserData(input: {
+  customer?: MetaCustomerInfo | null;
   email?: string | null;
   attribution: MetaAttribution;
 }) {
-  const userData: Record<string, string | string[]> = {};
-  const hashedEmail = hashEmail(input.email);
+  const customerInfo: MetaCustomerInfo = {
+    ...(input.customer ?? {}),
+    email: input.customer?.email ?? input.email ?? null,
+  };
 
-  if (hashedEmail) {
-    userData.em = [hashedEmail];
-  }
+  const userData: Record<string, string | string[]> = {
+    ...buildHashedCustomerUserData(customerInfo),
+  };
+
   if (input.attribution.clientIp) {
     userData.client_ip_address = input.attribution.clientIp;
   }
@@ -80,6 +75,7 @@ export type SendCapiEventInput = {
   eventId: string;
   eventSourceUrl: string;
   email?: string | null;
+  customer?: MetaCustomerInfo | null;
   attribution: MetaAttribution;
   customData?: Record<string, unknown>;
   eventTimeSeconds?: number;
@@ -101,6 +97,7 @@ export async function sendCapiEvent(input: SendCapiEventInput): Promise<void> {
 
     const userData = buildUserData({
       email: input.email,
+      customer: input.customer,
       attribution: input.attribution,
     });
 
@@ -184,6 +181,7 @@ export async function sendCapiEvent(input: SendCapiEventInput): Promise<void> {
 export type SendPurchaseEventInput = {
   paymentId: string;
   email?: string | null;
+  customer?: MetaCustomerInfo | null;
   metadata?: Record<string, unknown>;
   attribution?: MetaAttribution;
   eventSourceUrl?: string;
@@ -208,6 +206,7 @@ export async function sendPurchaseEvent(
       input.eventSourceUrl?.trim() ||
       resolvePurchaseEventSourceUrl(metadata),
     email: input.email,
+    customer: input.customer,
     attribution,
     customData: {
       value: publicConfig.lifetimeAccessPriceUsd,
@@ -225,6 +224,7 @@ export async function sendPurchaseEvent(
 export async function sendPurchaseEventFromPageRequest(input: {
   paymentId: string;
   email?: string | null;
+  customer?: MetaCustomerInfo | null;
   eventSourceUrl: string;
   requestHeaders: Headers;
 }): Promise<void> {
@@ -237,11 +237,14 @@ export async function sendPurchaseEventFromPageRequest(input: {
   const request = new Request(origin, {
     headers: input.requestHeaders,
   });
-  const attribution = getMetaAttributionFromRequest(request);
+  const attribution = getMetaAttributionFromRequest(request, {
+    eventSourceUrl: input.eventSourceUrl,
+  });
 
   await sendPurchaseEvent({
     paymentId,
     email: input.email,
+    customer: input.customer,
     attribution,
     eventSourceUrl: input.eventSourceUrl,
   });
@@ -254,6 +257,8 @@ export async function sendPurchaseEventFromPageRequest(input: {
 export async function trackLtdPurchaseFromPayment(input: {
   paymentId: string;
   email?: string | null;
+  name?: string | null;
+  billing?: MetaBillingAddress | null;
   metadata: Record<string, unknown>;
   productCart?: Array<{ product_id: string; quantity: number }> | null;
   expectedProductId: string;
@@ -271,6 +276,11 @@ export async function trackLtdPurchaseFromPayment(input: {
   await sendPurchaseEvent({
     paymentId: input.paymentId,
     email: input.email,
+    customer: metaCustomerInfoFromDodo({
+      email: input.email,
+      name: input.name,
+      billing: input.billing,
+    }),
     metadata: input.metadata,
   });
 }

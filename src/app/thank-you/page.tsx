@@ -39,6 +39,7 @@ export default async function ThankYouPage({ searchParams }: ThankYouPageProps) 
   await sendPurchaseEventFromPageRequest({
     paymentId: verification.paymentId,
     email: verification.email,
+    customer: verification.customer,
     eventSourceUrl: `${appOrigin}/thank-you`,
     requestHeaders,
   });

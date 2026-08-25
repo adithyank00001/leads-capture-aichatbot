@@ -6,12 +6,25 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 
 import { FB_PIXEL_ID } from "@/lib/fbpixel";
 import { trackPageView } from "@/lib/meta/browser-track";
+import { ensureBrowserFbcCookie } from "@/lib/meta/fbc";
 import { isPublicMetaPagePath } from "@/lib/meta/public-pages";
 
 function PixelTracker({ pixelReady }: { pixelReady: boolean }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const lastKeyRef = useRef<string | null>(null);
+
+  // Capture Meta click id as soon as the landing URL is known (before Pixel is ready).
+  useEffect(() => {
+    if (!isPublicMetaPagePath(pathname)) {
+      return;
+    }
+    try {
+      ensureBrowserFbcCookie();
+    } catch {
+      // ignore
+    }
+  }, [pathname, searchParams]);
 
   useEffect(() => {
     if (!pixelReady || !isPublicMetaPagePath(pathname)) {

@@ -13,11 +13,34 @@ import {
 } from "@/components/ui/card";
 import { getCustomerAccess } from "@/lib/auth/access";
 import { getCustomerByUserId } from "@/lib/db/customers";
+import { getDodoConfig } from "@/lib/billing/dodo-config";
 import { serverEnv } from "@/lib/env.server";
 import { sendPurchaseEventFromPageRequest } from "@/lib/meta/capi";
+import { metaCustomerInfoFromDodo } from "@/lib/meta/user-data";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import DodoPayments from "dodopayments";
+
+async function loadPurchaseCustomerInfo(paymentId: string, fallbackEmail: string | null) {
+  try {
+    const dodo = getDodoConfig();
+    const client = new DodoPayments({
+      bearerToken: dodo.apiKey,
+      environment: dodo.environment,
+    });
+    const payment = await client.payments.retrieve(paymentId);
+    const name =
+      typeof payment.customer?.name === "string" ? payment.customer.name : null;
+    return metaCustomerInfoFromDodo({
+      email: fallbackEmail ?? payment.customer?.email ?? null,
+      name,
+      billing: payment.billing ?? null,
+    });
+  } catch {
+    return fallbackEmail ? { email: fallbackEmail } : null;
+  }
+}
 
 export default async function CheckoutSuccessPage() {
   const supabase = await createServerSupabaseClient();
@@ -39,9 +62,12 @@ export default async function CheckoutSuccessPage() {
     if (paymentEventId) {
       const requestHeaders = await headers();
       const appOrigin = serverEnv.appUrl.replace(/\/+$/, "");
+      const email = user.email ?? customer?.email ?? null;
+      const customerInfo = await loadPurchaseCustomerInfo(paymentEventId, email);
       await sendPurchaseEventFromPageRequest({
         paymentId: paymentEventId,
-        email: user.email ?? customer?.email ?? null,
+        email,
+        customer: customerInfo,
         eventSourceUrl: `${appOrigin}/checkout/success`,
         requestHeaders,
       });

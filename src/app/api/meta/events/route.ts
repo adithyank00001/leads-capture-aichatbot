@@ -110,7 +110,9 @@ export async function POST(request: Request) {
       email = null;
     }
 
-    const attribution = getMetaAttributionFromRequest(request);
+    const attribution = getMetaAttributionFromRequest(request, {
+      eventSourceUrl,
+    });
 
     await sendCapiEvent({
       eventName,

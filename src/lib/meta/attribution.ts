@@ -1,5 +1,7 @@
 import "server-only";
 
+import { isValidFbc, resolveFbc } from "@/lib/meta/fbc";
+
 /** Dodo metadata values max 500 chars. */
 export const META_ATTR_MAX_VALUE_LEN = 500;
 
@@ -15,6 +17,11 @@ export type MetaAttribution = {
   fbc?: string;
   clientIp?: string;
   userAgent?: string;
+};
+
+export type MetaAttributionOptions = {
+  /** Page URL from the browser (may still contain fbclid). */
+  eventSourceUrl?: string | null;
 };
 
 function truncateMetaValue(value: string): string {
@@ -69,14 +76,27 @@ function getClientIpFromHeaders(headers: Headers): string | undefined {
 
 /**
  * Read Meta click/browser cookies + request IP/UA for CAPI matching.
+ * Builds fbc from fbclid in eventSourceUrl / request URL / Referer when _fbc is missing.
  * Safe to store in Dodo checkout metadata (values truncated to 500 chars).
  */
-export function getMetaAttributionFromRequest(request: Request): MetaAttribution {
+export function getMetaAttributionFromRequest(
+  request: Request,
+  options: MetaAttributionOptions = {},
+): MetaAttribution {
   const cookieHeader = request.headers.get("cookie");
   const fbp = parseCookieValue(cookieHeader, "_fbp");
-  const fbc = parseCookieValue(cookieHeader, "_fbc");
+  const cookieFbc = parseCookieValue(cookieHeader, "_fbc");
   const clientIp = getClientIpFromHeaders(request.headers);
   const userAgent = request.headers.get("user-agent")?.trim() || undefined;
+
+  const fbc = resolveFbc({
+    cookieFbc,
+    urls: [
+      options.eventSourceUrl,
+      request.url,
+      request.headers.get("referer"),
+    ],
+  });
 
   return {
     ...(fbp ? { fbp: truncateMetaValue(fbp) } : {}),
@@ -131,7 +151,7 @@ export function metaAttributionFromMetadata(
 
   return {
     ...(fbp ? { fbp } : {}),
-    ...(fbc ? { fbc } : {}),
+    ...(fbc && isValidFbc(fbc) ? { fbc } : {}),
     ...(clientIp ? { clientIp } : {}),
     ...(userAgent ? { userAgent } : {}),
   };

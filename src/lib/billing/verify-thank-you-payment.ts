@@ -5,12 +5,17 @@ import DodoPayments from "dodopayments";
 import { getDodoConfig } from "@/lib/billing/dodo-config";
 import { normalizeEmail } from "@/lib/billing/normalize-email";
 import { findPendingPurchaseByPaymentId } from "@/lib/billing/pending-purchase";
+import {
+  metaCustomerInfoFromDodo,
+  type MetaCustomerInfo,
+} from "@/lib/meta/user-data";
 
 export type ThankYouPaymentVerification =
   | {
       ok: true;
       paymentId: string;
       email: string | null;
+      customer: MetaCustomerInfo | null;
     }
   | {
       ok: false;
@@ -63,6 +68,34 @@ async function resolvePaymentEmail(input: {
   return pendingPurchase?.email ?? null;
 }
 
+function readCustomerName(customer: unknown): string | null {
+  if (
+    typeof customer === "object" &&
+    customer &&
+    "name" in customer &&
+    typeof customer.name === "string"
+  ) {
+    const name = customer.name.trim();
+    return name || null;
+  }
+  return null;
+}
+
+function readBilling(billing: unknown) {
+  if (!billing || typeof billing !== "object") {
+    return null;
+  }
+
+  const record = billing as Record<string, unknown>;
+  return {
+    country: typeof record.country === "string" ? record.country : null,
+    city: typeof record.city === "string" ? record.city : null,
+    state: typeof record.state === "string" ? record.state : null,
+    street: typeof record.street === "string" ? record.street : null,
+    zipcode: typeof record.zipcode === "string" ? record.zipcode : null,
+  };
+}
+
 export async function verifyThankYouPayment(input: {
   paymentId?: string | null;
   status?: string | null;
@@ -95,13 +128,20 @@ export async function verifyThankYouPayment(input: {
         ? payment.customer.email
         : null;
 
+    const email = await resolvePaymentEmail({
+      queryEmail: input.email,
+      paymentId,
+      paymentCustomerEmail: customerEmail,
+    });
+
     return {
       ok: true,
       paymentId,
-      email: await resolvePaymentEmail({
-        queryEmail: input.email,
-        paymentId,
-        paymentCustomerEmail: customerEmail,
+      email,
+      customer: metaCustomerInfoFromDodo({
+        email,
+        name: readCustomerName(payment.customer),
+        billing: readBilling(payment.billing),
       }),
     };
   } catch {
@@ -109,13 +149,16 @@ export async function verifyThankYouPayment(input: {
       return { ok: false };
     }
 
+    const email = await resolvePaymentEmail({
+      queryEmail: input.email,
+      paymentId,
+    });
+
     return {
       ok: true,
       paymentId,
-      email: await resolvePaymentEmail({
-        queryEmail: input.email,
-        paymentId,
-      }),
+      email,
+      customer: email ? { email } : null,
     };
   }
 }

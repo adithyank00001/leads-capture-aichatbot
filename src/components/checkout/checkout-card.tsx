@@ -8,6 +8,7 @@ import {
   isSafeInternalRedirect,
 } from "@/lib/billing/start-landing-checkout";
 import { publicConfig } from "@/lib/config";
+import { ensureBrowserFbcCookie } from "@/lib/meta/fbc";
 import { cn } from "@/lib/utils";
 
 type CheckoutResponse =
@@ -80,6 +81,12 @@ export function CheckoutCard({
     setLoading(true);
 
     try {
+      try {
+        ensureBrowserFbcCookie();
+      } catch {
+        // ignore
+      }
+
       const response = await fetch(
         isGuest ? "/api/checkout/guest" : "/api/checkout",
         {

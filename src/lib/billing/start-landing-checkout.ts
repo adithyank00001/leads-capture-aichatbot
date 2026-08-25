@@ -1,4 +1,5 @@
 import { trackInitiateCheckout } from "@/lib/meta/browser-track";
+import { ensureBrowserFbcCookie } from "@/lib/meta/fbc";
 
 const CHECKOUT_FALLBACK = "/checkout?error=checkout_failed";
 const PENDING_DODO_CHECKOUT_KEY = "pending-dodo-checkout-url";
@@ -85,6 +86,13 @@ export async function startLandingCheckout() {
   checkoutStartInFlight = true;
 
   try {
+    // Save click id before checkout API so Purchase CAPI gets fbc from Dodo metadata.
+    try {
+      ensureBrowserFbcCookie();
+    } catch {
+      // ignore
+    }
+
     const response = await fetch("/api/checkout/start", {
       method: "POST",
     });
