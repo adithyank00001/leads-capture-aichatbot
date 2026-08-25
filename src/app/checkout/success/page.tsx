@@ -22,7 +22,11 @@ import type { Database } from "@/lib/supabase/admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import DodoPayments from "dodopayments";
 
-async function loadPurchaseCustomerInfo(paymentId: string, fallbackEmail: string | null) {
+async function loadPurchaseCustomerInfo(
+  paymentId: string,
+  fallbackEmail: string | null,
+  fallbackUserId?: string | null,
+) {
   try {
     const dodo = getDodoConfig();
     const client = new DodoPayments({
@@ -32,13 +36,36 @@ async function loadPurchaseCustomerInfo(paymentId: string, fallbackEmail: string
     const payment = await client.payments.retrieve(paymentId);
     const name =
       typeof payment.customer?.name === "string" ? payment.customer.name : null;
+    const cardHolderName =
+      typeof payment.card_holder_name === "string"
+        ? payment.card_holder_name
+        : null;
+    const dodoCustomerId =
+      typeof payment.customer?.customer_id === "string"
+        ? payment.customer.customer_id
+        : null;
+    const userIdFromMetadata =
+      typeof payment.metadata?.user_id === "string"
+        ? payment.metadata.user_id
+        : null;
+
     return metaCustomerInfoFromDodo({
       email: fallbackEmail ?? payment.customer?.email ?? null,
       name,
+      cardHolderName,
       billing: payment.billing ?? null,
+      dodoCustomerId,
+      userId: userIdFromMetadata ?? fallbackUserId ?? null,
     });
   } catch {
-    return fallbackEmail ? { email: fallbackEmail } : null;
+    return fallbackEmail
+      ? metaCustomerInfoFromDodo({
+          email: fallbackEmail,
+          userId: fallbackUserId ?? null,
+        })
+      : fallbackUserId
+        ? metaCustomerInfoFromDodo({ userId: fallbackUserId })
+        : null;
   }
 }
 
@@ -63,7 +90,11 @@ export default async function CheckoutSuccessPage() {
       const requestHeaders = await headers();
       const appOrigin = serverEnv.appUrl.replace(/\/+$/, "");
       const email = user.email ?? customer?.email ?? null;
-      const customerInfo = await loadPurchaseCustomerInfo(paymentEventId, email);
+      const customerInfo = await loadPurchaseCustomerInfo(
+        paymentEventId,
+        email,
+        user.id,
+      );
       await sendPurchaseEventFromPageRequest({
         paymentId: paymentEventId,
         email,

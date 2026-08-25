@@ -13,6 +13,8 @@ export type MetaCustomerInfo = {
   city?: string | null;
   state?: string | null;
   zip?: string | null;
+  /** Raw IDs (Dodo customer_id, app user_id). Hashed before send. */
+  externalIds?: string[] | null;
 };
 
 export type MetaBillingAddress = {
@@ -76,7 +78,6 @@ function normalizeCountry(value: string): string | undefined {
   if (/^[a-z]{2}$/.test(trimmed)) {
     return trimmed;
   }
-  // Common long names → ISO (only a few we might see from checkout defaults).
   const aliases: Record<string, string> = {
     "united states": "us",
     usa: "us",
@@ -97,12 +98,76 @@ function normalizeEmail(email: string): string | undefined {
   return normalized;
 }
 
+/** Meta recommends hashing external_id; normalize then SHA-256. */
+function normalizeExternalId(value: string): string | undefined {
+  const normalized = value.trim().toLowerCase();
+  return normalized || undefined;
+}
+
+function namePartCount(name: string): number {
+  return name
+    .trim()
+    .split(/\s+/)
+    .map((part) => part.trim())
+    .filter(Boolean).length;
+}
+
+/**
+ * Prefer the richer name for Meta fn/ln splitting.
+ * Example: customer "dsfsdg" + card "Priya Sharma" → "Priya Sharma"
+ */
+export function pickBestFullName(
+  customerName?: string | null,
+  cardHolderName?: string | null,
+): string | null {
+  const candidates = [customerName, cardHolderName]
+    .map((value) => (typeof value === "string" ? value.trim() : ""))
+    .filter(Boolean);
+
+  if (candidates.length === 0) {
+    return null;
+  }
+
+  candidates.sort((a, b) => {
+    const partDiff = namePartCount(b) - namePartCount(a);
+    if (partDiff !== 0) {
+      return partDiff;
+    }
+    return b.length - a.length;
+  });
+
+  return candidates[0] ?? null;
+}
+
+export function collectExternalIds(input: {
+  dodoCustomerId?: string | null;
+  userId?: string | null;
+}): string[] {
+  const ids: string[] = [];
+  const seen = new Set<string>();
+
+  for (const raw of [input.dodoCustomerId, input.userId]) {
+    if (typeof raw !== "string") {
+      continue;
+    }
+    const trimmed = raw.trim();
+    if (!trimmed) {
+      continue;
+    }
+    const key = trimmed.toLowerCase();
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    ids.push(trimmed);
+  }
+
+  return ids;
+}
+
 /**
  * Split a full name for Meta fn / ln.
  * Meta only has first + last (no middle-name field).
- * Example: "John Michael Smith" → first=John, last=Smith (middle dropped).
- * Example: "Jane Doe" → first=Jane, last=Doe
- * Example: "Madonna" → first=Madonna only
  */
 export function splitFullName(fullName: string | null | undefined): {
   firstName?: string;
@@ -134,15 +199,24 @@ export function splitFullName(fullName: string | null | undefined): {
 export function metaCustomerInfoFromDodo(input: {
   email?: string | null;
   name?: string | null;
+  cardHolderName?: string | null;
   billing?: MetaBillingAddress | null;
+  dodoCustomerId?: string | null;
+  userId?: string | null;
 }): MetaCustomerInfo {
+  const externalIds = collectExternalIds({
+    dodoCustomerId: input.dodoCustomerId,
+    userId: input.userId,
+  });
+
   return {
     email: input.email ?? null,
-    fullName: input.name ?? null,
+    fullName: pickBestFullName(input.name, input.cardHolderName),
     country: input.billing?.country ?? null,
     city: input.billing?.city ?? null,
     state: input.billing?.state ?? null,
     zip: input.billing?.zipcode ?? null,
+    ...(externalIds.length > 0 ? { externalIds } : {}),
   };
 }
 
@@ -201,6 +275,16 @@ export function buildHashedCustomerUserData(
   const hashedZip = hashNormalized(zip || undefined);
   if (hashedZip) {
     userData.zp = [hashedZip];
+  }
+
+  const hashedExternalIds = (info.externalIds ?? [])
+    .map((id) => hashNormalized(normalizeExternalId(id)))
+    .filter((value): value is string => Boolean(value));
+
+  if (hashedExternalIds.length === 1) {
+    userData.external_id = hashedExternalIds[0];
+  } else if (hashedExternalIds.length > 1) {
+    userData.external_id = hashedExternalIds;
   }
 
   return userData;

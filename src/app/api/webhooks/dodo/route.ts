@@ -32,6 +32,7 @@ function getWebhookHandler() {
         metadata: payload.data.metadata,
         customer: payload.data.customer,
         billing: payload.data.billing,
+        card_holder_name: payload.data.card_holder_name,
         product_cart: payload.data.product_cart ?? undefined,
       };
 
@@ -45,6 +46,11 @@ function getWebhookHandler() {
             paymentId: payment.payment_id,
             email: payment.customer.email,
             name: payment.customer.name,
+            cardHolderName:
+              typeof payment.card_holder_name === "string"
+                ? payment.card_holder_name
+                : null,
+            dodoCustomerId: payment.customer.customer_id,
             billing: payment.billing,
             metadata: payment.metadata,
             productCart: payment.product_cart,

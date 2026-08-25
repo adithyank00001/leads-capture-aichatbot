@@ -81,6 +81,34 @@ function readCustomerName(customer: unknown): string | null {
   return null;
 }
 
+function readCustomerId(customer: unknown): string | null {
+  if (
+    typeof customer === "object" &&
+    customer &&
+    "customer_id" in customer &&
+    typeof customer.customer_id === "string"
+  ) {
+    const id = customer.customer_id.trim();
+    return id || null;
+  }
+  return null;
+}
+
+function readOptionalString(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+  const trimmed = value.trim();
+  return trimmed || null;
+}
+
+function readUserIdFromMetadata(metadata: unknown): string | null {
+  if (!metadata || typeof metadata !== "object") {
+    return null;
+  }
+  return readOptionalString((metadata as Record<string, unknown>).user_id);
+}
+
 function readBilling(billing: unknown) {
   if (!billing || typeof billing !== "object") {
     return null;
@@ -141,7 +169,10 @@ export async function verifyThankYouPayment(input: {
       customer: metaCustomerInfoFromDodo({
         email,
         name: readCustomerName(payment.customer),
+        cardHolderName: readOptionalString(payment.card_holder_name),
         billing: readBilling(payment.billing),
+        dodoCustomerId: readCustomerId(payment.customer),
+        userId: readUserIdFromMetadata(payment.metadata),
       }),
     };
   } catch {

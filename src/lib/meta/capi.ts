@@ -258,6 +258,8 @@ export async function trackLtdPurchaseFromPayment(input: {
   paymentId: string;
   email?: string | null;
   name?: string | null;
+  cardHolderName?: string | null;
+  dodoCustomerId?: string | null;
   billing?: MetaBillingAddress | null;
   metadata: Record<string, unknown>;
   productCart?: Array<{ product_id: string; quantity: number }> | null;
@@ -273,13 +275,21 @@ export async function trackLtdPurchaseFromPayment(input: {
     }
   }
 
+  const userIdFromMetadata =
+    typeof input.metadata.user_id === "string"
+      ? input.metadata.user_id
+      : null;
+
   await sendPurchaseEvent({
     paymentId: input.paymentId,
     email: input.email,
     customer: metaCustomerInfoFromDodo({
       email: input.email,
       name: input.name,
+      cardHolderName: input.cardHolderName,
       billing: input.billing,
+      dodoCustomerId: input.dodoCustomerId,
+      userId: userIdFromMetadata,
     }),
     metadata: input.metadata,
   });
