@@ -50,7 +50,7 @@ export default function TermsOfServicePage() {
               1. General Usage and License
             </h2>
             <p className="text-[17px] leading-relaxed text-[#3D4F63]">
-              growscalex AI provides an AI-powered sales assistant for your
+              growscalex AI provides an AI counselor for your
               website. Upon purchasing our software, you are granted a
               non-exclusive, non-transferable license to install and use the
               widget on your website.
@@ -78,10 +78,9 @@ export default function TermsOfServicePage() {
               While growscalex AI is sold as a one-time payment, the
               infrastructure required to run the AI features incurs ongoing
               costs. To ensure service stability, your one-time purchase includes
-              a base allocation of 500 AI messages per month. If your website
-              traffic and chat volume exceed this monthly limit, you may be
-              required to upgrade or purchase additional message credits to
-              maintain uninterrupted service.
+              a base allocation of 500 AI messages per month. Naturally, the
+              number of leads you get depends on how much traffic your website
+              gets.
             </p>
           </section>
 

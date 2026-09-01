@@ -79,12 +79,12 @@ export function DashboardOverview({
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <CardTitle>Your chatbot setup</CardTitle>
+              <CardTitle>Your AI Counselor setup</CardTitle>
               <CardDescription>
-                Complete these steps to get your chatbot ready for your website.
+                Complete these steps to get your AI counselor ready for your website.
               </CardDescription>
             </div>
-            <Badge variant="secondary">Chatbot status: {readinessLabel}</Badge>
+            <Badge variant="secondary">AI Counselor status: {readinessLabel}</Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -151,7 +151,7 @@ export function DashboardOverview({
           <CardHeader>
             <CardTitle>Website widget</CardTitle>
             <CardDescription>
-              Whether the chatbot is running on your website.
+              Whether the AI counselor is running on your website.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-sm">

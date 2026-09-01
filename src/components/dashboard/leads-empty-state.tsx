@@ -7,10 +7,10 @@ export function LeadsEmptyState() {
     <div className="rounded-lg border border-dashed p-8 text-center">
       <h3 className="text-lg font-semibold">No leads yet</h3>
       <p className="mt-2 text-sm text-muted-foreground">
-        Install your chatbot on your website to start capturing leads.
+        Install your AI counselor on your website to start capturing leads.
       </p>
       <Button asChild className="mt-4">
-        <Link href="/dashboard/embed">Install chatbot</Link>
+        <Link href="/dashboard/embed">Install AI Counselor</Link>
       </Button>
     </div>
   );

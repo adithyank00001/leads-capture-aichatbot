@@ -8,7 +8,7 @@
  *   CLOUDFLARE_ACCOUNT_ID
  *   CLOUDFLARE_API_TOKEN
  *   LOG_SHEET_ID (Google Sheet for automatic/deployed checks only)
- *   LEADY_APP_URL (public Leady website, e.g. https://your-app.vercel.app)
+ *   LEADY_APP_URL (public growscalex AI app URL, e.g. https://your-app.vercel.app)
  *               Used because Google Apps Script often cannot reach api.cloudflare.com.
  *
  * Manual test: set MANUAL_TEST_WEBSITE, then Run → runManualInstallCheck
@@ -257,7 +257,7 @@ function browseViaLeady_(targetUrl, startedAt) {
   if (status < 200 || status >= 300) {
     return failedBrowse_(
       startedAt,
-      "Leady browse HTTP " + status + ": " + text.slice(0, 300),
+      "growscalex AI browse HTTP " + status + ": " + text.slice(0, 300),
     );
   }
 
@@ -332,7 +332,7 @@ function openWithCloudflare_(targetUrl) {
         return viaLeady;
       }
     } catch (leadyErr) {
-      logManual_("Leady browse failed: " + leadyErr);
+      logManual_("growscalex AI browse failed: " + leadyErr);
     }
   }
 
@@ -343,7 +343,7 @@ function openWithCloudflare_(targetUrl) {
       startedAt,
       "Google Apps Script cannot reach Cloudflare directly (" +
         cloudflareErr +
-        "). Add script property LEADY_APP_URL = your public Leady website, plus CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN on the Leady server.",
+        "). Add script property LEADY_APP_URL = your public growscalex AI app URL, plus CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN on the growscalex AI server.",
     );
   }
 }

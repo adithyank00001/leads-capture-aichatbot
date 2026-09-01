@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 
 import { SalesLandingPage } from "@/components/marketing/sales-landing-page";
-import { publicConfig } from "@/lib/config";
 import { getHasLifetimeAccessForMarketing } from "@/lib/marketing/access";
 
 export const metadata: Metadata = {
-  title: `${publicConfig.appName} — Turn Website Visitors Into Real Estate Leads`,
+  title: "Generate More Qualified Student Leads With a 24/7 AI Counselor",
   description:
-    "High-intent prospects visit your website but leave without contacting you. Our AI sales assistant captures their details before they leave, 24/7.",
+    "Turn anonymous website visitors into qualified student leads. Your AI counselor answers questions, qualifies students, and captures their contact details 24/7 — built for study abroad agencies and consultants.",
   robots: {
     index: false,
     follow: false,

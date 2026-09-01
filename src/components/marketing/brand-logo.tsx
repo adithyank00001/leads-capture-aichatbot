@@ -32,7 +32,7 @@ export function BrandLogo({
   const logo = (
     <Image
       src="/growscalex-logo.png"
-      alt="growscalex"
+      alt="growscalex AI"
       width={dimensions.width}
       height={dimensions.height}
       priority
@@ -48,7 +48,7 @@ export function BrandLogo({
     <Link
       href={href}
       className="inline-flex transition-opacity hover:opacity-80"
-      aria-label="growscalex home"
+      aria-label="growscalex AI home"
     >
       {logo}
     </Link>

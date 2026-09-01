@@ -13,14 +13,14 @@ export const embedPasteGuideSteps = [
 ] as const;
 
 export const embedPasteGuideNote =
-  "Do not paste inside <head> — the chatbot works best at the bottom of the page.";
+  "Do not paste inside <head> — the AI counselor works best at the bottom of the page.";
 
 export const embedSupportLine = "Contact the support team.";
 
 export const embedSetupLoadFailed: EmbedHelpEntry = {
   id: "setup_load_failed",
-  title: "Could not load your chatbot setup",
-  issue: "We could not load your chatbot setup from our system.",
+  title: "Could not load your AI Counselor setup",
+  issue: "We could not load your AI Counselor setup from our system.",
   action: "Refresh this page. If the script still does not appear below, try again in a few minutes.",
   support: embedSupportLine,
 };
@@ -28,25 +28,25 @@ export const embedSetupLoadFailed: EmbedHelpEntry = {
 export const embedTroubleshootingEntries: EmbedHelpEntry[] = [
   {
     id: "missing_bot_id",
-    title: "Chatbot not showing — missing bot ID",
+    title: "AI Counselor not showing — missing bot ID",
     issue:
-      "Your website script is missing the bot ID (data-bot-id). The chatbot cannot connect to your business without it.",
+      "Your website script is missing the bot ID (data-bot-id). The AI counselor cannot connect to your business without it.",
     action:
-      'Copy the entire script below and paste it before </body> on your website. Replace any old chatbot script you added before.',
+      'Copy the entire script below and paste it before </body> on your website. Replace any old AI counselor script you added before.',
     support: embedSupportLine,
   },
   {
     id: "old_or_incomplete_script",
-    title: "Chatbot not showing — old or incomplete script",
+    title: "AI Counselor not showing — old or incomplete script",
     issue:
-      "Your website may be using an old or incomplete copy of the chatbot script.",
+      "Your website may be using an old or incomplete copy of the AI counselor script.",
     action:
-      'Copy the entire script below, remove any old chatbot script from your site, and paste the new one before </body>.',
+      'Copy the entire script below, remove any old AI counselor script from your site, and paste the new one before </body>.',
     support: embedSupportLine,
   },
   {
     id: "chatbot_not_visible",
-    title: "Chatbot not showing — other checks",
+    title: "AI Counselor not showing — other checks",
     issue: "The script may not be saved or published on your website yet.",
     action:
       "Make sure the script is pasted before </body>, save and publish your website, then hard-refresh your browser (Ctrl+Shift+R or Cmd+Shift+R).",

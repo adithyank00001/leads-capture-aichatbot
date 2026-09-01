@@ -40,7 +40,7 @@ export default function RefundPolicyPage() {
           </header>
 
           <p className="text-[17px] leading-relaxed text-[#3D4F63]">
-            We designed our AI sales assistant with one specific goal: to help
+            We designed our AI counselor with one specific goal: to help
             you capture more leads. We are completely confident in the
             software, which is why we offer a strictly results-based{" "}
             <strong className="font-semibold text-[var(--landing-navy)]">
@@ -61,7 +61,7 @@ export default function RefundPolicyPage() {
             </h2>
             <p className="text-[17px] leading-relaxed text-[#3D4F63]">
               You are entitled to a full, no-questions-asked refund if the AI
-              assistant fails to generate a single lead for you, provided you
+              counselor fails to generate a single lead for you, provided you
               meet the following installation criteria:
             </p>
 
@@ -87,7 +87,7 @@ export default function RefundPolicyPage() {
                 <p className="text-[17px] leading-relaxed text-[#3D4F63]">
                   Once the software is successfully installed and communicating
                   with our servers, your 30-day performance window begins. If
-                  the assistant does not capture a single valid lead within the{" "}
+                  the AI counselor does not capture a single valid lead within the{" "}
                   <strong className="font-semibold text-[var(--landing-navy)]">
                     30 days following your installation date
                   </strong>

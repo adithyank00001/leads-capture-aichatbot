@@ -7,7 +7,7 @@ import { publicConfig } from "@/lib/config";
 export const metadata: Metadata = {
   title: `Privacy Policy — ${publicConfig.appName}`,
   description:
-    "How growscalex collects, uses, and protects information when you use our website and AI software.",
+    "How growscalex AI collects, uses, and protects information when you use our website and AI software.",
 };
 
 export default function PrivacyPolicyPage() {
@@ -81,7 +81,7 @@ export default function PrivacyPolicyPage() {
                     <strong className="font-semibold text-[var(--landing-navy)]">
                       Voluntary Data:
                     </strong>{" "}
-                    The AI assistant is designed to collect lead information
+                    The AI counselor is designed to collect lead information
                     (such as Name, Email, and Phone Number) only when the visitor
                     explicitly and voluntarily provides it during the chat.
                   </li>
@@ -97,7 +97,7 @@ export default function PrivacyPolicyPage() {
                       Customization:
                     </strong>{" "}
                     Business owners have the ability to customize what
-                    information the AI assistant requests from their visitors.
+                    information the AI counselor requests from their visitors.
                   </li>
                 </ul>
               </div>

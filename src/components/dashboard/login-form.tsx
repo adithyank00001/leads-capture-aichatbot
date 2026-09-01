@@ -89,7 +89,7 @@ export function LoginForm({
     <Card className="w-full shadow-lg ring-primary/10">
       <CardHeader>
         <CardTitle className="text-2xl">Welcome back</CardTitle>
-        <CardDescription>Sign in to manage your chatbot and leads.</CardDescription>
+        <CardDescription>Sign in to manage your AI counselor and leads.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isPostPayment ? (

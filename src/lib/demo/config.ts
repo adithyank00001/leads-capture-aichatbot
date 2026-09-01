@@ -5,14 +5,14 @@ import type { WidgetSettings } from "@/lib/widget/types";
 export const isPublicDemoEnabled = false;
 
 export const demoBusiness: BusinessDisplay = {
-  name: "GrowscaleX Properties",
-  welcomeMessage: "Enter your details below to try the assistant.",
+  name: "GrowscaleX Demo Agency",
+  welcomeMessage: "Enter your details below to try the AI counselor.",
   chatWelcomeMessage:
-    "Hi, I'm the AI sales assistant from GrowscaleX Demo Properties. Looking for the right property? Tell me what you have in mind — I'll help you narrow down the best options.",
+    "Hi, I'm the AI counselor from GrowscaleX Demo Agency. Looking to study abroad? Tell me what you have in mind — I'll help you explore the best options.",
 };
 
 export const demoStarterQuestion =
-  "What properties do you have available right now?";
+  "What study abroad options do you have available right now?";
 
 export const demoWidgetSettings: WidgetSettings = {
   botId: "landing-demo",

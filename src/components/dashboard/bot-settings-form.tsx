@@ -234,10 +234,10 @@ export function BotSettingsForm({ initialData }: BotSettingsFormProps) {
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <CardTitle className="text-2xl">Chatbot Setup</CardTitle>
+            <CardTitle className="text-2xl">AI Counselor setup</CardTitle>
             <CardDescription className="mt-1">
               We learn from your website automatically. Add only what visitors
-              usually cannot find online or rules your chatbot must follow.
+              usually cannot find online or rules your AI counselor must follow.
             </CardDescription>
           </div>
           {usageText ? <Badge variant="secondary">{usageText}</Badge> : null}
@@ -254,7 +254,7 @@ export function BotSettingsForm({ initialData }: BotSettingsFormProps) {
                 onChange={(event) => setBusinessName(event.target.value)}
               />
               <p className="text-sm text-muted-foreground">
-                Shown at the top of your chatbot.
+                Shown at the top of your AI counselor.
               </p>
             </div>
           </SettingsSection>
@@ -265,7 +265,7 @@ export function BotSettingsForm({ initialData }: BotSettingsFormProps) {
           >
             <div className="space-y-2">
               <Label htmlFor="pricingNotes">
-                How should the chatbot handle pricing questions?
+                How should the AI counselor handle pricing questions?
               </Label>
               <Textarea
                 id="pricingNotes"
@@ -313,7 +313,7 @@ export function BotSettingsForm({ initialData }: BotSettingsFormProps) {
 
           <SettingsSection
             title="Website connection"
-            description="Your chatbot will only work on this website."
+            description="Your AI counselor will only work on this website."
           >
             <div className="space-y-2">
               <Label htmlFor="allowed-domains">Website domain</Label>

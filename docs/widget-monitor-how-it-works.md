@@ -1,10 +1,10 @@
 # Widget install monitoring — how it actually works
 
-This document describes **the code that exists today** in this repo (Leady AI / growscalex). It is not the old plan named `install_tracking_system`. Names, URLs, and tables below match the live implementation.
+This document describes **the code that exists today** in this repo (growscalex AI). It is not the old plan named `install_tracking_system`. Names, URLs, and tables below match the live implementation.
 
 Goal in one sentence: **once a day (UTC home minute), open the paid customer’s website in a headless browser (a browser with no human) and see if `widget.js` actually ran**, then record installed / missing / technical error.
 
-Proof of install is a **heartbeat** (a tiny POST from `widget.js` to Leady). HTML scraping in GAS is only for the Google Sheet log. Status in the database does **not** use that HTML scrape.
+Proof of install is a **heartbeat** (a tiny POST from `widget.js` to growscalex AI). HTML scraping in GAS is only for the Google Sheet log. Status in the database does **not** use that HTML scrape.
 
 ---
 
@@ -19,7 +19,7 @@ This system does **not**:
 - edit MasterWorker or PageWorker
 - run inside Google Apps Script as the daily scheduler
 
-Google Apps Script only opens the page (via Cloudflare) and reports whether the **page opened**. Leady decides installed vs missing.
+Google Apps Script only opens the page (via Cloudflare) and reports whether the **page opened**. growscalex AI decides installed vs missing.
 
 ---
 
@@ -27,8 +27,8 @@ Google Apps Script only opens the page (via Cloudflare) and reports whether the 
 
 | Piece | Where | Job |
 |---|---|---|
-| Minute timer | Supabase `pg_cron` job `dispatch-widget-monitor-tick` (`* * * * *`) | Every minute, try to wake Leady |
-| Settings row | Table `widget_monitor_settings` (exactly **one** row, `id = 1`) | Stores the URL and secret the timer uses to call Leady |
+| Minute timer | Supabase `pg_cron` job `dispatch-widget-monitor-tick` (`* * * * *`) | Every minute, try to wake growscalex AI |
+| Settings row | Table `widget_monitor_settings` (exactly **one** row, `id = 1`) | Stores the URL and secret the timer uses to call growscalex AI |
 | Tick API | Next.js `POST /api/internal/widget-monitor/tick` | Claim one due customer, call GAS |
 | Claim SQL | `claim_due_widget_monitor_check()` | Lock one due row, create `check_id` |
 | GAS | `google-apps-script/InstallChecker.js` | Open one URL with Cloudflare Browser Rendering `/content` |
@@ -47,7 +47,7 @@ pg_cron every minute
       → fail_stale_widget_monitor_checks(12)
       → pg_net POST tick_url with Bearer cron_secret
 
-Leady /tick
+growscalex AI /tick
   → verify cron_secret against Vercel env WIDGET_MONITOR_CRON_SECRET
   → fail_stale again
   → claim_due_widget_monitor_check()   // one bot
@@ -58,9 +58,9 @@ GAS doPost
   → verify HMAC
   → enqueue (script property + 1ms trigger) so the HTTP request can return fast
   → drainMonitorQueue_ opens Cloudflare
-  → POST Leady /complete (HMAC)
+  → POST growscalex AI /complete (HMAC)
 
-Leady complete.ts
+growscalex AI complete.ts
   → installed / missing / check_error
   → maybe event installed / removed / reinstalled
   → schedule_widget_monitor_next()
@@ -79,7 +79,7 @@ All in schema `public`.
 Columns:
 
 - `id` — always `1`
-- `tick_url` — full URL of Leady tick, example shape: `https://YOUR-LIVE-DOMAIN/api/internal/widget-monitor/tick`
+- `tick_url` — full URL of growscalex AI tick, example shape: `https://YOUR-LIVE-DOMAIN/api/internal/widget-monitor/tick`
 - `cron_secret` — must match Vercel `WIDGET_MONITOR_CRON_SECRET`
 - `updated_at`
 
@@ -183,7 +183,7 @@ That function:
 3. If URL or secret blank → `{ skipped: true, reason: 'not_configured' }`. **This is the empty-table stop.**
 4. Else `net.http_post` to `tick_url` with header `Authorization: Bearer {cron_secret}`, body `{"source":"pg_cron"}`, 8s timeout.
 
-`pg_net` is async. The cron job can succeed even if Leady is down. The claim happens **inside** `/tick`, not inside the cron function. So if settings are empty, **no claim happens**.
+`pg_net` is async. The cron job can succeed even if growscalex AI is down. The claim happens **inside** `/tick`, not inside the cron function. So if settings are empty, **no claim happens**.
 
 ---
 
@@ -220,8 +220,8 @@ GAS: same canonical JSON in `InstallChecker.js`
 
 Two message types:
 
-- `monitor_check` — Leady → GAS (includes `completeUrl`)
-- `monitor_complete` — GAS → Leady (`pageOk`, `errorMessage`)
+- `monitor_check` — growscalex AI → GAS (includes `completeUrl`)
+- `monitor_complete` — GAS → growscalex AI (`pageOk`, `errorMessage`)
 
 TTL 15 minutes. Secret: `GAS_MONITOR_HMAC_SECRET` on Vercel **and** GAS script property with the same name. If they differ, GAS returns Unauthorized or `/complete` returns 401.
 
@@ -259,7 +259,7 @@ Script properties:
 
 Manual `runManualInstallCheck` does **not** write Supabase or the sheet. Executions log only.
 
-If Cloudflare cannot reach the site (“address unavailable”, HTTP error, timeout) → `pageOk: false` → Leady `check_error`.
+If Cloudflare cannot reach the site (“address unavailable”, HTTP error, timeout) → `pageOk: false` → growscalex AI `check_error`.
 
 ---
 

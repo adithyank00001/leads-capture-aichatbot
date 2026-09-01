@@ -145,7 +145,7 @@ export function DemoChatInterface({
   const leadGateTimerRef = useRef<number | null>(null);
   const floatingCtaTimerRef = useRef<number | null>(null);
 
-  const assistantLabel = `${business.name} assistant`;
+  const assistantLabel = "AI Counselor";
 
   useEffect(() => {
     if (!sessionId) {
