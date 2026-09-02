@@ -556,7 +556,7 @@ export function SalesLandingPage({
                     <div className="mx-auto w-full max-w-[19.5rem] text-left sm:max-w-md lg:mx-0 lg:max-w-none">
                       <p className="text-left text-[17px] font-medium leading-relaxed text-[var(--landing-navy)] sm:text-[18px] lg:text-[19px]">
                         Stop losing students to competitors after working
-                        hours. Our AI guides them and captures their details
+                        hours. Our AI guides students and captures their details
                         even when your office is closed.
                       </p>
                       <p className="mt-4 text-left text-[17px] font-medium leading-relaxed text-[var(--landing-navy)] sm:text-[18px] lg:mt-5 lg:text-[19px]">
