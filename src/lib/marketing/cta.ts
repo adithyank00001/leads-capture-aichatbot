@@ -26,7 +26,7 @@ export function resolveMarketingCta(
   return {
     label: overrides.label ?? "Get Lifetime Access",
     href: "/checkout",
-    showPrice: overrides.showPrice ?? true,
+    showPrice: overrides.showPrice ?? false,
     startCheckout: true,
   };
 }

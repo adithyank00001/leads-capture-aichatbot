@@ -114,9 +114,7 @@ const comparisonRows = [
   },
   {
     without: "Endless monthly fees for lead-capturing chat tools.",
-    withPrefix: "A one-time",
-    withPrice: true,
-    withSuffix: "payment to capture student leads for life.",
+    with: "A one-time payment to capture student leads for life.",
   },
 ] as const;
 
@@ -147,7 +145,8 @@ const faqItems = [
       "There are zero hidden fees and no monthly subscriptions. Here is how we do it: Unlike generic AI tools (which use massive, expensive computing power to write essays or code), our AI is highly specialized strictly for student admissions and lead capture. Because it is highly optimized for this one specific task, the computing cost per conversation is microscopic—literally fractions of a penny. This efficiency allows us to comfortably cover typical enrollment volumes of up to 500 messages every single month, easily absorbing this tiny cost into your one-time payment.",
   },
   {
-    question: "Where do my counselors actually access the captured student leads?",
+    question:
+      "Where do my counselors actually access the captured student leads?",
     answer:
       "All your qualified student leads and complete chat transcripts are securely stored in your centralized AI Dashboard. Instead of losing high-value student phone numbers in a messy folder, your team gets one clean, organized portal. Your counselors can instantly see the newest qualified students, view their target countries, and start following up.",
   },
@@ -507,6 +506,9 @@ export function SalesLandingPage({
   showSolutionVideo?: boolean;
 }) {
   const marketingCta = resolveMarketingCta(hasLifetimeAccess);
+  const pricingCta = resolveMarketingCta(hasLifetimeAccess, {
+    showPrice: true,
+  });
 
   return (
     <>
@@ -555,9 +557,9 @@ export function SalesLandingPage({
                   <div className="mx-auto mt-8 max-w-2xl sm:mt-10 lg:mx-0 lg:mt-8 lg:max-w-none">
                     <div className="mx-auto w-full max-w-[19.5rem] text-left sm:max-w-md lg:mx-0 lg:max-w-none">
                       <p className="text-left text-[17px] font-medium leading-relaxed text-[var(--landing-navy)] sm:text-[18px] lg:text-[19px]">
-                        Stop losing students to competitors after working
-                        hours. Our AI guides students and captures their details
-                        even when your office is closed.
+                        Stop losing students to competitors after working hours.
+                        Our AI guides students and captures their details even
+                        when your office is closed.
                       </p>
                       <p className="mt-4 text-left text-[17px] font-medium leading-relaxed text-[var(--landing-navy)] sm:text-[18px] lg:mt-5 lg:text-[19px]">
                         Our AI counselor works 24/7 on your website to:
@@ -584,7 +586,7 @@ export function SalesLandingPage({
                   id="landing-hero-cta"
                   className="mt-10 flex flex-col items-center sm:mt-12 lg:mt-4 lg:items-stretch lg:self-start"
                 >
-                  <div className="mx-auto inline-flex flex-col items-stretch gap-5 sm:gap-6 lg:hidden">
+                  <div className="mx-auto flex w-full flex-col items-center gap-5 sm:gap-6 lg:hidden">
                     <CtaButton variant="secondary" {...marketingCta} />
                     <div className="flex w-full flex-col items-stretch gap-1">
                       <MoneyBackGuarantee
@@ -735,15 +737,7 @@ export function SalesLandingPage({
                       className="size-5 shrink-0 text-[#16A34A]"
                       strokeWidth={2.5}
                     />
-                    {"withPrice" in row && row.withPrice ? (
-                      <p className="text-[17px] font-bold leading-snug text-[var(--landing-navy)]">
-                        {row.withPrefix}{" "}
-                        <FormattedPrice
-                          amount={publicConfig.lifetimeAccessPriceUsd}
-                        />{" "}
-                        {row.withSuffix}
-                      </p>
-                    ) : "with" in row ? (
+                    {"with" in row ? (
                       <p className="text-[17px] font-bold leading-snug text-[var(--landing-navy)]">
                         {row.with}
                       </p>
@@ -773,15 +767,7 @@ export function SalesLandingPage({
                       className="size-5 shrink-0 text-[#16A34A]"
                       strokeWidth={2.5}
                     />
-                    {"withPrice" in row && row.withPrice ? (
-                      <p className="text-[15px] font-bold leading-snug text-[var(--landing-navy)] sm:text-[17px]">
-                        {row.withPrefix}{" "}
-                        <FormattedPrice
-                          amount={publicConfig.lifetimeAccessPriceUsd}
-                        />{" "}
-                        {row.withSuffix}
-                      </p>
-                    ) : "with" in row ? (
+                    {"with" in row ? (
                       <p className="text-[15px] font-bold leading-snug text-[var(--landing-navy)] sm:text-[17px]">
                         {row.with}
                       </p>
@@ -1104,7 +1090,7 @@ export function SalesLandingPage({
                         showDiscountBadge={!hasLifetimeAccess}
                         size="large"
                         priceBelow
-                        {...marketingCta}
+                        {...pricingCta}
                       />
                     </div>
                     <p className="mb-1 pt-1 text-[13px] font-bold uppercase tracking-wide text-[#16A34A] lg:text-[14px]">
@@ -1122,10 +1108,7 @@ export function SalesLandingPage({
         </section>
 
         {/* FAQ — below sticky CTAs (z-[120]) so floating CTA stays on top */}
-        <section
-          id="landing-faq"
-          className="relative z-[110] bg-white"
-        >
+        <section id="landing-faq" className="relative z-[110] bg-white">
           <div
             className={cn(
               "mx-auto max-w-6xl px-4 pt-16 pb-12 sm:px-6 sm:pt-20 sm:pb-16",
@@ -1176,9 +1159,8 @@ export function SalesLandingPage({
           >
             <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
               <SectionHeading onDark className="text-[28px] lg:text-[38px]">
-                Just{" "}
-                <span className="text-[var(--landing-orange)]">ONE</span> Extra
-                Student Pays For This AI Forever.
+                Just <span className="text-[var(--landing-orange)]">ONE</span>{" "}
+                Extra Student Pays For This AI Forever.
               </SectionHeading>
               <p className="mt-5 max-w-2xl text-[17px] font-medium leading-relaxed text-white/80 sm:mt-6 sm:text-[18px] lg:text-[19px]">
                 <strong className="font-bold text-white">
