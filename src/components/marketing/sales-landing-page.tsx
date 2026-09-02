@@ -160,7 +160,7 @@ const faqItems = [
 const testimonials = [
   {
     quote:
-      "Honestly, I wasn\u2019t sure at first. We were already getting enquiries from our website, so I didn\u2019t expect a huge difference. But after adding the AI counselor, we started getting more student leads than before. For AED 369, I\u2019d say it\u2019s definitely worth it.",
+      "Honestly, I wasn\u2019t sure at first. We were already getting enquiries from our website, so I didn\u2019t expect a huge difference. But after adding the AI counselor, we started getting more student leads than before. I\u2019d say it\u2019s definitely worth it.",
     highlights: [
       "we started getting",
       "more student leads than before",
@@ -497,6 +497,17 @@ function LandingFadeSeparator() {
   );
 }
 
+function PriceUnderCta({ className, variant = "hero" }: { className?: string; variant?: "hero" | "pricing" }) {
+  const isPricing = variant === "pricing";
+  return (
+    <div className={cn("mt-1.5 flex items-center justify-center gap-1.5", isPricing ? "text-[16px]" : "text-[15px] sm:text-[16px]", className)}>
+      <span className="font-medium opacity-80">Just</span>
+      <FormattedPrice amount={publicConfig.lifetimeAccessPriceUsd} weight="bold" className={cn("font-bold", isPricing ? "text-[16px]" : "text-[16px] sm:text-[17px]")} />
+      <FormattedPrice amount={publicConfig.lifetimeAccessOriginalPrice} lineThrough weight="regular" className={cn("font-normal opacity-50", isPricing ? "text-[16px]" : "text-[14px] sm:text-[15px]")} />
+    </div>
+  );
+}
+
 export function SalesLandingPage({
   hasLifetimeAccess = false,
   showSolutionVideo = true,
@@ -506,9 +517,6 @@ export function SalesLandingPage({
   showSolutionVideo?: boolean;
 }) {
   const marketingCta = resolveMarketingCta(hasLifetimeAccess);
-  const pricingCta = resolveMarketingCta(hasLifetimeAccess, {
-    showPrice: true,
-  });
 
   return (
     <>
@@ -587,7 +595,10 @@ export function SalesLandingPage({
                   className="mt-10 flex flex-col items-center sm:mt-12 lg:mt-4 lg:items-stretch lg:self-start"
                 >
                   <div className="mx-auto flex w-full flex-col items-center gap-5 sm:gap-6 lg:hidden">
-                    <CtaButton variant="secondary" {...marketingCta} />
+                    <div className="flex w-full flex-col items-center gap-0.5">
+                      <CtaButton variant="secondary" {...marketingCta} />
+                      {!hasLifetimeAccess ? <PriceUnderCta className="text-[var(--landing-navy)]" /> : null}
+                    </div>
                     <div className="flex w-full flex-col items-stretch gap-1">
                       <MoneyBackGuarantee
                         centered
@@ -600,11 +611,14 @@ export function SalesLandingPage({
                   </div>
 
                   <div className="hidden lg:flex lg:flex-col lg:rounded-2xl lg:border lg:border-[#D8E2EC] lg:bg-white lg:p-8 lg:shadow-[0_6px_28px_rgba(17,36,55,0.1)] xl:p-9">
-                    <CtaButton
-                      className="w-full"
-                      size="large"
-                      {...marketingCta}
-                    />
+                    <div className="flex w-full flex-col items-center gap-0.5">
+                      <CtaButton
+                        className="w-full"
+                        size="large"
+                        {...marketingCta}
+                      />
+                      {!hasLifetimeAccess ? <PriceUnderCta className="text-[var(--landing-navy)]" /> : null}
+                    </div>
                     <div className="mt-6 flex flex-col gap-1.5">
                       <MoneyBackGuarantee
                         centered
@@ -1084,14 +1098,15 @@ export function SalesLandingPage({
                     <p className="mt-3 text-[17px] font-semibold text-[var(--landing-navy)] sm:mt-4 sm:text-[19px] lg:mt-0 lg:text-[22px] lg:leading-snug">
                       Capture More Student Leads Without Another Monthly Bill.
                     </p>
-                    <div className="flex w-full flex-col items-center gap-3 lg:gap-4">
+                    <div className="flex w-full flex-col items-center gap-1.5 lg:gap-2">
                       <CtaButton
-                        className="w-full sm:w-auto lg:w-full lg:[&_a]:px-7 lg:[&_a]:py-4 lg:[&_a]:text-[20px]"
+                        className="w-full sm:w-auto lg:w-full lg:[&_a]:px-7 lg:[&_a]:text-[22px]"
+                        buttonClassName="py-6 sm:py-7 lg:py-8"
                         showDiscountBadge={!hasLifetimeAccess}
                         size="large"
-                        priceBelow
-                        {...pricingCta}
+                        {...marketingCta}
                       />
+                      {!hasLifetimeAccess ? <PriceUnderCta variant="pricing" className="text-[var(--landing-navy)] mt-1" /> : null}
                     </div>
                     <p className="mb-1 pt-1 text-[13px] font-bold uppercase tracking-wide text-[#16A34A] lg:text-[14px]">
                       Try It Risk-Free
