@@ -928,7 +928,7 @@ export function SalesLandingPage({
                 Want More Qualified Student Leads?
               </p>
               <div className="mt-5 w-full max-w-sm sm:mt-6">
-                <CtaButton className="w-full" {...marketingCta} />
+                <CtaButton className="w-full" buttonClassName="text-[18px] sm:text-[22px]" {...marketingCta} />
               </div>
             </div>
           </div>

@@ -27,6 +27,7 @@ function DiscountBadge({ className }: { className?: string }) {
 
 export function CtaButton({
   className,
+  buttonClassName,
   showDiscountBadge = false,
   size = "default",
   priceBelow = false,
@@ -37,6 +38,7 @@ export function CtaButton({
   startCheckout = false,
 }: {
   className?: string;
+  buttonClassName?: string;
   showDiscountBadge?: boolean;
   size?: "default" | "large" | "compact";
   /** Stack prices on a horizontal row under the label (pricing section). */
@@ -93,8 +95,9 @@ export function CtaButton({
       ? "rounded-[15px] px-5 py-3.5 text-[18px] sm:px-7 sm:text-[20px]"
       : isCompact
         ? "rounded-[13px] px-3 py-2 text-[13px]"
-        : "rounded-[13px] px-4 py-2.5 text-[15px] sm:px-5 sm:text-[17px]",
+        : "rounded-[13px] px-4 py-2.5 text-[17px] sm:px-5 sm:text-[19px]",
     loading && "pointer-events-none opacity-90",
+    buttonClassName,
   );
 
   const labelContent = (

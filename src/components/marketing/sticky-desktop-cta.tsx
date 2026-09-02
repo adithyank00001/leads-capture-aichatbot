@@ -19,7 +19,7 @@ export function StickyDesktopCta({
             LIMITED TIME · SAVE 80% TODAY
           </p>
         ) : null}
-        <CtaButton className="w-full" {...marketingCta} />
+        <CtaButton className="w-full" buttonClassName="text-[18px] sm:text-[22px]" {...marketingCta} />
         {!hasLifetimeAccess ? (
           <p className="mt-2 text-center text-[12px] font-semibold uppercase leading-none tracking-tight text-[#16A34A]">
             Try it risk-free · 100% money-back guarantee

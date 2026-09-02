@@ -18,7 +18,7 @@ export function StickyMobileCta({
           LIMITED TIME · SAVE 80% TODAY
         </p>
       ) : null}
-      <CtaButton className="w-full" {...marketingCta} />
+      <CtaButton className="w-full" buttonClassName="text-[18px] sm:text-[22px]" {...marketingCta} />
       {!hasLifetimeAccess ? (
         <p className="mt-2 w-full text-center text-[13px] font-semibold uppercase leading-none tracking-tight text-[#16A34A] whitespace-nowrap">
           Try it risk-free · 100% money-back guarantee
