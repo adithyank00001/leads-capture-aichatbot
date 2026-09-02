@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 
 import { SalesLandingPage } from "@/components/marketing/sales-landing-page";
 import { getHasLifetimeAccessForMarketing } from "@/lib/marketing/access";
+import { landingPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = {
-  title: "Generate More Qualified Student Leads With a 24/7 AI Counselor",
-  description:
-    "Turn anonymous website visitors into qualified student leads. Your AI counselor answers questions, qualifies students, and captures their contact details 24/7 — built for study abroad agencies and consultants.",
+  ...landingPageMetadata,
   robots: {
     index: false,
     follow: false,

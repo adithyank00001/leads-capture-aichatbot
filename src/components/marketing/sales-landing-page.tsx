@@ -105,12 +105,8 @@ const steps = [
 const comparisonRows = [
   {
     without:
-      "Students leave anonymously, taking potential enrollments to competitors.",
-    with: "Capture their WhatsApp number while their interest is high.",
-  },
-  {
-    without: "Students ready to enquire can slip away after office hours.",
-    with: "Your AI counselor captures and qualifies them 24/7.",
+      "Students who visit after working hours leave and enroll with competitors.",
+    with: "Our AI guides them and captures their details 24/7—even when the office is closed.",
   },
   {
     without: "Counselors follow up cold, with no idea what the student wants.",
@@ -559,8 +555,9 @@ export function SalesLandingPage({
                   <div className="mx-auto mt-8 max-w-2xl sm:mt-10 lg:mx-0 lg:mt-8 lg:max-w-none">
                     <div className="mx-auto w-full max-w-[19.5rem] text-left sm:max-w-md lg:mx-0 lg:max-w-none">
                       <p className="text-left text-[17px] font-medium leading-relaxed text-[var(--landing-navy)] sm:text-[18px] lg:text-[19px]">
-                        Our AI turns your anonymous website visitors into
-                        qualified student leads.
+                        Stop losing students to competitors after working
+                        hours. Our AI guides them and captures their details
+                        even when your office is closed.
                       </p>
                       <p className="mt-4 text-left text-[17px] font-medium leading-relaxed text-[var(--landing-navy)] sm:text-[18px] lg:mt-5 lg:text-[19px]">
                         Our AI counselor works 24/7 on your website to:
@@ -680,11 +677,13 @@ export function SalesLandingPage({
               </p>
 
               <p className="mt-5 border-l-4 border-[var(--landing-orange)] pl-4 text-[17px] font-bold leading-snug text-white sm:pl-5 sm:text-[19px] lg:mx-auto lg:mt-8 lg:max-w-[780px] lg:border-l-0 lg:border-t-4 lg:px-8 lg:py-5 lg:pl-8 lg:text-center lg:text-[22px] lg:font-extrabold lg:leading-[1.35] lg:tracking-tight">
-                And once they leave, there&apos;s a good chance{" "}
+                If a student visits after working hours and can&apos;t get
+                instant answers, they won&apos;t wait until morning. They will
+                simply leave and{" "}
                 <span className="italic text-[var(--landing-orange)]">
-                  they&apos;ll find another agency
-                </span>{" "}
-                — and your team may never get another chance.
+                  enroll with a competitor
+                </span>
+                .
               </p>
             </div>
           </div>
@@ -703,7 +702,96 @@ export function SalesLandingPage({
               <SectionLabel light className="mb-6 text-[14px]">
                 The Solution
               </SectionLabel>
+            </div>
 
+            <div className="mx-auto max-w-3xl text-center">
+              <SectionHeading className="text-[28px] lg:text-[38px]">
+                <span className="text-[var(--landing-orange)]">Without</span>{" "}
+                vs. <span className="text-[var(--landing-orange)]">With</span>{" "}
+                our AI Counselor
+              </SectionHeading>
+            </div>
+
+            <div className="mx-auto mt-10 hidden overflow-hidden rounded-2xl border border-[#D8E2EC] lg:mt-10 lg:grid lg:w-full lg:max-w-[1140px] lg:grid-cols-2">
+              <div className="border-b border-[#D8E2EC] bg-[#FEF2F2] px-6 py-4 text-center text-[15px] font-bold uppercase tracking-wide text-[#6B7280] lg:border-r">
+                Without
+              </div>
+              <div className="border-b border-[#D8E2EC] bg-[#EFF6FF] px-6 py-4 text-center text-[15px] font-bold uppercase tracking-wide text-[var(--landing-navy)]">
+                With
+              </div>
+              {comparisonRows.map((row) => (
+                <Fragment key={row.without}>
+                  <div className="flex min-h-[72px] items-center gap-3 border-b border-[#D8E2EC] bg-[#FEF2F2] px-6 py-5 last:border-b-0 lg:border-r">
+                    <X
+                      className="size-5 shrink-0 text-[#F87171]"
+                      strokeWidth={2.5}
+                    />
+                    <p className="text-[17px] font-bold leading-snug text-[#6B7280]">
+                      {row.without}
+                    </p>
+                  </div>
+                  <div className="flex min-h-[72px] items-center gap-3 border-b border-[#D8E2EC] bg-[#EFF6FF] px-6 py-5 last:border-b-0">
+                    <Check
+                      className="size-5 shrink-0 text-[#16A34A]"
+                      strokeWidth={2.5}
+                    />
+                    {"withPrice" in row && row.withPrice ? (
+                      <p className="text-[17px] font-bold leading-snug text-[var(--landing-navy)]">
+                        {row.withPrefix}{" "}
+                        <FormattedPrice
+                          amount={publicConfig.lifetimeAccessPriceUsd}
+                        />{" "}
+                        {row.withSuffix}
+                      </p>
+                    ) : "with" in row ? (
+                      <p className="text-[17px] font-bold leading-snug text-[var(--landing-navy)]">
+                        {row.with}
+                      </p>
+                    ) : null}
+                  </div>
+                </Fragment>
+              ))}
+            </div>
+
+            <div className="mx-auto mt-10 flex max-w-3xl flex-col gap-[14px] sm:mt-12 sm:gap-5 lg:hidden">
+              {comparisonRows.map((row) => (
+                <div
+                  key={row.without}
+                  className="overflow-hidden rounded-2xl border border-[#D8E2EC]"
+                >
+                  <div className="flex items-center gap-3 bg-[#FEF2F2] px-4 py-4 sm:px-5 sm:py-5">
+                    <X
+                      className="size-5 shrink-0 text-[#F87171]"
+                      strokeWidth={2.5}
+                    />
+                    <p className="text-[15px] font-bold leading-snug text-[#6B7280] sm:text-[17px]">
+                      {row.without}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3 bg-[#EFF6FF] px-4 py-4 sm:px-5 sm:py-5">
+                    <Check
+                      className="size-5 shrink-0 text-[#16A34A]"
+                      strokeWidth={2.5}
+                    />
+                    {"withPrice" in row && row.withPrice ? (
+                      <p className="text-[15px] font-bold leading-snug text-[var(--landing-navy)] sm:text-[17px]">
+                        {row.withPrefix}{" "}
+                        <FormattedPrice
+                          amount={publicConfig.lifetimeAccessPriceUsd}
+                        />{" "}
+                        {row.withSuffix}
+                      </p>
+                    ) : "with" in row ? (
+                      <p className="text-[15px] font-bold leading-snug text-[var(--landing-navy)] sm:text-[17px]">
+                        {row.with}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mx-auto mt-10 max-w-3xl text-center sm:mt-12 lg:mt-16 lg:max-w-[900px]">
               <h2 className="text-balance text-[28px] font-bold tracking-tight text-[var(--landing-navy)] sm:text-[31px] lg:text-[38px]">
                 Turn More Website Visitors Into{" "}
                 <span className="text-[var(--landing-orange)]">
@@ -914,10 +1002,8 @@ export function SalesLandingPage({
           >
             <div className="mx-auto max-w-3xl text-center">
               <SectionHeading className="lg:text-[38px]">
-                Start Capturing Qualified Student Leads in{" "}
-                <span className="text-[var(--landing-orange)]">
-                  3 Simple Steps
-                </span>
+                Go Live In{" "}
+                <span className="text-[var(--landing-orange)]">5 Minutes</span>
               </SectionHeading>
             </div>
 
@@ -955,103 +1041,6 @@ export function SalesLandingPage({
         </section>
 
         <LandingFadeSeparator />
-
-        {/* Comparison — z-[90] keeps demo chat launcher (z-[100]) visible above */}
-        <section className="relative z-[90] bg-white">
-          <div
-            className={cn(
-              "mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10",
-              DESKTOP_CONTAINER,
-            )}
-          >
-            <div className="mx-auto max-w-3xl text-center">
-              <SectionHeading className="text-[28px] lg:text-[38px]">
-                <span className="text-[var(--landing-orange)]">Without</span>{" "}
-                vs. <span className="text-[var(--landing-orange)]">With</span>{" "}
-                an AI Counselor
-              </SectionHeading>
-            </div>
-
-            <div className="mx-auto mt-10 hidden overflow-hidden rounded-2xl border border-[#D8E2EC] lg:mt-10 lg:grid lg:w-full lg:max-w-[1140px] lg:grid-cols-2">
-              <div className="border-b border-[#D8E2EC] bg-[#FEF2F2] px-6 py-4 text-center text-[15px] font-bold uppercase tracking-wide text-[#6B7280] lg:border-r">
-                Without
-              </div>
-              <div className="border-b border-[#D8E2EC] bg-[#EFF6FF] px-6 py-4 text-center text-[15px] font-bold uppercase tracking-wide text-[var(--landing-navy)]">
-                With
-              </div>
-              {comparisonRows.map((row) => (
-                <Fragment key={row.without}>
-                  <div className="flex min-h-[72px] items-center gap-3 border-b border-[#D8E2EC] bg-[#FEF2F2] px-6 py-5 last:border-b-0 lg:border-r">
-                    <X
-                      className="size-5 shrink-0 text-[#F87171]"
-                      strokeWidth={2.5}
-                    />
-                    <p className="text-[17px] leading-snug text-[#6B7280]">
-                      {row.without}
-                    </p>
-                  </div>
-                  <div className="flex min-h-[72px] items-center gap-3 border-b border-[#D8E2EC] bg-[#EFF6FF] px-6 py-5 last:border-b-0">
-                    <Check
-                      className="size-5 shrink-0 text-[#16A34A]"
-                      strokeWidth={2.5}
-                    />
-                    {"withPrice" in row && row.withPrice ? (
-                      <p className="text-[17px] font-bold leading-snug text-[var(--landing-navy)]">
-                        {row.withPrefix}{" "}
-                        <FormattedPrice
-                          amount={publicConfig.lifetimeAccessPriceUsd}
-                        />{" "}
-                        {row.withSuffix}
-                      </p>
-                    ) : "with" in row ? (
-                      <p className="text-[17px] font-bold leading-snug text-[var(--landing-navy)]">
-                        {row.with}
-                      </p>
-                    ) : null}
-                  </div>
-                </Fragment>
-              ))}
-            </div>
-
-            <div className="mx-auto mt-10 flex max-w-3xl flex-col gap-[14px] sm:mt-12 sm:gap-5 lg:hidden">
-              {comparisonRows.map((row) => (
-                <div
-                  key={row.without}
-                  className="overflow-hidden rounded-2xl border border-[#D8E2EC]"
-                >
-                  <div className="flex items-center gap-3 bg-[#FEF2F2] px-4 py-4 sm:px-5 sm:py-5">
-                    <X
-                      className="size-5 shrink-0 text-[#F87171]"
-                      strokeWidth={2.5}
-                    />
-                    <p className="text-[15px] leading-snug text-[#6B7280] sm:text-[17px]">
-                      {row.without}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3 bg-[#EFF6FF] px-4 py-4 sm:px-5 sm:py-5">
-                    <Check
-                      className="size-5 shrink-0 text-[#16A34A]"
-                      strokeWidth={2.5}
-                    />
-                    {"withPrice" in row && row.withPrice ? (
-                      <p className="text-[15px] font-bold leading-snug text-[var(--landing-navy)] sm:text-[17px]">
-                        {row.withPrefix}{" "}
-                        <FormattedPrice
-                          amount={publicConfig.lifetimeAccessPriceUsd}
-                        />{" "}
-                        {row.withSuffix}
-                      </p>
-                    ) : "with" in row ? (
-                      <p className="text-[15px] font-bold leading-snug text-[var(--landing-navy)] sm:text-[17px]">
-                        {row.with}
-                      </p>
-                    ) : null}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* Pricing — z-[130] hides sticky mobile CTA (z-[120]) and demo chat launcher (z-[100]) */}
         <section

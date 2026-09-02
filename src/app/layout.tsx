@@ -12,6 +12,8 @@ import { MicrosoftClarity } from "@/components/microsoft-clarity";
 import { Toaster } from "@/components/ui/sonner";
 import { publicConfig } from "@/lib/config";
 
+const appOrigin = publicConfig.appUrl.replace(/\/+$/, "");
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -23,6 +25,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(`${appOrigin}/`),
   title: publicConfig.appName,
   description: publicConfig.productTagline,
 };
