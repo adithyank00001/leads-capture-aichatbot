@@ -8,6 +8,15 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: projectRoot,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/ntv0bhpy/**",
+      },
+    ],
+  },
   async headers() {
     return [
       {

@@ -22,6 +22,9 @@ const sizeDimensions = {
   md: { width: 160, height: 36 },
 } as const;
 
+const BRAND_LOGO_SRC =
+  "https://res.cloudinary.com/ntv0bhpy/image/upload/v1788457921/Untitled_design_18.png";
+
 export function BrandLogo({
   className,
   href = "/",
@@ -31,7 +34,7 @@ export function BrandLogo({
 
   const logo = (
     <Image
-      src="/growscalex-logo.png"
+      src={BRAND_LOGO_SRC}
       alt="growscalex AI"
       width={dimensions.width}
       height={dimensions.height}

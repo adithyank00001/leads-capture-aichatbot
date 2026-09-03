@@ -169,7 +169,7 @@ const testimonials = [
     name: "Zain Khan",
     role: "VERIFIED CUSTOMER",
     rating: 5,
-    image: "/testimonials/review-zain-v2.webp",
+    image: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1788458255/e6a23fe0-7623-4e17-8a13-878844eeed19.png",
   },
   {
     quote:
@@ -181,7 +181,7 @@ const testimonials = [
     name: "Sara Zaabi",
     role: "VERIFIED CUSTOMER",
     rating: 5,
-    image: "/testimonials/review-sara-v2.webp",
+    image: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1788458314/c55fd900-d70f-44f5-b1ac-b32a2fbb35ff.png",
   },
   {
     quote:
@@ -195,7 +195,7 @@ const testimonials = [
     name: "Hamad Shamsi",
     role: "VERIFIED CUSTOMER",
     rating: 5,
-    image: "/testimonials/review-hamad-v2.webp",
+    image: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1788458287/f55fa1f1-b460-4821-af43-0f62ffba5db1.png",
   },
 ] as const;
 
@@ -855,16 +855,15 @@ export function SalesLandingPage({
 
             {showSolutionVideo ? (
               <div className="mx-auto mt-10 max-w-4xl overflow-hidden rounded-xl sm:mt-12 lg:hidden">
-                <video
-                  src="/solution-demo.mp4"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                  aria-hidden
-                  tabIndex={-1}
-                  className="pointer-events-none block h-auto w-full"
+                <iframe
+                  src="https://player.cloudinary.com/embed/?cloud_name=ntv0bhpy&public_id=0821_2_2&player%5Bautoplay%5D=true&player%5Bmuted%5D=true&player%5Bloop%5D=true&player%5Bcontrols%5D=false"
+                  title="AI counselor demo"
+                  width={640}
+                  height={360}
+                  allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                  allowFullScreen
+                  loading="lazy"
+                  className="pointer-events-none block h-auto w-full border-0 aspect-video"
                 />
               </div>
             ) : null}
