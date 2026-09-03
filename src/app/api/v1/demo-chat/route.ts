@@ -1,10 +1,13 @@
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { sendDemoChatMessage } from "@/lib/api/handlers/demo-chat";
 import { handleRouteError, parseJsonBody } from "@/lib/api/request";
-import { isPublicDemoEnabled } from "@/lib/demo/config";
+import {
+  isPrivateDemoPageEnabled,
+  isPublicDemoEnabled,
+} from "@/lib/demo/config";
 
 export async function POST(request: Request) {
-  if (!isPublicDemoEnabled) {
+  if (!isPublicDemoEnabled && !isPrivateDemoPageEnabled) {
     return apiError("NOT_FOUND", "Demo is not available.", 404);
   }
 

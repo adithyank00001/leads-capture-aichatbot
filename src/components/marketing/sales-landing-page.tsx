@@ -18,10 +18,6 @@ import {
 
 import { BrandLogo } from "@/components/marketing/brand-logo";
 import { CtaButton } from "@/components/marketing/cta-button";
-import {
-  DemoChatSection,
-  DemoTryButton,
-} from "@/components/marketing/demo-chat/demo-chat-section";
 import { StickyDesktopCta } from "@/components/marketing/sticky-desktop-cta";
 import { StickyMobileCta } from "@/components/marketing/sticky-mobile-cta";
 import {
@@ -33,7 +29,6 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { FormattedPrice } from "@/components/ui/formatted-price";
 import { Separator } from "@/components/ui/separator";
-import { isPublicDemoEnabled } from "@/lib/demo/config";
 import { resolveMarketingCta } from "@/lib/marketing/cta";
 import { publicConfig } from "@/lib/config";
 import { cn } from "@/lib/utils";
@@ -75,12 +70,6 @@ const problemPoints = [
     icon: ClipboardCheck,
     text: "They may be seriously considering applying.",
   },
-] as const;
-
-const demoHighlights = [
-  "No typing needed · No signup",
-  "Pre-written message — just tap to send",
-  "Sample details already filled in",
 ] as const;
 
 const steps = [
@@ -169,7 +158,7 @@ const testimonials = [
     name: "Zain Khan",
     role: "VERIFIED CUSTOMER",
     rating: 5,
-    image: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1788458255/e6a23fe0-7623-4e17-8a13-878844eeed19.png",
+    image: "https://res.cloudinary.com/ntv0bhpy/image/upload/f_auto,q_auto,c_fill,g_auto,w_96,h_96/v1788458255/e6a23fe0-7623-4e17-8a13-878844eeed19.png",
   },
   {
     quote:
@@ -181,7 +170,7 @@ const testimonials = [
     name: "Sara Zaabi",
     role: "VERIFIED CUSTOMER",
     rating: 5,
-    image: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1788458314/c55fd900-d70f-44f5-b1ac-b32a2fbb35ff.png",
+    image: "https://res.cloudinary.com/ntv0bhpy/image/upload/f_auto,q_auto,c_fill,g_auto,w_96,h_96/v1788458314/c55fd900-d70f-44f5-b1ac-b32a2fbb35ff.png",
   },
   {
     quote:
@@ -195,7 +184,7 @@ const testimonials = [
     name: "Hamad Shamsi",
     role: "VERIFIED CUSTOMER",
     rating: 5,
-    image: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1788458287/f55fa1f1-b460-4821-af43-0f62ffba5db1.png",
+    image: "https://res.cloudinary.com/ntv0bhpy/image/upload/f_auto,q_auto,c_fill,g_auto,w_96,h_96/v1788458287/f55fa1f1-b460-4821-af43-0f62ffba5db1.png",
   },
 ] as const;
 
@@ -855,15 +844,18 @@ export function SalesLandingPage({
 
             {showSolutionVideo ? (
               <div className="mx-auto mt-10 max-w-4xl overflow-hidden rounded-xl sm:mt-12 lg:hidden">
-                <iframe
-                  src="https://player.cloudinary.com/embed/?cloud_name=ntv0bhpy&public_id=0821_2_2&player%5Bautoplay%5D=true&player%5Bmuted%5D=true&player%5Bloop%5D=true&player%5Bcontrols%5D=false"
-                  title="AI counselor demo"
-                  width={640}
-                  height={360}
-                  allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                  allowFullScreen
-                  loading="lazy"
-                  className="pointer-events-none block h-auto w-full border-0 aspect-video"
+                <video
+                  src="https://res.cloudinary.com/ntv0bhpy/video/upload/v1788455543/0821_2_2.webm"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  disablePictureInPicture
+                  preload="none"
+                  aria-hidden
+                  tabIndex={-1}
+                  controls={false}
+                  className="pointer-events-none block h-auto w-full [&::-webkit-media-controls]:hidden"
                 />
               </div>
             ) : null}
@@ -914,6 +906,7 @@ export function SalesLandingPage({
                         alt={testimonial.name}
                         width={48}
                         height={48}
+                        sizes="48px"
                         className="size-12 shrink-0 rounded-full object-cover"
                       />
                       <div>
@@ -931,12 +924,6 @@ export function SalesLandingPage({
             </div>
 
             <div className="mx-auto mt-10 flex max-w-3xl flex-col items-center text-center sm:mt-12 lg:mt-10">
-              {isPublicDemoEnabled ? (
-                <p className="mb-8 w-full border-l-4 border-[var(--landing-orange)] pl-4 text-left text-[17px] font-bold leading-snug text-white sm:mb-10 sm:pl-5 sm:text-[19px] lg:mb-10 lg:max-w-2xl lg:border-l-0 lg:pl-0 lg:text-center lg:text-[19px]">
-                  Now imagine this working on your website.
-                </p>
-              ) : null}
-
               <p className="text-balance text-[22px] font-bold leading-snug text-white sm:text-[25px] lg:text-[28px]">
                 Want More Qualified Student Leads?
               </p>
@@ -947,49 +934,7 @@ export function SalesLandingPage({
           </div>
         </section>
 
-        {isPublicDemoEnabled ? (
-          <>
-            {/* Live demo — z-[90] shows demo chat launcher (z-[100]) above this section */}
-            <section id="landing-demo" className="relative z-[90] bg-white">
-              <div
-                className={cn(
-                  "mx-auto max-w-6xl px-4 pt-14 pb-8 sm:px-6 sm:pt-20 sm:pb-10",
-                  DESKTOP_CONTAINER,
-                )}
-              >
-                <div className="mx-auto max-w-3xl text-center lg:max-w-[960px]">
-                  <SectionLabel light className="mb-6 text-[14px]">
-                    Live Demo
-                  </SectionLabel>
-                  <h2 className="text-balance text-[28px] font-bold uppercase tracking-tight text-[var(--landing-navy)] sm:text-[31px] lg:text-[38px]">
-                    See It in Action
-                  </h2>
-                  <DemoTryButton />
-                  <ul className="mx-auto mt-4 flex w-full max-w-xl flex-col items-start gap-2 text-left sm:mt-5 sm:gap-2.5">
-                    {demoHighlights.map((point) => (
-                      <li
-                        key={point}
-                        className="flex w-full items-start gap-2.5 text-left sm:gap-3"
-                      >
-                        <Check className="mt-0.5 size-5 shrink-0 stroke-[2.5] text-[#16A34A]" />
-                        <span className="min-w-0 flex-1 text-left text-[17px] font-medium leading-relaxed text-[var(--landing-navy)] sm:text-[19px]">
-                          {point}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="mx-auto mt-8 max-w-2xl sm:mt-10">
-                  <DemoChatSection hasLifetimeAccess={hasLifetimeAccess} />
-                </div>
-              </div>
-            </section>
-
-            <LandingFadeSeparator />
-          </>
-        ) : (
-          <LandingFadeSeparator />
-        )}
+        <LandingFadeSeparator />
 
         {/* Steps — z-[90] keeps demo chat launcher (z-[100]) visible above */}
         <section id="landing-steps" className="relative z-[90] bg-white">

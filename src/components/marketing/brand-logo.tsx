@@ -23,7 +23,7 @@ const sizeDimensions = {
 } as const;
 
 const BRAND_LOGO_SRC =
-  "https://res.cloudinary.com/ntv0bhpy/image/upload/v1788457921/Untitled_design_18.png";
+  "https://res.cloudinary.com/ntv0bhpy/image/upload/f_auto,q_auto,w_360/v1788457921/Untitled_design_18.png";
 
 export function BrandLogo({
   className,

@@ -1,8 +1,11 @@
 import type { BusinessDisplay } from "@/lib/business/display";
 import type { WidgetSettings } from "@/lib/widget/types";
 
-/** Set to true in code when you want the landing-page demo section and chat back. */
+/** Set to true to show the demo section on the public landing page. */
 export const isPublicDemoEnabled = false;
+
+/** Private /demo page (not indexed). Chat API stays on for that page. */
+export const isPrivateDemoPageEnabled = true;
 
 export const demoBusiness: BusinessDisplay = {
   name: "GrowscaleX Demo Agency",

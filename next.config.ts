@@ -28,6 +28,15 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        source: "/demo",
+        headers: [
+          {
+            key: "X-Robots-Tag",
+            value: "noindex, nofollow, noarchive",
+          },
+        ],
+      },
     ];
   },
 };
