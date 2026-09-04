@@ -11,6 +11,7 @@ import {
 import { WhatsAppIcon } from "@/components/marketing/whatsapp-icon";
 import { startLandingCheckout } from "@/lib/billing/start-landing-checkout";
 import { publicConfig } from "@/lib/config";
+import { trackWhatsAppContact } from "@/lib/meta/browser-track";
 import { cn } from "@/lib/utils";
 
 function DiscountBadge({ className }: { className?: string }) {
@@ -86,6 +87,15 @@ export function CtaButton({
       await startLandingCheckout();
     } finally {
       setLoading(false);
+    }
+  }
+
+  function handleWhatsAppClick() {
+    // Fire Pixel + CAPI before WhatsApp opens; do not block navigation.
+    try {
+      trackWhatsAppContact();
+    } catch {
+      // Tracking must never block WhatsApp.
     }
   }
 
@@ -174,6 +184,7 @@ export function CtaButton({
       target="_blank"
       rel="noopener noreferrer"
       className={clickableClassName}
+      onClick={handleWhatsAppClick}
     >
       {labelContent}
     </a>

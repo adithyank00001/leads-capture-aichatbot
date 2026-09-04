@@ -3,7 +3,10 @@ import { track } from "@/lib/fbpixel";
 import { ensureBrowserFbcCookie } from "@/lib/meta/fbc";
 import { getMetaPageContentName } from "@/lib/meta/public-pages";
 
-export type BrowserTrackableEvent = "PageView" | "InitiateCheckout";
+export type BrowserTrackableEvent =
+  | "PageView"
+  | "InitiateCheckout"
+  | "Contact";
 
 function createEventId(): string {
   if (
@@ -108,6 +111,20 @@ export function trackInitiateCheckout(eventSourceUrl?: string): void {
       value: publicConfig.lifetimeAccessPriceUsd,
       currency: "USD",
       num_items: 1,
+    },
+    eventSourceUrl,
+  );
+}
+
+/** WhatsApp CTA click — Pixel + CAPI Contact with shared event_id (dedupe). */
+export function trackWhatsAppContact(eventSourceUrl?: string): void {
+  trackPixelAndCapi(
+    "Contact",
+    {
+      value: publicConfig.lifetimeAccessPriceUsd,
+      currency: "AED",
+      content_name: "WhatsApp CTA",
+      content_category: "whatsapp",
     },
     eventSourceUrl,
   );

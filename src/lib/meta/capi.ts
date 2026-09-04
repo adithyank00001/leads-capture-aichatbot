@@ -20,6 +20,7 @@ const GRAPH_API_VERSION = "v22.0";
 export const CLIENT_FORWARDABLE_CAPI_EVENTS = [
   "PageView",
   "InitiateCheckout",
+  "Contact",
 ] as const;
 
 export type ClientForwardableCapiEvent =

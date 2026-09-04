@@ -72,7 +72,7 @@ export async function POST(request: Request) {
     if (!isClientForwardableEvent(eventName)) {
       return apiError(
         "INVALID_EVENT",
-        "Only PageView and InitiateCheckout can be sent from the browser.",
+        "Only PageView, InitiateCheckout, and Contact can be sent from the browser.",
         400,
       );
     }
