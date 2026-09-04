@@ -18,6 +18,7 @@ import {
 
 import { BrandLogo } from "@/components/marketing/brand-logo";
 import { CtaButton } from "@/components/marketing/cta-button";
+import { SolutionDemoVideo } from "@/components/marketing/solution-demo-video";
 import { StickyDesktopCta } from "@/components/marketing/sticky-desktop-cta";
 import { StickyMobileCta } from "@/components/marketing/sticky-mobile-cta";
 import {
@@ -842,23 +843,7 @@ export function SalesLandingPage({
               So your team can follow up while the student is still interested.
             </p>
 
-            {showSolutionVideo ? (
-              <div className="mx-auto mt-10 max-w-4xl overflow-hidden rounded-xl sm:mt-12 lg:hidden">
-                <video
-                  src="https://res.cloudinary.com/ntv0bhpy/video/upload/v1788455543/0821_2_2.webm"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  disablePictureInPicture
-                  preload="none"
-                  aria-hidden
-                  tabIndex={-1}
-                  controls={false}
-                  className="pointer-events-none block h-auto w-full [&::-webkit-media-controls]:hidden"
-                />
-              </div>
-            ) : null}
+            {showSolutionVideo ? <SolutionDemoVideo /> : null}
           </div>
         </section>
 

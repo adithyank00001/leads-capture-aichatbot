@@ -8,6 +8,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    // Intentionally omit "/" so the Meta ads landing page stays fully static
+    // (no edge middleware / no Supabase on every ad click).
     "/login",
     "/signup",
     "/checkout",
