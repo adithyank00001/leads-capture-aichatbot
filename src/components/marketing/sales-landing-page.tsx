@@ -18,6 +18,7 @@ import {
 
 import { BrandLogo } from "@/components/marketing/brand-logo";
 import { CtaButton } from "@/components/marketing/cta-button";
+import { CtaSubtext } from "@/components/marketing/cta-subtext";
 import { SolutionDemoVideo } from "@/components/marketing/solution-demo-video";
 import { StickyDesktopCta } from "@/components/marketing/sticky-desktop-cta";
 import { StickyMobileCta } from "@/components/marketing/sticky-mobile-cta";
@@ -159,7 +160,8 @@ const testimonials = [
     name: "Zain Khan",
     role: "VERIFIED CUSTOMER",
     rating: 5,
-    image: "https://res.cloudinary.com/ntv0bhpy/image/upload/f_auto,q_auto,c_fill,g_auto,w_96,h_96/v1788458255/e6a23fe0-7623-4e17-8a13-878844eeed19.png",
+    image:
+      "https://res.cloudinary.com/ntv0bhpy/image/upload/f_auto,q_auto,c_fill,g_auto,w_96,h_96/v1788458255/e6a23fe0-7623-4e17-8a13-878844eeed19.png",
   },
   {
     quote:
@@ -171,7 +173,8 @@ const testimonials = [
     name: "Sara Zaabi",
     role: "VERIFIED CUSTOMER",
     rating: 5,
-    image: "https://res.cloudinary.com/ntv0bhpy/image/upload/f_auto,q_auto,c_fill,g_auto,w_96,h_96/v1788458314/c55fd900-d70f-44f5-b1ac-b32a2fbb35ff.png",
+    image:
+      "https://res.cloudinary.com/ntv0bhpy/image/upload/f_auto,q_auto,c_fill,g_auto,w_96,h_96/v1788458314/c55fd900-d70f-44f5-b1ac-b32a2fbb35ff.png",
   },
   {
     quote:
@@ -185,7 +188,8 @@ const testimonials = [
     name: "Hamad Shamsi",
     role: "VERIFIED CUSTOMER",
     rating: 5,
-    image: "https://res.cloudinary.com/ntv0bhpy/image/upload/f_auto,q_auto,c_fill,g_auto,w_96,h_96/v1788458287/f55fa1f1-b460-4821-af43-0f62ffba5db1.png",
+    image:
+      "https://res.cloudinary.com/ntv0bhpy/image/upload/f_auto,q_auto,c_fill,g_auto,w_96,h_96/v1788458287/f55fa1f1-b460-4821-af43-0f62ffba5db1.png",
   },
 ] as const;
 
@@ -487,17 +491,6 @@ function LandingFadeSeparator() {
   );
 }
 
-function PriceUnderCta({ className, variant = "hero" }: { className?: string; variant?: "hero" | "pricing" }) {
-  const isPricing = variant === "pricing";
-  return (
-    <div className={cn("mt-1.5 flex items-center justify-center gap-1.5", isPricing ? "text-[16px]" : "text-[15px] sm:text-[16px]", className)}>
-      <span className="font-medium opacity-80">Just</span>
-      <FormattedPrice amount={publicConfig.lifetimeAccessPriceUsd} weight="bold" className={cn("font-bold", isPricing ? "text-[16px]" : "text-[16px] sm:text-[17px]")} />
-      <FormattedPrice amount={publicConfig.lifetimeAccessOriginalPrice} lineThrough weight="regular" className={cn("font-normal opacity-50", isPricing ? "text-[16px]" : "text-[14px] sm:text-[15px]")} />
-    </div>
-  );
-}
-
 export function SalesLandingPage({
   hasLifetimeAccess = false,
   showSolutionVideo = true,
@@ -587,7 +580,7 @@ export function SalesLandingPage({
                   <div className="mx-auto flex w-full flex-col items-center gap-5 sm:gap-6 lg:hidden">
                     <div className="flex w-full flex-col items-center gap-0.5">
                       <CtaButton variant="secondary" {...marketingCta} />
-                      {!hasLifetimeAccess ? <PriceUnderCta className="text-[var(--landing-navy)]" /> : null}
+                      {!hasLifetimeAccess ? <CtaSubtext /> : null}
                     </div>
                     <div className="flex w-full flex-col items-stretch gap-1">
                       <MoneyBackGuarantee
@@ -607,7 +600,7 @@ export function SalesLandingPage({
                         size="large"
                         {...marketingCta}
                       />
-                      {!hasLifetimeAccess ? <PriceUnderCta className="text-[var(--landing-navy)]" /> : null}
+                      {!hasLifetimeAccess ? <CtaSubtext /> : null}
                     </div>
                     <div className="mt-6 flex flex-col gap-1.5">
                       <MoneyBackGuarantee
@@ -912,8 +905,13 @@ export function SalesLandingPage({
               <p className="text-balance text-[22px] font-bold leading-snug text-white sm:text-[25px] lg:text-[28px]">
                 Want More Qualified Student Leads?
               </p>
-              <div className="mt-5 w-full max-w-sm sm:mt-6">
-                <CtaButton className="w-full" buttonClassName="text-[18px] sm:text-[22px]" {...marketingCta} />
+              <div className="mt-5 flex w-full max-w-sm flex-col items-center sm:mt-6">
+                <CtaButton
+                  className="w-full"
+                  buttonClassName="text-[18px] sm:text-[22px]"
+                  {...marketingCta}
+                />
+                {!hasLifetimeAccess ? <CtaSubtext onDark /> : null}
               </div>
             </div>
           </div>
@@ -1035,7 +1033,7 @@ export function SalesLandingPage({
                         size="large"
                         {...marketingCta}
                       />
-                      {!hasLifetimeAccess ? <PriceUnderCta variant="pricing" className="text-[var(--landing-navy)] mt-1" /> : null}
+                      {!hasLifetimeAccess ? <CtaSubtext className="mt-1" /> : null}
                     </div>
                     <p className="mb-1 pt-1 text-[13px] font-bold uppercase tracking-wide text-[#16A34A] lg:text-[14px]">
                       Try It Risk-Free
@@ -1114,18 +1112,21 @@ export function SalesLandingPage({
               </p>
 
               <div className="mt-8 flex w-full max-w-md flex-col items-center gap-3 sm:mt-10 lg:mt-10">
-                <CtaButton
-                  className="w-full sm:w-auto lg:w-full lg:[&_a]:px-8 lg:[&_a]:py-4 lg:[&_a]:text-[22px]"
-                  showDiscountBadge={!hasLifetimeAccess}
-                  size="large"
-                  {...marketingCta}
-                  label={
-                    hasLifetimeAccess
-                      ? marketingCta.label
-                      : "Start Capturing Leads Risk-Free"
-                  }
-                  showPrice={false}
-                />
+                <div className="flex w-full flex-col items-center">
+                  <CtaButton
+                    className="w-full sm:w-auto lg:w-full lg:[&_a]:px-8 lg:[&_a]:py-4 lg:[&_a]:text-[22px]"
+                    showDiscountBadge={!hasLifetimeAccess}
+                    size="large"
+                    {...marketingCta}
+                    label={
+                      hasLifetimeAccess
+                        ? marketingCta.label
+                        : "Start Capturing Leads Risk-Free"
+                    }
+                    showPrice={false}
+                  />
+                  {!hasLifetimeAccess ? <CtaSubtext onDark /> : null}
+                </div>
                 <p className="mb-1 pt-1 text-[13px] font-bold uppercase tracking-wide text-[#86EFAC] lg:text-[14px]">
                   Try It Risk-Free
                 </p>

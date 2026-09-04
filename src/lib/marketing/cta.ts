@@ -1,8 +1,11 @@
+import { getWhatsAppHref } from "@/lib/marketing/whatsapp";
+
 export type MarketingCtaConfig = {
   label: string;
   href: string;
   showPrice: boolean;
   startCheckout: boolean;
+  isWhatsApp: boolean;
 };
 
 type MarketingCtaOverrides = {
@@ -20,13 +23,15 @@ export function resolveMarketingCta(
       href: "/dashboard",
       showPrice: false,
       startCheckout: false,
+      isWhatsApp: false,
     };
   }
 
   return {
     label: overrides.label ?? "Get Lifetime Access",
-    href: "/checkout",
+    href: getWhatsAppHref(),
     showPrice: overrides.showPrice ?? false,
-    startCheckout: true,
+    startCheckout: false,
+    isWhatsApp: true,
   };
 }
