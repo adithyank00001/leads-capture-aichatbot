@@ -39,9 +39,10 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         {metaPixelBootstrapScript ? (
-          <Script id="meta-pixel-bootstrap" strategy="beforeInteractive">
-            {metaPixelBootstrapScript}
-          </Script>
+          <script
+            id="meta-pixel-bootstrap"
+            dangerouslySetInnerHTML={{ __html: metaPixelBootstrapScript }}
+          />
         ) : null}
         {/* GTM disabled for now
         <GoogleTagManager />

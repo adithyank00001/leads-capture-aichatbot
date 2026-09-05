@@ -1,33 +1,8 @@
 import { FB_PIXEL_ID } from "@/lib/fbpixel";
-
-/** Paths that get early head PageView (Pixel + CAPI). Keep in sync with public-pages. */
-const BOOTSTRAP_PUBLIC_PATHS = [
-  "/",
-  "/landing-b",
-  "/login",
-  "/signup",
-  "/checkout",
-  "/checkout/cancel",
-  "/checkout/success",
-  "/thank-you",
-  "/privacy-policy",
-  "/terms-of-service",
-  "/refund-policy",
-] as const;
-
-const BOOTSTRAP_CONTENT_NAMES: Record<string, string> = {
-  "/": "Home",
-  "/landing-b": "Landing B",
-  "/login": "Login",
-  "/signup": "Signup",
-  "/checkout": "Checkout",
-  "/checkout/cancel": "Checkout Cancel",
-  "/checkout/success": "Checkout Success",
-  "/thank-you": "Thank You",
-  "/privacy-policy": "Privacy Policy",
-  "/terms-of-service": "Terms of Service",
-  "/refund-policy": "Refund Policy",
-};
+import {
+  META_PAGE_CONTENT_NAMES,
+  PUBLIC_META_PAGE_PATHS,
+} from "@/lib/meta/public-pages";
 
 /**
  * Inline script for Next.js `beforeInteractive` (injected into <head>).
@@ -39,10 +14,11 @@ export function getMetaPixelBootstrapScript(): string {
     return "";
   }
 
-  const pathsJson = JSON.stringify(BOOTSTRAP_PUBLIC_PATHS);
-  const namesJson = JSON.stringify(BOOTSTRAP_CONTENT_NAMES);
+  const pathsJson = JSON.stringify(PUBLIC_META_PAGE_PATHS);
+  const namesJson = JSON.stringify(META_PAGE_CONTENT_NAMES);
 
   // Keep this self-contained — no imports at runtime.
+  // PageView key must match getMetaPageViewKey() in meta-pixel.tsx (path, or path?query).
   return `(function(){try{
 var paths=${pathsJson};
 var names=${namesJson};
@@ -51,8 +27,9 @@ if(path.indexOf("/embed")===0||path.indexOf("/auth")===0||path.indexOf("/dashboa
 var allowed=false;
 for(var i=0;i<paths.length;i++){if(paths[i]===path){allowed=true;break;}}
 if(!allowed)return;
-var search=location.search||"";
-var key=path+search;
+var rawSearch=location.search||"";
+var query=rawSearch.charAt(0)==="?"?rawSearch.slice(1):rawSearch;
+var key=query?path+"?"+query:path;
 var eventId=(typeof crypto!=="undefined"&&crypto.randomUUID)?crypto.randomUUID():("evt_"+Date.now()+"_"+Math.random().toString(36).slice(2,11));
 var contentName=names[path]||null;
 var customData=contentName?{content_name:contentName}:{};
