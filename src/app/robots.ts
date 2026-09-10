@@ -4,8 +4,16 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
-      allow: "/",
-      disallow: ["/demo", "/landing-b"],
+      allow: [
+        "/privacy-policy",
+        "/terms-of-service",
+        "/refund-policy",
+        "/login",
+        "/signup",
+        "/checkout",
+      ],
+      // Do not use Disallow: "/" — that can block the whole site for crawlers.
+      disallow: ["/landing-b", "/demo", "/dashboard", "/embed"],
     },
   };
 }

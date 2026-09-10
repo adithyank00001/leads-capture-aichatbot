@@ -6,6 +6,7 @@ import {
   isCheckoutLandingPath,
   isCheckoutPath,
   isGuestAllowedCheckoutPath,
+  isHiddenPublicMarketingPath,
 } from "@/lib/auth/access-paths";
 import { publicSupabaseConfig } from "@/lib/supabase/config";
 
@@ -55,6 +56,22 @@ export async function updateSession(request: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
   const user = session?.user ?? null;
+
+  // Landing / demo are closed: guests → login, customers → dashboard.
+  if (isHiddenPublicMarketingPath(pathname)) {
+    if (!user) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/login";
+      redirectUrl.search = "";
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    const hasLifetimeAccess = await getHasLifetimeAccess(supabase, user.id);
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = hasLifetimeAccess ? "/dashboard" : "/checkout";
+    redirectUrl.search = "";
+    return NextResponse.redirect(redirectUrl);
+  }
 
   if (!user && isCheckoutPath(pathname)) {
     if (isGuestAllowedCheckoutPath(pathname)) {

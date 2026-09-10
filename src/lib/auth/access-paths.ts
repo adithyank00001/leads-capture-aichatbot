@@ -4,6 +4,20 @@ export function isDashboardPath(pathname: string) {
   );
 }
 
+/** Marketing pages that are closed to the public (checkout + policy pages stay open). */
+export function isHiddenPublicMarketingPath(pathname: string) {
+  const normalized =
+    pathname.length > 1 && pathname.endsWith("/")
+      ? pathname.slice(0, -1)
+      : pathname;
+
+  return (
+    normalized === "/" ||
+    normalized === "/landing-b" ||
+    normalized === "/demo"
+  );
+}
+
 export function isCheckoutPath(pathname: string) {
   return (
     pathname === "/checkout" ||

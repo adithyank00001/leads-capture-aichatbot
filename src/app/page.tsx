@@ -3,9 +3,23 @@ import type { Metadata } from "next";
 import { SalesLandingPage } from "@/components/marketing/sales-landing-page";
 import { landingPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = landingPageMetadata;
+export const metadata: Metadata = {
+  ...landingPageMetadata,
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: {
+      index: false,
+      follow: false,
+    },
+  },
+};
 
-/** Public Meta ads landing — fully static (no auth / cookie checks). */
+/**
+ * Marketing home is closed via middleware:
+ * guests → /login, customers → /dashboard (or /checkout).
+ * Component kept only as a fallback if middleware is bypassed.
+ */
 export default function HomePage() {
   return <SalesLandingPage />;
 }

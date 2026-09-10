@@ -8,8 +8,12 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Intentionally omit "/" so the Meta ads landing page stays fully static
-    // (no edge middleware / no Supabase on every ad click).
+    // Public marketing pages are gated (redirect guests to login).
+    "/",
+    "/landing-b",
+    "/landing-b/",
+    "/demo",
+    "/demo/",
     "/login",
     "/signup",
     "/checkout",

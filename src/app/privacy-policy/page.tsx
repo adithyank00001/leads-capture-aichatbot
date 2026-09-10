@@ -15,12 +15,12 @@ export default function PrivacyPolicyPage() {
     <div className="min-h-screen bg-white text-[var(--landing-navy)]">
       <header className="border-b border-[#D8E2EC]">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-6 sm:px-6">
-          <BrandLogo size="sm" />
+          <BrandLogo size="sm" href="/login" />
           <Link
-            href="/"
+            href="/login"
             className="text-sm font-medium text-[#5B6B7C] hover:text-[var(--landing-navy)] hover:underline"
           >
-            Back to home
+            Back to login
           </Link>
         </div>
       </header>
