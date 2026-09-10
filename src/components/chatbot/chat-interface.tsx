@@ -74,7 +74,7 @@ export function ChatInterface({
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const leadGateTimerRef = useRef<number | null>(null);
 
-  const assistantLabel = "AI Counselor";
+  const assistantLabel = "AI Sales Agent";
   const pageUrl =
     parentPageUrl ??
     (typeof window !== "undefined" ? window.location.href : undefined);

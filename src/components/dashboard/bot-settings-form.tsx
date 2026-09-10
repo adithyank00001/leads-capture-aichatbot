@@ -234,10 +234,10 @@ export function BotSettingsForm({ initialData }: BotSettingsFormProps) {
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <CardTitle className="text-2xl">AI Counselor setup</CardTitle>
+            <CardTitle className="text-2xl">AI Sales Agent setup</CardTitle>
             <CardDescription className="mt-1">
               We learn from your website automatically. Add only what visitors
-              usually cannot find online or rules your AI counselor must follow.
+              usually cannot find online or rules your AI Sales Agent must follow.
             </CardDescription>
           </div>
           {usageText ? <Badge variant="secondary">{usageText}</Badge> : null}
@@ -254,7 +254,7 @@ export function BotSettingsForm({ initialData }: BotSettingsFormProps) {
                 onChange={(event) => setBusinessName(event.target.value)}
               />
               <p className="text-sm text-muted-foreground">
-                Shown at the top of your AI counselor.
+                Shown at the top of your AI Sales Agent.
               </p>
             </div>
           </SettingsSection>
@@ -265,7 +265,7 @@ export function BotSettingsForm({ initialData }: BotSettingsFormProps) {
           >
             <div className="space-y-2">
               <Label htmlFor="pricingNotes">
-                How should the AI counselor handle pricing questions?
+                How should the AI Sales Agent handle pricing questions?
               </Label>
               <Textarea
                 id="pricingNotes"
@@ -313,7 +313,7 @@ export function BotSettingsForm({ initialData }: BotSettingsFormProps) {
 
           <SettingsSection
             title="Website connection"
-            description="Your AI counselor will only work on this website."
+            description="Your AI Sales Agent will only work on this website."
           >
             <div className="space-y-2">
               <Label htmlFor="allowed-domains">Website domain</Label>

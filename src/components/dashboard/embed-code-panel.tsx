@@ -99,7 +99,7 @@ export function EmbedCodePanel() {
   return (
     <Card className="shadow-md ring-primary/5">
       <CardHeader>
-        <CardTitle className="text-2xl">Install your AI Counselor</CardTitle>
+        <CardTitle className="text-2xl">Install your AI Sales Agent</CardTitle>
         <CardDescription>
           Copy the script and paste it on your website.
         </CardDescription>
@@ -109,7 +109,7 @@ export function EmbedCodePanel() {
           <Alert>
             <AlertTitle>Save your website domain first</AlertTitle>
             <AlertDescription>
-              Add your website domain in Setup before installing the AI counselor.{" "}
+              Add your website domain in Setup before installing the AI Sales Agent.{" "}
               <Link
                 href="/dashboard/settings"
                 className="font-medium text-primary underline"
@@ -125,7 +125,7 @@ export function EmbedCodePanel() {
           <ol className="list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
             <li>Copy the script below.</li>
             <li>Paste it before &lt;/body&gt; on your website.</li>
-            <li>Open your website and test the AI counselor.</li>
+            <li>Open your website and test the AI Sales Agent.</li>
           </ol>
           <p className="text-sm text-muted-foreground">{embedPasteGuideNote}</p>
         </div>
@@ -171,7 +171,7 @@ export function EmbedCodePanel() {
         {botId ? (
           <Button variant="outline" asChild>
             <a href={`/embed/${botId}`} target="_blank" rel="noreferrer">
-              Open AI Counselor preview
+              Open AI Sales Agent preview
             </a>
           </Button>
         ) : null}

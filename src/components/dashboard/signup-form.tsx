@@ -87,7 +87,7 @@ export function SignupForm({
       <CardHeader>
         <CardTitle className="text-2xl">Create your account</CardTitle>
         <CardDescription>
-          Create your account, then unlock lifetime access for your AI counselor
+          Create your account, then unlock lifetime access for your AI Sales Agent
           dashboard.
         </CardDescription>
       </CardHeader>

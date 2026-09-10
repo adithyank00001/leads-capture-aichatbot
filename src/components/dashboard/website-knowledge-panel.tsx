@@ -272,7 +272,7 @@ export function WebsiteKnowledgePanel() {
       <CardHeader>
         <CardTitle className="text-2xl">Website information</CardTitle>
         <CardDescription>
-          We scan your website and automatically teach the AI counselor about your
+          We scan your website and automatically teach the AI Sales Agent about your
           business.
         </CardDescription>
       </CardHeader>
