@@ -4,6 +4,18 @@ export function isDashboardPath(pathname: string) {
   );
 }
 
+/** Paid product areas (chooser + both dashboards + Product 2 APIs). */
+export function isPaidAppPath(pathname: string) {
+  return (
+    pathname === "/products" ||
+    pathname.startsWith("/products/") ||
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/location-leads") ||
+    pathname.startsWith("/api/dashboard") ||
+    pathname.startsWith("/api/location-leads")
+  );
+}
+
 /** Marketing pages that are closed to the public (checkout + policy pages stay open). */
 export function isHiddenPublicMarketingPath(pathname: string) {
   const normalized =

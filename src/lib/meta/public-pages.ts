@@ -36,7 +36,7 @@ export function isPublicMetaPagePath(pathname: string): boolean {
     return false;
   }
 
-  if (pathname.startsWith("/dashboard")) {
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/products") || pathname.startsWith("/location-leads")) {
     return false;
   }
 

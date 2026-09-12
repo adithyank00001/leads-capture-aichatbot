@@ -16,7 +16,7 @@ import { ApiValidationError } from "@/lib/validation/errors";
 export type StartCheckoutForRequestResult =
   | {
       alreadyPaid: true;
-      redirectUrl: "/dashboard";
+      redirectUrl: "/products";
     }
   | {
       alreadyPaid?: false;
@@ -43,7 +43,7 @@ export async function startCheckoutForRequest(
     if (access.hasLifetimeAccess) {
       return {
         alreadyPaid: true,
-        redirectUrl: "/dashboard",
+        redirectUrl: "/products",
       };
     }
 

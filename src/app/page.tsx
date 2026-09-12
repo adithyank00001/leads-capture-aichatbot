@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 /**
  * Marketing home is closed via middleware:
- * guests → /login, customers → /dashboard (or /checkout).
+ * guests → /login, customers → /products (or /checkout).
  * Component kept only as a fallback if middleware is bypassed.
  */
 export default function HomePage() {

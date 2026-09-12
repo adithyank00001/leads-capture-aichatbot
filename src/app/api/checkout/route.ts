@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     if (access.hasLifetimeAccess) {
       return apiSuccess({
         alreadyPaid: true,
-        redirectUrl: "/dashboard",
+        redirectUrl: "/products",
       });
     }
 

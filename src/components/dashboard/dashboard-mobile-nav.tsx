@@ -65,6 +65,9 @@ export function DashboardMobileNav() {
           </nav>
           <div className="space-y-2 border-t p-3">
             <Button variant="ghost" className="w-full justify-start" asChild>
+              <Link href="/products">Switch product</Link>
+            </Button>
+            <Button variant="ghost" className="w-full justify-start" asChild>
               <Link href="/dashboard/embed">Help</Link>
             </Button>
             <DashboardLogoutButton className="w-full justify-start" />

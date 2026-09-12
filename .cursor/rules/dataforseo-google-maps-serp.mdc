@@ -1,0 +1,47 @@
+---
+description: Require DataForSEO Google Maps SERP docs before Maps SERP work
+globs: "**/dataforseo/**,src/lib/dataforseo/**,**/maps-serp/**"
+alwaysApply: false
+---
+
+# DataForSEO Google Maps SERP — read docs first
+
+Before writing or changing Google Maps SERP code, **fetch and read the live docs**. Do not rely on memory alone.
+
+## Required docs
+
+1. [Overview](https://docs.dataforseo.com/v3/serp/google/maps/overview/)
+2. [Task POST](https://docs.dataforseo.com/v3/serp/google/maps/task_post/)
+3. [Tasks Ready](https://docs.dataforseo.com/v3/serp/google/maps/tasks_ready/)
+4. [Task GET Advanced](https://docs.dataforseo.com/v3/serp/google/maps/task_get/advanced/)
+
+## Standard method flow (cheaper than Live)
+
+1. **POST** `https://api.dataforseo.com/v3/serp/google/maps/task_post` — create task(s); you are charged here.
+2. **GET** `https://api.dataforseo.com/v3/serp/google/maps/tasks_ready` — list completed, uncollected task IDs (free).
+3. **GET** `https://api.dataforseo.com/v3/serp/google/maps/task_get/advanced/$id` — fetch full results (free for 30 days after post).
+
+Auth: Basic auth with login + password from [API Access](https://app.dataforseo.com/api-access). Never put credentials in client-side code.
+
+## Task POST requirements
+
+- Body: JSON **array** of task objects (max **100** tasks per POST; max **2000** calls/min).
+- Required: `keyword` + one of `location_code` | `location_name` | `location_coordinate` + one of `language_code` | `language_name`.
+- Prefer `location_code` + `language_code` (e.g. `2840`, `en`).
+- `location_coordinate` format: `"lat,lng,zoom"` (zoom optional, default `17z`).
+- Defaults: `depth` 100 (max 700; billed per 100 results), `device` desktop, `priority` 1 (normal). Mobile returns only **20** results.
+- Keep `search_this_area: true` (default) for accurate area SERPs.
+- If using `postback_url`, set `postback_data: "advanced"`. Successful postbacks do **not** appear in Tasks Ready.
+
+## Tasks Ready / Task GET
+
+- Tasks Ready: up to **20** calls/min; tasks drop off after collection or **3 days**.
+- Prefer `endpoint_advanced` from Tasks Ready when fetching results.
+- Item types: `maps_search`, `maps_paid_item`. Key fields: `place_id`, `cid`, `title`, `address`, `phone`, `rating`, `category`, `latitude`, `longitude`.
+- Handle `status_code` at response and task level (success often `20000`; created `20100`).
+
+## Rule
+
+- Match current DataForSEO payload/response shapes from the docs above.
+- Prefer Standard POST → Ready → GET over Live unless instant results are required.
+- Prefer official docs over blogs or outdated examples.

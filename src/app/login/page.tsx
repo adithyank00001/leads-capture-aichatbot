@@ -20,7 +20,7 @@ type LoginPageProps = {
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const { next, error, paid, email } = await searchParams;
   const isPostPayment = paid === "1";
-  const nextPath = next ?? (isPostPayment ? "/dashboard" : undefined);
+  const nextPath = next ?? (isPostPayment ? "/products" : undefined);
 
   const supabase = await createServerSupabaseClient();
   const {
@@ -41,7 +41,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     );
 
     if (access.hasLifetimeAccess) {
-      redirect("/dashboard");
+      redirect("/products");
     }
   }
 

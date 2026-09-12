@@ -13,7 +13,14 @@ export default function robots(): MetadataRoute.Robots {
         "/checkout",
       ],
       // Do not use Disallow: "/" — that can block the whole site for crawlers.
-      disallow: ["/landing-b", "/demo", "/dashboard", "/embed"],
+      disallow: [
+        "/landing-b",
+        "/demo",
+        "/products",
+        "/dashboard",
+        "/location-leads",
+        "/embed",
+      ],
     },
   };
 }

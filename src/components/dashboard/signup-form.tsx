@@ -66,7 +66,7 @@ export function SignupForm({
         };
 
         if (result.data?.hasLifetimeAccess) {
-          redirectPath = "/dashboard";
+          redirectPath = "/products";
         }
       } catch {
         // Claim is retried on dashboard load if webhook is still processing.

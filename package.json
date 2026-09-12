@@ -22,6 +22,7 @@
     "@upstash/redis": "^1.38.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "country-state-city": "^3.2.1",
     "dirham": "^1.5.3",
     "lucide-react": "^1.28.0",
     "next": "16.2.11",

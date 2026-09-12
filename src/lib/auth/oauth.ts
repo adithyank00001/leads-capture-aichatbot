@@ -1,4 +1,12 @@
-const ALLOWED_OAUTH_NEXT_PATHS = ["/dashboard", "/checkout"] as const;
+const ALLOWED_OAUTH_NEXT_PATHS = [
+  "/products",
+  "/dashboard",
+  "/location-leads",
+  "/checkout",
+] as const;
+
+/** After login/signup, paid users pick a product here. */
+export const PAID_HOME_PATH = "/products";
 
 export function getSafeOAuthNextPath(nextPath?: string | null) {
   if (!nextPath) {
@@ -18,7 +26,7 @@ export function getSafeOAuthNextPath(nextPath?: string | null) {
 }
 
 export function resolvePostLoginRedirect(hasLifetimeAccess: boolean) {
-  return hasLifetimeAccess ? "/dashboard" : "/checkout";
+  return hasLifetimeAccess ? PAID_HOME_PATH : "/checkout";
 }
 
 export function getRequestOrigin(request: Request) {

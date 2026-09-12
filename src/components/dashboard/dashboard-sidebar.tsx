@@ -53,6 +53,13 @@ export function DashboardSidebar() {
           className="w-full justify-start text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
           asChild
         >
+          <Link href="/products">Switch product</Link>
+        </Button>
+        <Button
+          variant="ghost"
+          className="w-full justify-start text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          asChild
+        >
           <Link href="/dashboard/embed">Help</Link>
         </Button>
         <DashboardLogoutButton className="w-full justify-start" />

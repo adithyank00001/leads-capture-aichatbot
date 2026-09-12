@@ -23,7 +23,7 @@ export function getMetaPixelBootstrapScript(): string {
 var paths=${pathsJson};
 var names=${namesJson};
 var path=location.pathname||"/";
-if(path.indexOf("/embed")===0||path.indexOf("/auth")===0||path.indexOf("/dashboard")===0)return;
+if(path.indexOf("/embed")===0||path.indexOf("/auth")===0||path.indexOf("/dashboard")===0||path.indexOf("/products")===0||path.indexOf("/location-leads")===0)return;
 var allowed=false;
 for(var i=0;i<paths.length;i++){if(paths[i]===path){allowed=true;break;}}
 if(!allowed)return;

@@ -2,7 +2,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 import { serverEnv } from "@/lib/env.server";
 
-type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -23,6 +23,8 @@ export type Database = {
           lifetime_access_granted_at: string | null;
           dodo_payment_id: string | null;
           dodo_customer_id: string | null;
+          maps_lead_credits_limit: number;
+          maps_lead_credits_used: number;
         };
         Insert: {
           id?: string;
@@ -33,6 +35,8 @@ export type Database = {
           lifetime_access_granted_at?: string | null;
           dodo_payment_id?: string | null;
           dodo_customer_id?: string | null;
+          maps_lead_credits_limit?: number;
+          maps_lead_credits_used?: number;
         };
         Update: {
           id?: string;
@@ -43,6 +47,137 @@ export type Database = {
           lifetime_access_granted_at?: string | null;
           dodo_payment_id?: string | null;
           dodo_customer_id?: string | null;
+          maps_lead_credits_limit?: number;
+          maps_lead_credits_used?: number;
+        };
+        Relationships: [];
+      };
+      maps_searches: {
+        Row: {
+          id: string;
+          customer_id: string;
+          keyword: string;
+          country: string;
+          state: string | null;
+          city: string | null;
+          location_name: string;
+          depth: number;
+          credits_charged: number;
+          status: "queued" | "submitted" | "completed" | "failed";
+          dataforseo_task_id: string | null;
+          error_message: string | null;
+          results_count: number;
+          created_at: string;
+          updated_at: string;
+          completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          customer_id: string;
+          keyword: string;
+          country: string;
+          state?: string | null;
+          city?: string | null;
+          location_name: string;
+          depth: number;
+          credits_charged: number;
+          status?: "queued" | "submitted" | "completed" | "failed";
+          dataforseo_task_id?: string | null;
+          error_message?: string | null;
+          results_count?: number;
+          created_at?: string;
+          updated_at?: string;
+          completed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          customer_id?: string;
+          keyword?: string;
+          country?: string;
+          state?: string | null;
+          city?: string | null;
+          location_name?: string;
+          depth?: number;
+          credits_charged?: number;
+          status?: "queued" | "submitted" | "completed" | "failed";
+          dataforseo_task_id?: string | null;
+          error_message?: string | null;
+          results_count?: number;
+          created_at?: string;
+          updated_at?: string;
+          completed_at?: string | null;
+        };
+        Relationships: [];
+      };
+      maps_leads: {
+        Row: {
+          id: string;
+          search_id: string;
+          customer_id: string;
+          place_id: string | null;
+          title: string | null;
+          category: string | null;
+          phone: string | null;
+          address: string | null;
+          website: string | null;
+          rating_value: number | null;
+          rating_votes: number | null;
+          latitude: number | null;
+          longitude: number | null;
+          cid: string | null;
+          is_claimed: boolean | null;
+          snippet: string | null;
+          additional_categories: Json | null;
+          raw_item: Json | null;
+          is_saved: boolean;
+          rank_absolute: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          search_id: string;
+          customer_id: string;
+          place_id?: string | null;
+          title?: string | null;
+          category?: string | null;
+          phone?: string | null;
+          address?: string | null;
+          website?: string | null;
+          rating_value?: number | null;
+          rating_votes?: number | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          cid?: string | null;
+          is_claimed?: boolean | null;
+          snippet?: string | null;
+          additional_categories?: Json | null;
+          raw_item?: Json | null;
+          is_saved?: boolean;
+          rank_absolute?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          search_id?: string;
+          customer_id?: string;
+          place_id?: string | null;
+          title?: string | null;
+          category?: string | null;
+          phone?: string | null;
+          address?: string | null;
+          website?: string | null;
+          rating_value?: number | null;
+          rating_votes?: number | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          cid?: string | null;
+          is_claimed?: boolean | null;
+          snippet?: string | null;
+          additional_categories?: Json | null;
+          raw_item?: Json | null;
+          is_saved?: boolean;
+          rank_absolute?: number | null;
+          created_at?: string;
         };
         Relationships: [];
       };
@@ -734,6 +869,24 @@ export type Database = {
       dispatch_widget_monitor_tick: {
         Args: Record<string, never>;
         Returns: Json;
+      };
+      maps_deduct_credits: {
+        Args: {
+          p_customer_id: string;
+          p_amount: number;
+        };
+        Returns: boolean;
+      };
+      maps_refund_credits: {
+        Args: {
+          p_customer_id: string;
+          p_amount: number;
+        };
+        Returns: boolean;
+      };
+      cleanup_expired_maps_searches: {
+        Args: Record<string, never>;
+        Returns: undefined;
       };
     };
     Enums: Record<string, never>;

@@ -19,8 +19,8 @@ export function resolveMarketingCta(
 ): MarketingCtaConfig {
   if (hasLifetimeAccess) {
     return {
-      label: "Dashboard",
-      href: "/dashboard",
+      label: "Open products",
+      href: "/products",
       showPrice: false,
       startCheckout: false,
       isWhatsApp: false,

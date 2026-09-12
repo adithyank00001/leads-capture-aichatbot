@@ -117,7 +117,7 @@ export default async function CheckoutSuccessPage() {
             </CardHeader>
             <CardContent>
               <Button asChild className="w-full" size="lg">
-                <Link href="/dashboard">Go to dashboard</Link>
+                <Link href="/products">Choose product</Link>
               </Button>
               {paymentEventId ? (
                 <MetaPixelPurchase eventId={paymentEventId} />

@@ -70,6 +70,9 @@ export const serverEnv = {
   demoOpenRouterFallbackModel:
     readOptionalEnv("DEMO_OPENROUTER_FALLBACK_MODEL") ??
     "deepseek/deepseek-v4-flash",
+  dataforseoLogin: readOptionalEnv("DATAFORSEO_LOGIN"),
+  dataforseoPassword: readOptionalEnv("DATAFORSEO_PASSWORD"),
+  dataforseoPostbackSecret: readOptionalEnv("DATAFORSEO_POSTBACK_SECRET"),
 } as const;
 
 export function getServiceStatus(): {

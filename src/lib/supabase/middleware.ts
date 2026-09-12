@@ -7,7 +7,9 @@ import {
   isCheckoutPath,
   isGuestAllowedCheckoutPath,
   isHiddenPublicMarketingPath,
+  isPaidAppPath,
 } from "@/lib/auth/access-paths";
+import { PAID_HOME_PATH } from "@/lib/auth/oauth";
 import { publicSupabaseConfig } from "@/lib/supabase/config";
 
 async function getHasLifetimeAccess(
@@ -68,7 +70,7 @@ export async function updateSession(request: NextRequest) {
 
     const hasLifetimeAccess = await getHasLifetimeAccess(supabase, user.id);
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = hasLifetimeAccess ? "/dashboard" : "/checkout";
+    redirectUrl.pathname = hasLifetimeAccess ? PAID_HOME_PATH : "/checkout";
     redirectUrl.search = "";
     return NextResponse.redirect(redirectUrl);
   }
@@ -88,7 +90,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (!user && pathname.startsWith("/dashboard")) {
+  if (!user && isPaidAppPath(pathname)) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
     redirectUrl.searchParams.set("next", pathname);
@@ -102,7 +104,7 @@ export async function updateSession(request: NextRequest) {
 
     const hasLifetimeAccess = await getHasLifetimeAccess(supabase, user.id);
 
-    if (pathname.startsWith("/dashboard") && !hasLifetimeAccess) {
+    if (isPaidAppPath(pathname) && !hasLifetimeAccess) {
       const redirectUrl = request.nextUrl.clone();
       redirectUrl.pathname = "/checkout";
       redirectUrl.search = "";
@@ -111,14 +113,14 @@ export async function updateSession(request: NextRequest) {
 
     if (hasLifetimeAccess && isCheckoutLandingPath(pathname)) {
       const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = "/dashboard";
+      redirectUrl.pathname = PAID_HOME_PATH;
       redirectUrl.search = "";
       return NextResponse.redirect(redirectUrl);
     }
 
     if (hasLifetimeAccess && pathname === "/thank-you") {
       const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = "/dashboard";
+      redirectUrl.pathname = PAID_HOME_PATH;
       redirectUrl.search = "";
       return NextResponse.redirect(redirectUrl);
     }
@@ -128,7 +130,7 @@ export async function updateSession(request: NextRequest) {
       (pathname === "/login" || pathname === "/signup")
     ) {
       const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = hasLifetimeAccess ? "/dashboard" : "/checkout";
+      redirectUrl.pathname = hasLifetimeAccess ? PAID_HOME_PATH : "/checkout";
       redirectUrl.search = "";
       return NextResponse.redirect(redirectUrl);
     }

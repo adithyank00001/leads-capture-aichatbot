@@ -61,7 +61,7 @@ export default async function ThankYouPage({ searchParams }: ThankYouPageProps) 
     );
 
     if (access.hasLifetimeAccess) {
-      redirect("/dashboard");
+      redirect("/products");
     }
   }
 
@@ -87,7 +87,7 @@ export default async function ThankYouPage({ searchParams }: ThankYouPageProps) 
         </div>
 
         <LoginForm
-          nextPath="/dashboard"
+          nextPath="/products"
           isPostPayment
           defaultEmail={verification.email ?? undefined}
         />
