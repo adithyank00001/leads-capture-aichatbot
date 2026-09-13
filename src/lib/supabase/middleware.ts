@@ -99,8 +99,7 @@ export async function updateSession(request: NextRequest) {
 
   if (user) {
     const isPostPaymentLogin =
-      pathname === "/login" &&
-      request.nextUrl.searchParams.get("paid") === "1";
+      pathname === "/login" && request.nextUrl.searchParams.get("paid") === "1";
 
     const hasLifetimeAccess = await getHasLifetimeAccess(supabase, user.id);
 

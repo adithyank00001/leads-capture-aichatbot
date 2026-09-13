@@ -24,9 +24,7 @@ export function isHiddenPublicMarketingPath(pathname: string) {
       : pathname;
 
   return (
-    normalized === "/" ||
-    normalized === "/landing-b" ||
-    normalized === "/demo"
+    normalized === "/" || normalized === "/landing-b" || normalized === "/demo"
   );
 }
 
@@ -52,11 +50,12 @@ export function isGuestAllowedCheckoutPath(pathname: string) {
 }
 
 export function isCheckoutSuccessPath(pathname: string) {
-  return pathname === "/checkout/success" || pathname.startsWith("/checkout/success/");
+  return (
+    pathname === "/checkout/success" ||
+    pathname.startsWith("/checkout/success/")
+  );
 }
 
 export function isCheckoutApiPath(pathname: string) {
-  return (
-    pathname === "/api/checkout" || pathname.startsWith("/api/checkout/")
-  );
+  return pathname === "/api/checkout" || pathname.startsWith("/api/checkout/");
 }

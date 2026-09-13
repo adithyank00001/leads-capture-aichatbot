@@ -25,8 +25,8 @@ function cleanPart(value: string | null | undefined): string | null {
 }
 
 /**
- * Build a clean location_name for the extraction API.
- * Format: "City, State, Country" | "State, Country" | "Country"
+ * Build display location parts for our DB.
+ * DataForSEO matching uses resolveMapsLocation() with official location_code.
  */
 export function buildNormalizedLocationName(input: LocationInput): {
   country: string;
@@ -54,6 +54,7 @@ export function buildNormalizedLocationName(input: LocationInput): {
     country,
     state,
     city,
+    // Temporary display value; replaced by official DataForSEO location_name after resolve.
     locationName: parts.join(", "),
   };
 }

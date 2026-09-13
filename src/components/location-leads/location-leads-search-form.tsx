@@ -106,11 +106,12 @@ export function LocationLeadsSearchForm({
           body: JSON.stringify({
             keyword: keyword.trim(),
             country: selectedCountry.label,
+            countryIso: countryCode,
             state: selectedState?.label ?? null,
             city: cityName || null,
             depth,
           }),
-          timeoutMs: 60_000,
+          timeoutMs: 45_000,
         },
       );
 

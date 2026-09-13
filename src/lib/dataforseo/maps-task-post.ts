@@ -7,6 +7,9 @@ import { serverEnv } from "@/lib/env.server";
 
 export type MapsTaskPostInput = {
   keyword: string;
+  /** Preferred — from DataForSEO locations list */
+  locationCode: number;
+  /** Kept for logging / DB display */
   locationName: string;
   depth: number;
   searchId: string;
@@ -28,13 +31,18 @@ export function buildMapsPostbackUrl(searchId: string): string {
   return url.toString();
 }
 
+/**
+ * Standard queue Task POST.
+ * Docs: https://docs.dataforseo.com/v3/serp/google/maps/task_post/
+ * Prefer location_code over free-text location_name.
+ */
 export async function postGoogleMapsTask(
   input: MapsTaskPostInput,
 ): Promise<MapsTaskPostResult> {
   const payload = [
     {
       keyword: input.keyword,
-      location_name: input.locationName,
+      location_code: input.locationCode,
       language_code: "en",
       depth: input.depth,
       device: "desktop",
@@ -59,9 +67,7 @@ export async function postGoogleMapsTask(
 
   // 20100 = Task Created
   if (taskStatus !== 20100 || !task?.id) {
-    throw new Error(
-      `Task create failed (${taskStatus}): ${taskMessage}`,
-    );
+    throw new Error(`Task create failed (${taskStatus}): ${taskMessage}`);
   }
 
   return {
