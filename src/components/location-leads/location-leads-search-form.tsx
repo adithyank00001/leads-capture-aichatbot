@@ -179,7 +179,9 @@ export function LocationLeadsSearchForm({
             value={cityName}
             onChange={(event) => setCityName(event.target.value)}
             placeholder={
-              countryCode ? "Type a city, e.g. Kanhangad" : "Select country first"
+              countryCode
+                ? "Type the exact city name (no spelling mistakes)"
+                : "Select country first"
             }
             disabled={!countryCode}
             maxLength={120}
