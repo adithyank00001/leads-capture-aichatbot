@@ -21,8 +21,6 @@ export type MapsLeadRow = {
   phone: string | null;
   address: string | null;
   website: string | null;
-  rating_value: number | null;
-  rating_votes: number | null;
   is_saved: boolean;
 };
 
@@ -82,7 +80,6 @@ export function LocationLeadsResultsTable({
             <TableHead>Category</TableHead>
             <TableHead>Phone</TableHead>
             <TableHead>Address</TableHead>
-            <TableHead>Rating</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -108,18 +105,6 @@ export function LocationLeadsResultsTable({
               <TableCell>{lead.phone ?? "—"}</TableCell>
               <TableCell className="max-w-[220px] truncate">
                 {lead.address ?? "—"}
-              </TableCell>
-              <TableCell>
-                {lead.rating_value != null ? (
-                  <span>
-                    {lead.rating_value}
-                    {lead.rating_votes != null
-                      ? ` (${lead.rating_votes})`
-                      : ""}
-                  </span>
-                ) : (
-                  "—"
-                )}
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-2">

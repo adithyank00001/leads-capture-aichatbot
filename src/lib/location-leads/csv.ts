@@ -13,21 +13,7 @@ function escapeCsvCell(value: string | number | boolean | null | undefined): str
 }
 
 export function buildLeadsCsv(rows: CsvRow[]): string {
-  const headers = [
-    "title",
-    "category",
-    "phone",
-    "address",
-    "website",
-    "rating_value",
-    "rating_votes",
-    "latitude",
-    "longitude",
-    "place_id",
-    "cid",
-    "is_claimed",
-    "snippet",
-  ];
+  const headers = ["title", "category", "phone", "address", "website"];
 
   const lines = [headers.join(",")];
 
