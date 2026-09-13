@@ -10,12 +10,14 @@ import {
 } from "@/components/location-leads/location-leads-results-table";
 import { PageHeader } from "@/components/app-shell/page-header";
 import { Surface } from "@/components/app-shell/surface";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { fetchJsonWithTimeout } from "@/lib/api/fetch-client";
 import {
   DATA_EXPIRES_BADGE,
   getProcessingStatusLabel,
+  MAPS_SEARCH_DEPTH_MAX,
   type MapsSearchStatus,
 } from "@/lib/location-leads/constants";
 
@@ -123,6 +125,17 @@ export function LocationLeadsSearchPanel({
         title="Search leads"
         description="Run a B2B database search by keyword and location. Results expire in 24 hours."
       />
+
+      <Alert className="border-border/80 bg-muted/40 px-4 py-3">
+        <AlertTitle className="text-sm font-semibold text-foreground">
+          Tip for better results
+        </AlertTitle>
+        <AlertDescription className="text-sm leading-relaxed text-muted-foreground">
+          To get the most B2B leads from each search, use smaller areas such as a
+          city or district instead of an entire state or country. Each search can
+          return a maximum of {MAPS_SEARCH_DEPTH_MAX} leads.
+        </AlertDescription>
+      </Alert>
 
       <LocationLeadsSearchForm
         onSearchCreated={(searchId) => {
