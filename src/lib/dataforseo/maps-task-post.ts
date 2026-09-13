@@ -22,10 +22,27 @@ export type MapsTaskPostResult = {
   statusMessage: string;
 };
 
+/**
+ * Public origin for DataForSEO postbacks.
+ * Apex growscalex.com 307-redirects to www; DataForSEO does not complete
+ * POST postbacks across that redirect, so always use www in production.
+ */
+export function getPublicAppOrigin(): string {
+  const raw = serverEnv.appUrl.replace(/\/+$/, "");
+  try {
+    const url = new URL(raw);
+    if (url.hostname === "growscalex.com") {
+      url.hostname = "www.growscalex.com";
+    }
+    return url.origin;
+  } catch {
+    return raw;
+  }
+}
+
 export function buildMapsPostbackUrl(searchId: string): string {
   assertDataForSeoConfigured();
-  const origin = serverEnv.appUrl.replace(/\/+$/, "");
-  const url = new URL(`${origin}/api/webhooks/dataforseo/maps`);
+  const url = new URL(`${getPublicAppOrigin()}/api/webhooks/dataforseo/maps`);
   url.searchParams.set("secret", serverEnv.dataforseoPostbackSecret!);
   url.searchParams.set("search_id", searchId);
   return url.toString();

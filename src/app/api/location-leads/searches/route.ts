@@ -15,8 +15,9 @@ import {
   refundMapsCredits,
 } from "@/lib/location-leads/credits";
 import {
-  isMapsSearchDepth,
-  type MapsSearchDepth,
+  MAPS_SEARCH_DEPTH_MAX,
+  MAPS_SEARCH_DEPTH_MIN,
+  parseMapsSearchDepth,
 } from "@/lib/location-leads/constants";
 import { listRecentMapsSearches } from "@/lib/location-leads/db";
 import { buildNormalizedLocationName } from "@/lib/location-leads/location";
@@ -89,16 +90,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const depthValue =
-      typeof body.depth === "string" ? Number(body.depth) : body.depth;
-    if (!isMapsSearchDepth(depthValue)) {
+    const depth = parseMapsSearchDepth(body.depth);
+    if (depth === null) {
       throw new ApiValidationError(
         "INVALID_DEPTH",
-        "Choose a valid search depth.",
+        `Enter a whole number from ${MAPS_SEARCH_DEPTH_MIN} to ${MAPS_SEARCH_DEPTH_MAX}.`,
         400,
       );
     }
-    const depth: MapsSearchDepth = depthValue;
 
     const countryIso =
       typeof body.countryIso === "string" ? body.countryIso.trim() : "";

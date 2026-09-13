@@ -9,9 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fetchJsonWithTimeout } from "@/lib/api/fetch-client";
 import {
-  DEPTH_DROPDOWN_LABEL,
+  DEPTH_INPUT_LABEL,
   getDepthCostHelperText,
-  MAPS_SEARCH_DEPTHS,
+  isMapsSearchDepth,
+  MAPS_SEARCH_DEPTH_DEFAULT,
+  MAPS_SEARCH_DEPTH_MAX,
+  MAPS_SEARCH_DEPTH_MIN,
   type MapsSearchDepth,
 } from "@/lib/location-leads/constants";
 
@@ -39,8 +42,15 @@ export function LocationLeadsSearchForm({
   const [countryCode, setCountryCode] = useState("");
   const [stateCode, setStateCode] = useState("");
   const [cityName, setCityName] = useState("");
-  const [depth, setDepth] = useState<MapsSearchDepth>(50);
+  const [depthInput, setDepthInput] = useState(
+    String(MAPS_SEARCH_DEPTH_DEFAULT),
+  );
   const [submitting, setSubmitting] = useState(false);
+
+  const parsedDepth = Number(depthInput);
+  const depth: MapsSearchDepth | null = isMapsSearchDepth(parsedDepth)
+    ? parsedDepth
+    : null;
 
   const countries = useMemo(
     () =>
@@ -95,6 +105,12 @@ export function LocationLeadsSearchForm({
       toast.error("Select a country.");
       return;
     }
+    if (depth === null) {
+      toast.error(
+        `Enter a whole number from ${MAPS_SEARCH_DEPTH_MIN} to ${MAPS_SEARCH_DEPTH_MAX}.`,
+      );
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -132,7 +148,10 @@ export function LocationLeadsSearchForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-border p-4 md:p-5">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 rounded-xl border border-border p-4 md:p-5"
+    >
       <div className="space-y-1.5">
         <label htmlFor="maps-keyword" className="text-sm font-medium">
           Keyword <span className="text-destructive">*</span>
@@ -186,33 +205,30 @@ export function LocationLeadsSearchForm({
           }
           options={cities}
           value={cityName}
-          disabled={
-            !countryCode || (states.length > 0 && !stateCode)
-          }
+          disabled={!countryCode || (states.length > 0 && !stateCode)}
           onChange={setCityName}
         />
       </div>
 
       <div className="space-y-1.5">
         <label htmlFor="maps-depth" className="text-sm font-medium">
-          {DEPTH_DROPDOWN_LABEL}
+          {DEPTH_INPUT_LABEL}
         </label>
-        <select
+        <Input
           id="maps-depth"
-          className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-          value={depth}
-          onChange={(event) =>
-            setDepth(Number(event.target.value) as MapsSearchDepth)
-          }
-        >
-          {MAPS_SEARCH_DEPTHS.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
+          type="number"
+          inputMode="numeric"
+          min={MAPS_SEARCH_DEPTH_MIN}
+          max={MAPS_SEARCH_DEPTH_MAX}
+          step={1}
+          value={depthInput}
+          onChange={(event) => setDepthInput(event.target.value)}
+          required
+        />
         <p className="text-xs text-muted-foreground">
-          {getDepthCostHelperText(depth)}
+          {depth !== null
+            ? getDepthCostHelperText(depth)
+            : `Enter a whole number from ${MAPS_SEARCH_DEPTH_MIN} to ${MAPS_SEARCH_DEPTH_MAX}.`}
         </p>
       </div>
 

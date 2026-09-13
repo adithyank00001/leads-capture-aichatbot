@@ -33,8 +33,8 @@ export function LocationLeadsSidebar() {
               className={cn(
                 "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                  ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                  : "text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
               )}
             >
               {item.label}
@@ -45,7 +45,7 @@ export function LocationLeadsSidebar() {
       <div className="space-y-2 border-t border-sidebar-border p-3">
         <Button
           variant="ghost"
-          className="w-full justify-start text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          className="w-full justify-start text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           asChild
         >
           <Link href="/products">Switch product</Link>

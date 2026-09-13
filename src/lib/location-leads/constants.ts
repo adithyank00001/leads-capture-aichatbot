@@ -1,8 +1,11 @@
 export const MAPS_LEAD_CREDIT_LIMIT = 100_000;
 
-export const MAPS_SEARCH_DEPTHS = [50, 100, 200, 500, 700] as const;
+/** DataForSEO Maps depth: any integer from 1 to 700. */
+export const MAPS_SEARCH_DEPTH_MIN = 1;
+export const MAPS_SEARCH_DEPTH_MAX = 700;
+export const MAPS_SEARCH_DEPTH_DEFAULT = 50;
 
-export type MapsSearchDepth = (typeof MAPS_SEARCH_DEPTHS)[number];
+export type MapsSearchDepth = number;
 
 export const MAPS_SEARCH_STATUSES = [
   "queued",
@@ -15,15 +18,33 @@ export type MapsSearchStatus = (typeof MAPS_SEARCH_STATUSES)[number];
 
 export const LEAD_CREDITS_BADGE_LABEL = "100,000 Lead Credits";
 
-export const DEPTH_DROPDOWN_LABEL = "Database Lead Search Depth (Max Leads/Searches)";
+export const DEPTH_INPUT_LABEL = "How many leads do you want? (1–700)";
 
 export const DATA_EXPIRES_BADGE = "Data expires in 24 hours.";
 
 export function isMapsSearchDepth(value: unknown): value is MapsSearchDepth {
   return (
     typeof value === "number" &&
-    (MAPS_SEARCH_DEPTHS as readonly number[]).includes(value)
+    Number.isInteger(value) &&
+    value >= MAPS_SEARCH_DEPTH_MIN &&
+    value <= MAPS_SEARCH_DEPTH_MAX
   );
+}
+
+export function parseMapsSearchDepth(value: unknown): MapsSearchDepth | null {
+  const raw =
+    typeof value === "string"
+      ? Number(value.trim())
+      : typeof value === "number"
+        ? value
+        : NaN;
+
+  if (!Number.isFinite(raw)) {
+    return null;
+  }
+
+  const depth = Math.trunc(raw);
+  return isMapsSearchDepth(depth) ? depth : null;
 }
 
 export function getDepthCostHelperText(depth: MapsSearchDepth): string {

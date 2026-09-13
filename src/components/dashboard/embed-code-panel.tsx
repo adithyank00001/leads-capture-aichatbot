@@ -163,7 +163,7 @@ export function EmbedCodePanel() {
               </Button>
             ) : null}
           </div>
-          <pre className="overflow-x-auto rounded-lg border bg-sidebar p-4 text-xs text-sidebar-foreground">
+          <pre className="overflow-x-auto rounded-lg border bg-muted p-4 text-xs text-foreground">
             {botId ? embedCode : "Loading..."}
           </pre>
         </div>

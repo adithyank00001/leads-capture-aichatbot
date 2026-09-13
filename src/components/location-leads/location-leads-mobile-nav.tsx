@@ -33,10 +33,13 @@ export function LocationLeadsMobileNav() {
             <span className="sr-only">Open menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-72 p-0">
-          <SheetHeader className="border-b px-4 py-4">
+        <SheetContent
+          side="left"
+          className="w-72 border-sidebar-border bg-sidebar p-0 text-sidebar-foreground"
+        >
+          <SheetHeader className="border-b border-sidebar-border px-4 py-4">
             <BrandLogo href="/location-leads" size="md" />
-            <p className="text-left text-xs text-muted-foreground">
+            <p className="text-left text-xs text-sidebar-foreground/70">
               Location B2B leads
             </p>
           </SheetHeader>
@@ -54,8 +57,8 @@ export function LocationLeadsMobileNav() {
                   className={cn(
                     "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "hover:bg-muted",
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                      : "text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                   )}
                 >
                   {item.label}
@@ -63,8 +66,12 @@ export function LocationLeadsMobileNav() {
               );
             })}
           </nav>
-          <div className="space-y-2 border-t p-3">
-            <Button variant="ghost" className="w-full justify-start" asChild>
+          <div className="space-y-2 border-t border-sidebar-border p-3">
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              asChild
+            >
               <Link href="/products">Switch product</Link>
             </Button>
             <DashboardLogoutButton className="w-full justify-start" />
