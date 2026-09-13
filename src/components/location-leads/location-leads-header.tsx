@@ -1,8 +1,8 @@
 import { LocationLeadsCreditsBadge } from "@/components/location-leads/location-leads-credits-badge";
-import { requireDashboardAuth } from "@/lib/auth/dashboard-session";
+import { requireMapsAuth } from "@/lib/auth/dashboard-session";
 
 export async function LocationLeadsHeader() {
-  const { user } = await requireDashboardAuth();
+  const { user } = await requireMapsAuth();
 
   return (
     <header className="hidden border-b border-border/80 bg-card/90 backdrop-blur-sm md:block">

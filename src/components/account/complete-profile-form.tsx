@@ -120,9 +120,6 @@ export function CompleteProfileForm({
               maxLength={20}
               disabled={loading}
             />
-            <p className="text-xs text-muted-foreground">
-              Use a number we can reach you on (WhatsApp is fine).
-            </p>
           </div>
           {error ? (
             <Alert variant="destructive">
