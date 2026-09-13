@@ -7,6 +7,7 @@ import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/admin";
 import { claimPendingLifetimePurchase } from "@/lib/billing/claim-pending-purchase";
+import { syncLifetimeAccessForEmail } from "@/lib/billing/sync-lifetime-access";
 import { syncMapsAccessForEmail } from "@/lib/billing/sync-maps-access";
 import { ensureCustomerOnboarding } from "@/lib/dashboard/onboarding";
 import { ApiValidationError } from "@/lib/validation/errors";
@@ -152,6 +153,10 @@ async function refreshAccessEntitlements(input: {
 
   if (!customer?.has_lifetime_access) {
     await claimPendingLifetimePurchase({
+      userId: input.userId,
+      email: input.email,
+    });
+    await syncLifetimeAccessForEmail({
       userId: input.userId,
       email: input.email,
     });

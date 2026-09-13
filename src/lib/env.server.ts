@@ -73,6 +73,10 @@ export const serverEnv = {
   dataforseoLogin: readOptionalEnv("DATAFORSEO_LOGIN"),
   dataforseoPassword: readOptionalEnv("DATAFORSEO_PASSWORD"),
   dataforseoPostbackSecret: readOptionalEnv("DATAFORSEO_POSTBACK_SECRET"),
+  founderEmail: readOptionalEnv("FOUNDER_EMAIL"),
+  founderPassword: readOptionalEnv("FOUNDER_PASSWORD"),
+  founderDashboardSecret: readOptionalEnv("FOUNDER_DASHBOARD_SECRET"),
+  founderSessionSecret: readOptionalEnv("FOUNDER_SESSION_SECRET"),
 } as const;
 
 export function getServiceStatus(): {

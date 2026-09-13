@@ -88,6 +88,27 @@ export type Database = {
         };
         Relationships: [];
       };
+      lifetime_access_emails: {
+        Row: {
+          id: string;
+          email: string;
+          note: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          note?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          note?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       maps_searches: {
         Row: {
           id: string;

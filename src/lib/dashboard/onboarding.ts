@@ -2,6 +2,7 @@ import { createBotForCustomer, getBotByCustomerId } from "@/lib/db/bots";
 import { createEmptyBotKnowledge } from "@/lib/db/bot-knowledge";
 import { ensureWidgetSettingsForBot } from "@/lib/db/bot-widget-settings";
 import { createCustomer, getCustomerByUserId } from "@/lib/db/customers";
+import { syncLifetimeAccessForEmail } from "@/lib/billing/sync-lifetime-access";
 import { syncMapsAccessForEmail } from "@/lib/billing/sync-maps-access";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -23,6 +24,10 @@ export async function ensureCustomerOnboarding(
     }));
 
   if (input.email) {
+    await syncLifetimeAccessForEmail({
+      userId: input.userId,
+      email: input.email,
+    });
     await syncMapsAccessForEmail({
       userId: input.userId,
       email: input.email,

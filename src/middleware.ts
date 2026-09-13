@@ -33,5 +33,9 @@ export const config = {
     "/api/checkout/:path*",
     "/api/dashboard",
     "/api/dashboard/:path*",
+    "/founder",
+    "/founder/:path*",
+    "/api/founder",
+    "/api/founder/:path*",
   ],
 };

@@ -3,6 +3,7 @@ import { handleRouteError } from "@/lib/api/request";
 import { getCustomerAccess } from "@/lib/auth/access";
 import { requireAuthUser } from "@/lib/auth/dashboard";
 import { PAID_HOME_PATH } from "@/lib/auth/oauth";
+import { syncLifetimeAccessForEmail } from "@/lib/billing/sync-lifetime-access";
 import { syncMapsAccessForEmail } from "@/lib/billing/sync-maps-access";
 import { ensureCustomerOnboarding } from "@/lib/dashboard/onboarding";
 import type { Database } from "@/lib/supabase/admin";
@@ -104,6 +105,11 @@ export async function POST(request: Request) {
     if (updateError) {
       throw new Error(updateError.message);
     }
+
+    await syncLifetimeAccessForEmail({
+      userId: user.id,
+      email: user.email,
+    });
 
     await syncMapsAccessForEmail({
       userId: user.id,

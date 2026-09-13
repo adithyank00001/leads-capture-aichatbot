@@ -3,6 +3,7 @@ import { handleRouteError } from "@/lib/api/request";
 import { getCustomerAccess } from "@/lib/auth/access";
 import { requireAuthUser } from "@/lib/auth/dashboard";
 import { claimPendingLifetimePurchase } from "@/lib/billing/claim-pending-purchase";
+import { syncLifetimeAccessForEmail } from "@/lib/billing/sync-lifetime-access";
 import { syncMapsAccessForEmail } from "@/lib/billing/sync-maps-access";
 import { ensureCustomerOnboarding } from "@/lib/dashboard/onboarding";
 import type { Database } from "@/lib/supabase/admin";
@@ -26,6 +27,11 @@ export async function POST() {
     });
 
     await ensureCustomerOnboarding(supabase, {
+      userId: user.id,
+      email: user.email,
+    });
+
+    await syncLifetimeAccessForEmail({
       userId: user.id,
       email: user.email,
     });

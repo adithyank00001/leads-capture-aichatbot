@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { LoginForm } from "@/components/dashboard/login-form";
 import { claimPendingLifetimePurchase } from "@/lib/billing/claim-pending-purchase";
+import { syncLifetimeAccessForEmail } from "@/lib/billing/sync-lifetime-access";
 import { syncMapsAccessForEmail } from "@/lib/billing/sync-maps-access";
 import { getCustomerAccess } from "@/lib/auth/access";
 import { resolvePostLoginRedirect } from "@/lib/auth/oauth";
@@ -39,6 +40,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     }
 
     await ensureCustomerOnboarding(supabase, {
+      userId: user.id,
+      email: user.email,
+    });
+
+    await syncLifetimeAccessForEmail({
       userId: user.id,
       email: user.email,
     });

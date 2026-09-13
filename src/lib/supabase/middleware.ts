@@ -16,6 +16,12 @@ import {
 import { PAID_HOME_PATH } from "@/lib/auth/oauth";
 import { publicSupabaseConfig } from "@/lib/supabase/config";
 
+function isFounderPath(pathname: string) {
+  return (
+    pathname.startsWith("/founder") || pathname.startsWith("/api/founder")
+  );
+}
+
 type AccessFlags = {
   hasLifetimeAccess: boolean;
   hasMapsAccess: boolean;
@@ -75,6 +81,12 @@ export async function updateSession(request: NextRequest) {
   );
 
   const pathname = request.nextUrl.pathname;
+
+  // Founder area is separate from customer auth / product gates.
+  if (isFounderPath(pathname)) {
+    return supabaseResponse;
+  }
+
   const {
     data: { session },
   } = await supabase.auth.getSession();

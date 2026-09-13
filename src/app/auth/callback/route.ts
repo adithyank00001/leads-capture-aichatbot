@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getCustomerAccess } from "@/lib/auth/access";
 import { getRequestOrigin, resolvePostLoginRedirect } from "@/lib/auth/oauth";
 import { claimPendingLifetimePurchase } from "@/lib/billing/claim-pending-purchase";
+import { syncLifetimeAccessForEmail } from "@/lib/billing/sync-lifetime-access";
 import { syncMapsAccessForEmail } from "@/lib/billing/sync-maps-access";
 import { ensureCustomerOnboarding } from "@/lib/dashboard/onboarding";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -25,6 +26,11 @@ export async function GET(request: Request) {
       });
 
       await ensureCustomerOnboarding(supabase, {
+        userId: data.user.id,
+        email: data.user.email,
+      });
+
+      await syncLifetimeAccessForEmail({
         userId: data.user.id,
         email: data.user.email,
       });
