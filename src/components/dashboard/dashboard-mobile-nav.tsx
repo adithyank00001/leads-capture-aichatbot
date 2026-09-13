@@ -29,10 +29,10 @@ export function DashboardMobileNav() {
 
   return (
     <div className="flex items-center justify-between border-b border-sidebar-border bg-sidebar px-4 py-3 text-sidebar-foreground md:hidden">
-      <BrandLogo href="/dashboard" size="md" />
+      <BrandLogo href="/dashboard" size="md" tone="onDark" />
       <Sheet>
         <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="border-sidebar-border bg-transparent">
+          <Button variant="outline" size="icon" className="border-sidebar-border bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
             <MenuIcon className="size-4" />
             <span className="sr-only">Open menu</span>
           </Button>
@@ -42,7 +42,7 @@ export function DashboardMobileNav() {
           className="w-72 border-sidebar-border bg-sidebar p-0 text-sidebar-foreground"
         >
           <SheetHeader className="border-b border-sidebar-border px-4 py-4">
-            <BrandLogo href="/dashboard" size="md" />
+            <BrandLogo href="/dashboard" size="md" tone="onDark" />
           </SheetHeader>
           <nav className="flex flex-col gap-1 p-3">
             {navItems.map((item) => {

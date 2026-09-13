@@ -23,7 +23,7 @@ export function DashboardSidebar() {
   return (
     <aside className="hidden w-60 shrink-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex md:flex-col">
       <div className="flex items-center border-b border-sidebar-border px-4 py-5">
-        <BrandLogo href="/dashboard" size="md" />
+        <BrandLogo href="/dashboard" size="md" tone="onDark" />
       </div>
       <nav className="flex flex-1 flex-col gap-1 p-3">
         {navItems.map((item) => {

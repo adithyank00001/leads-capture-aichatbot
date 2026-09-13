@@ -24,19 +24,35 @@ export type MapsTaskPostResult = {
 
 /**
  * Public origin for DataForSEO postbacks.
- * Apex growscalex.com 307-redirects to www; DataForSEO does not complete
- * POST postbacks across that redirect, so always use www in production.
+ * Must be a public https URL DataForSEO can reach.
+ * - Apex growscalex.com 307-redirects to www (breaks POST postbacks)
+ * - localhost / ngrok tunnels often return 404 when offline
  */
 export function getPublicAppOrigin(): string {
   const raw = serverEnv.appUrl.replace(/\/+$/, "");
+  const productionOrigin = "https://www.growscalex.com";
+
   try {
     const url = new URL(raw);
-    if (url.hostname === "growscalex.com") {
-      url.hostname = "www.growscalex.com";
+    const host = url.hostname.toLowerCase();
+
+    if (
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host.endsWith(".ngrok-free.dev") ||
+      host.endsWith(".ngrok.io") ||
+      host.endsWith(".ngrok.app")
+    ) {
+      return productionOrigin;
     }
+
+    if (host === "growscalex.com") {
+      return productionOrigin;
+    }
+
     return url.origin;
   } catch {
-    return raw;
+    return productionOrigin;
   }
 }
 

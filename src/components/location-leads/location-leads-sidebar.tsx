@@ -15,7 +15,7 @@ export function LocationLeadsSidebar() {
   return (
     <aside className="hidden w-60 shrink-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex md:flex-col">
       <div className="flex flex-col gap-1 border-b border-sidebar-border px-4 py-5">
-        <BrandLogo href="/location-leads" size="md" />
+        <BrandLogo href="/location-leads" size="md" tone="onDark" />
         <p className="text-xs text-sidebar-foreground/70">
           Location B2B leads
         </p>

@@ -21,13 +21,13 @@ export function LocationLeadsMobileNav() {
 
   return (
     <div className="flex items-center justify-between border-b border-sidebar-border bg-sidebar px-4 py-3 text-sidebar-foreground md:hidden">
-      <BrandLogo href="/location-leads" size="md" />
+      <BrandLogo href="/location-leads" size="md" tone="onDark" />
       <Sheet>
         <SheetTrigger asChild>
           <Button
             variant="outline"
             size="icon"
-            className="border-sidebar-border bg-transparent"
+            className="border-sidebar-border bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           >
             <MenuIcon className="size-4" />
             <span className="sr-only">Open menu</span>
@@ -38,7 +38,7 @@ export function LocationLeadsMobileNav() {
           className="w-72 border-sidebar-border bg-sidebar p-0 text-sidebar-foreground"
         >
           <SheetHeader className="border-b border-sidebar-border px-4 py-4">
-            <BrandLogo href="/location-leads" size="md" />
+            <BrandLogo href="/location-leads" size="md" tone="onDark" />
             <p className="text-left text-xs text-sidebar-foreground/70">
               Location B2B leads
             </p>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { City, Country, State } from "country-state-city";
+import { Country, State } from "country-state-city";
 import { toast } from "sonner";
 
 import { SearchableSelect } from "@/components/location-leads/searchable-select";
@@ -71,26 +71,6 @@ export function LocationLeadsSearchForm({
     }));
   }, [countryCode]);
 
-  const cities = useMemo(() => {
-    if (!countryCode) {
-      return [];
-    }
-    // Prefer state-scoped cities when the country has states (avoids huge lists).
-    if (states.length > 0) {
-      if (!stateCode) {
-        return [];
-      }
-      return City.getCitiesOfState(countryCode, stateCode).map((city) => ({
-        value: city.name,
-        label: city.name,
-      }));
-    }
-    return (City.getCitiesOfCountry(countryCode) ?? []).map((city) => ({
-      value: city.name,
-      label: city.name,
-    }));
-  }, [countryCode, stateCode, states.length]);
-
   const selectedCountry = countries.find((item) => item.value === countryCode);
   const selectedState = states.find((item) => item.value === stateCode);
 
@@ -124,7 +104,7 @@ export function LocationLeadsSearchForm({
             country: selectedCountry.label,
             countryIso: countryCode,
             state: selectedState?.label ?? null,
-            city: cityName || null,
+            city: cityName.trim() || null,
             depth,
           }),
           timeoutMs: 45_000,
@@ -188,26 +168,24 @@ export function LocationLeadsSearchForm({
           options={states}
           value={stateCode}
           disabled={!countryCode || states.length === 0}
-          onChange={(next) => {
-            setStateCode(next);
-            setCityName("");
-          }}
+          onChange={setStateCode}
         />
-        <SearchableSelect
-          id="maps-city"
-          label="City"
-          placeholder={
-            !countryCode
-              ? "Select country first"
-              : states.length > 0 && !stateCode
-                ? "Select state first (optional city)"
-                : "Optional"
-          }
-          options={cities}
-          value={cityName}
-          disabled={!countryCode || (states.length > 0 && !stateCode)}
-          onChange={setCityName}
-        />
+        <div className="space-y-1.5">
+          <label htmlFor="maps-city" className="text-sm font-medium">
+            City <span className="font-normal text-muted-foreground">(optional)</span>
+          </label>
+          <Input
+            id="maps-city"
+            value={cityName}
+            onChange={(event) => setCityName(event.target.value)}
+            placeholder={
+              countryCode ? "Type a city, e.g. Kanhangad" : "Select country first"
+            }
+            disabled={!countryCode}
+            maxLength={120}
+            autoComplete="address-level2"
+          />
+        </div>
       </div>
 
       <div className="space-y-1.5">

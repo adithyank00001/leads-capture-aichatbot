@@ -8,6 +8,8 @@ type BrandLogoProps = {
   href?: string;
   /** xs = landing page, sm = policy pages, md = dashboard & app pages */
   size?: "xs" | "sm" | "md";
+  /** Use on blue/dark sidebars so the logo stays visible. */
+  tone?: "default" | "onDark";
 };
 
 const sizeClasses = {
@@ -29,6 +31,7 @@ export function BrandLogo({
   className,
   href = "/",
   size = "sm",
+  tone = "default",
 }: BrandLogoProps) {
   const dimensions = sizeDimensions[size];
 
@@ -39,7 +42,11 @@ export function BrandLogo({
       width={dimensions.width}
       height={dimensions.height}
       priority
-      className={cn(sizeClasses[size], className)}
+      className={cn(
+        sizeClasses[size],
+        tone === "onDark" && "brightness-0 invert",
+        className,
+      )}
     />
   );
 
