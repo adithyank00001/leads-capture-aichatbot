@@ -7,16 +7,28 @@ import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/admin";
 import { claimPendingLifetimePurchase } from "@/lib/billing/claim-pending-purchase";
+import { syncMapsAccessForEmail } from "@/lib/billing/sync-maps-access";
 import { ensureCustomerOnboarding } from "@/lib/dashboard/onboarding";
 import { ApiValidationError } from "@/lib/validation/errors";
 import type { WebsiteBuildStatus } from "@/lib/dashboard/setup-status";
 
 type Client = SupabaseClient<Database>;
 
+type CustomerAccessRow = {
+  id: string;
+  has_lifetime_access: boolean;
+  has_maps_access: boolean;
+  profile_completed_at: string | null;
+  full_name: string | null;
+  mobile_phone: string | null;
+};
+
 async function loadCustomerAccess(supabase: Client, userId: string) {
   const { data, error } = await supabase
     .from("customers")
-    .select("id, has_lifetime_access")
+    .select(
+      "id, has_lifetime_access, has_maps_access, profile_completed_at, full_name, mobile_phone",
+    )
     .eq("user_id", userId)
     .maybeSingle();
 
@@ -24,7 +36,7 @@ async function loadCustomerAccess(supabase: Client, userId: string) {
     throw new Error(error.message);
   }
 
-  return data;
+  return data as CustomerAccessRow | null;
 }
 
 type BotBundle = {
@@ -61,12 +73,16 @@ type BotBundle = {
 type CustomerBundle = {
   id: string;
   has_lifetime_access: boolean;
+  has_maps_access: boolean;
+  profile_completed_at: string | null;
   bots: BotBundle | null;
 };
 
 const CUSTOMER_BUNDLE_SELECT = `
   id,
   has_lifetime_access,
+  has_maps_access,
+  profile_completed_at,
   bots (
     bot_id,
     business_name,
@@ -123,6 +139,45 @@ async function fetchCustomerBundle(
   return data as CustomerBundle | null;
 }
 
+async function refreshAccessEntitlements(input: {
+  supabase: Client;
+  userId: string;
+  email: string | null | undefined;
+}) {
+  if (!input.email) {
+    return loadCustomerAccess(input.supabase, input.userId);
+  }
+
+  let customer = await loadCustomerAccess(input.supabase, input.userId);
+
+  if (!customer?.has_lifetime_access) {
+    await claimPendingLifetimePurchase({
+      userId: input.userId,
+      email: input.email,
+    });
+  }
+
+  if (!customer?.has_maps_access) {
+    await syncMapsAccessForEmail({
+      userId: input.userId,
+      email: input.email,
+    });
+  }
+
+  return loadCustomerAccess(input.supabase, input.userId);
+}
+
+function toAccess(customer: CustomerAccessRow | null) {
+  return {
+    hasLifetimeAccess: customer?.has_lifetime_access ?? false,
+    hasMapsAccess: customer?.has_maps_access ?? false,
+    profileCompleted: Boolean(customer?.profile_completed_at),
+    customerId: customer?.id ?? null,
+    fullName: customer?.full_name ?? null,
+    mobilePhone: customer?.mobile_phone ?? null,
+  };
+}
+
 export const getDashboardAuth = cache(async () => {
   const supabase = await createServerSupabaseClient();
   const user = await readSessionUser(supabase);
@@ -131,23 +186,23 @@ export const getDashboardAuth = cache(async () => {
     return null;
   }
 
-  let customer = await loadCustomerAccess(supabase as Client, user.id);
-
-  if (!customer?.has_lifetime_access && user.email) {
-    await claimPendingLifetimePurchase({
+  if (user.email) {
+    await ensureCustomerOnboarding(supabase as Client, {
       userId: user.id,
       email: user.email,
     });
-    customer = await loadCustomerAccess(supabase as Client, user.id);
   }
+
+  const customer = await refreshAccessEntitlements({
+    supabase: supabase as Client,
+    userId: user.id,
+    email: user.email,
+  });
 
   return {
     supabase: supabase as Client,
     user,
-    access: {
-      hasLifetimeAccess: customer?.has_lifetime_access ?? false,
-      customerId: customer?.id ?? null,
-    },
+    access: toAccess(customer),
   };
 });
 
@@ -158,6 +213,12 @@ export const getDashboardBundle = cache(async () => {
   if (!user) {
     return null;
   }
+
+  await refreshAccessEntitlements({
+    supabase: supabase as Client,
+    userId: user.id,
+    email: user.email,
+  });
 
   let customer = await fetchCustomerBundle(supabase as Client, user.id);
 
@@ -179,11 +240,37 @@ export const getDashboardBundle = cache(async () => {
     customer,
     access: {
       hasLifetimeAccess: customer.has_lifetime_access,
+      hasMapsAccess: customer.has_maps_access,
+      profileCompleted: Boolean(customer.profile_completed_at),
       customerId: customer.id,
     },
   };
 });
 
+function redirectIfProfileIncomplete(profileCompleted: boolean) {
+  if (!profileCompleted) {
+    redirect("/complete-profile");
+  }
+}
+
+/** Any logged-in user with Product 1 and/or Product 2 access (after profile). */
+export async function requireAnyProductAuth() {
+  const auth = await getDashboardAuth();
+
+  if (!auth) {
+    redirect("/login");
+  }
+
+  redirectIfProfileIncomplete(auth.access.profileCompleted);
+
+  if (!auth.access.hasLifetimeAccess && !auth.access.hasMapsAccess) {
+    redirect("/checkout");
+  }
+
+  return auth;
+}
+
+/** Product 1 (AI Sales Agent) only. */
 export async function requireDashboardAuth() {
   const auth = await getDashboardAuth();
 
@@ -191,8 +278,10 @@ export async function requireDashboardAuth() {
     redirect("/login");
   }
 
+  redirectIfProfileIncomplete(auth.access.profileCompleted);
+
   if (!auth.access.hasLifetimeAccess) {
-    redirect("/checkout");
+    redirect(auth.access.hasMapsAccess ? "/products" : "/checkout");
   }
 
   return auth;
@@ -205,8 +294,10 @@ export async function requireDashboardBundle() {
     redirect("/login");
   }
 
+  redirectIfProfileIncomplete(bundle.access.profileCompleted);
+
   if (!bundle.access.hasLifetimeAccess) {
-    redirect("/checkout");
+    redirect(bundle.access.hasMapsAccess ? "/products" : "/checkout");
   }
 
   return bundle;
@@ -217,6 +308,14 @@ export async function requireDashboardApiUser() {
 
   if (!auth) {
     throw new ApiValidationError("UNAUTHORIZED", "Please log in to continue.", 401);
+  }
+
+  if (!auth.access.profileCompleted) {
+    throw new ApiValidationError(
+      "PROFILE_REQUIRED",
+      "Complete your profile to continue.",
+      403,
+    );
   }
 
   if (!auth.access.hasLifetimeAccess) {
@@ -230,7 +329,58 @@ export async function requireDashboardApiUser() {
   return auth;
 }
 
-// Backwards-compatible aliases used by existing imports.
+/** Product 2 (Location Leads) pages. */
+export async function requireMapsAuth() {
+  const auth = await getDashboardAuth();
+
+  if (!auth) {
+    redirect("/login");
+  }
+
+  redirectIfProfileIncomplete(auth.access.profileCompleted);
+
+  if (!auth.access.hasMapsAccess) {
+    redirect(auth.access.hasLifetimeAccess ? "/products" : "/checkout");
+  }
+
+  return auth;
+}
+
+export async function requireMapsApiUser() {
+  const auth = await getDashboardAuth();
+
+  if (!auth) {
+    throw new ApiValidationError("UNAUTHORIZED", "Please log in to continue.", 401);
+  }
+
+  if (!auth.access.profileCompleted) {
+    throw new ApiValidationError(
+      "PROFILE_REQUIRED",
+      "Complete your profile to continue.",
+      403,
+    );
+  }
+
+  if (!auth.access.hasMapsAccess) {
+    throw new ApiValidationError(
+      "MAPS_ACCESS_REQUIRED",
+      "You do not have access to Location B2B Leads yet.",
+      403,
+    );
+  }
+
+  return auth;
+}
+
+/** Logged in only — used by complete-profile. */
+export async function requireLoggedInAuth() {
+  const auth = await getDashboardAuth();
+  if (!auth) {
+    redirect("/login");
+  }
+  return auth;
+}
+
 export const getDashboardSession = getDashboardAuth;
 
 export async function requireDashboardSession() {

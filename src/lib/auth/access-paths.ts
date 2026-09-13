@@ -4,15 +4,32 @@ export function isDashboardPath(pathname: string) {
   );
 }
 
-/** Paid product areas (chooser + both dashboards + Product 2 APIs). */
+export function isLocationLeadsPath(pathname: string) {
+  return (
+    pathname.startsWith("/location-leads") ||
+    pathname.startsWith("/api/location-leads")
+  );
+}
+
+export function isProductsPath(pathname: string) {
+  return pathname === "/products" || pathname.startsWith("/products/");
+}
+
+export function isCompleteProfilePath(pathname: string) {
+  return (
+    pathname === "/complete-profile" ||
+    pathname.startsWith("/complete-profile/") ||
+    pathname === "/api/account/profile"
+  );
+}
+
+/** Logged-in app areas (chooser + both products + APIs). */
 export function isPaidAppPath(pathname: string) {
   return (
-    pathname === "/products" ||
-    pathname.startsWith("/products/") ||
-    pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/location-leads") ||
-    pathname.startsWith("/api/dashboard") ||
-    pathname.startsWith("/api/location-leads")
+    isProductsPath(pathname) ||
+    isDashboardPath(pathname) ||
+    isLocationLeadsPath(pathname) ||
+    isCompleteProfilePath(pathname)
   );
 }
 

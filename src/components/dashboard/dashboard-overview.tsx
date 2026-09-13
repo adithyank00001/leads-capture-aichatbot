@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { PageHeader } from "@/components/app-shell/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -70,12 +71,12 @@ export function DashboardOverview({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Welcome, {displayName}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{userEmail}</p>
-      </div>
+      <PageHeader
+        title={`Welcome, ${displayName}`}
+        description={userEmail}
+      />
 
-      <Card className="shadow-md ring-primary/5">
+      <Card className="border-border/80 shadow-sm">
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -84,7 +85,7 @@ export function DashboardOverview({
                 Complete these steps to get your AI Sales Agent ready for your website.
               </CardDescription>
             </div>
-            <Badge variant="secondary">AI Sales Agent status: {readinessLabel}</Badge>
+            <Badge variant="secondary">Status: {readinessLabel}</Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -92,7 +93,7 @@ export function DashboardOverview({
             {steps.map((step) => (
               <li
                 key={step.id}
-                className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm"
+                className="flex items-center justify-between gap-3 rounded-lg border border-border/80 bg-muted/20 px-3 py-2.5 text-sm"
               >
                 <span>
                   {step.complete ? "✓" : "○"} {step.label}
@@ -112,34 +113,34 @@ export function DashboardOverview({
       </Card>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="border-border/80 shadow-sm">
           <CardHeader className="pb-2">
             <CardDescription>Leads this month</CardDescription>
-            <CardTitle className="text-2xl">
+            <CardTitle className="text-2xl tabular-nums">
               {initialData.usage?.leadsCapturedThisPeriod ?? 0}
             </CardTitle>
           </CardHeader>
         </Card>
-        <Card>
+        <Card className="border-border/80 shadow-sm">
           <CardHeader className="pb-2">
             <CardDescription>Messages used</CardDescription>
-            <CardTitle className="text-2xl">
+            <CardTitle className="text-2xl tabular-nums">
               {initialData.usage
                 ? `${initialData.usage.messagesUsedThisPeriod} / ${initialData.usage.monthlyMessageLimit}`
                 : "—"}
             </CardTitle>
           </CardHeader>
         </Card>
-        <Card>
+        <Card className="border-border/80 shadow-sm">
           <CardHeader className="pb-2">
             <CardDescription>Knowledge pages</CardDescription>
-            <CardTitle className="text-2xl">{initialData.completedPages}</CardTitle>
+            <CardTitle className="text-2xl tabular-nums">{initialData.completedPages}</CardTitle>
           </CardHeader>
         </Card>
-        <Card>
+        <Card className="border-border/80 shadow-sm">
           <CardHeader className="pb-2">
             <CardDescription>Business</CardDescription>
-            <CardTitle className="text-lg truncate">
+            <CardTitle className="truncate text-lg">
               {initialData.businessName || "Not set"}
             </CardTitle>
           </CardHeader>
@@ -147,14 +148,14 @@ export function DashboardOverview({
       </div>
 
       {initialData.widgetMonitor ? (
-        <Card className="shadow-md ring-primary/5">
+        <Card className="border-border/80 shadow-sm">
           <CardHeader>
             <CardTitle>Website widget</CardTitle>
             <CardDescription>
               Whether the AI Sales Agent is running on your website.
             </CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-sm">
+          <CardContent className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <p className="text-muted-foreground">Widget status</p>
               <p className="mt-1 font-medium">

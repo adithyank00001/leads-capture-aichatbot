@@ -27,19 +27,29 @@ type LoginFormProps = {
   defaultEmail?: string;
 };
 
-async function claimPurchaseIfNeeded() {
+async function claimAccessAfterLogin() {
   try {
     const response = await fetch("/api/auth/claim-purchase", { method: "POST" });
     const result = (await response.json()) as {
       ok?: boolean;
       data?: {
         hasLifetimeAccess?: boolean;
+        hasMapsAccess?: boolean;
+        profileCompleted?: boolean;
       };
     };
 
-    return result.data?.hasLifetimeAccess ?? false;
+    return {
+      hasLifetimeAccess: result.data?.hasLifetimeAccess ?? false,
+      hasMapsAccess: result.data?.hasMapsAccess ?? false,
+      profileCompleted: result.data?.profileCompleted ?? false,
+    };
   } catch {
-    return false;
+    return {
+      hasLifetimeAccess: false,
+      hasMapsAccess: false,
+      profileCompleted: false,
+    };
   }
 }
 
@@ -78,10 +88,10 @@ export function LoginForm({
       return;
     }
 
-    const hasLifetimeAccess = await claimPurchaseIfNeeded();
+    const access = await claimAccessAfterLogin();
     setLoading(false);
 
-    router.push(resolvePostLoginRedirect(hasLifetimeAccess));
+    router.push(resolvePostLoginRedirect(access));
     router.refresh();
   }
 
@@ -89,7 +99,9 @@ export function LoginForm({
     <Card className="w-full shadow-lg ring-primary/10">
       <CardHeader>
         <CardTitle className="text-2xl">Welcome back</CardTitle>
-        <CardDescription>Sign in to manage your AI Sales Agent and leads.</CardDescription>
+        <CardDescription>
+          Sign in to open your products. Access depends on which product you paid for.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isPostPayment ? (

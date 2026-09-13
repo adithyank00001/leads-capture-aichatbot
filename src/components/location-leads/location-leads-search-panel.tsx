@@ -8,6 +8,8 @@ import {
   LocationLeadsResultsTable,
   type MapsLeadRow,
 } from "@/components/location-leads/location-leads-results-table";
+import { PageHeader } from "@/components/app-shell/page-header";
+import { Surface } from "@/components/app-shell/surface";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { fetchJsonWithTimeout } from "@/lib/api/fetch-client";
@@ -117,13 +119,10 @@ export function LocationLeadsSearchPanel({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Search leads</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Run a B2B database search by keyword and location. Results expire in
-          24 hours.
-        </p>
-      </div>
+      <PageHeader
+        title="Search leads"
+        description="Run a B2B database search by keyword and location. Results expire in 24 hours."
+      />
 
       <LocationLeadsSearchForm
         onSearchCreated={(searchId) => {
@@ -134,8 +133,8 @@ export function LocationLeadsSearchPanel({
       />
 
       {search ? (
-        <div className="space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="space-y-4">
+          <Surface padding="sm" className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">
               {getProcessingStatusLabel(search.status)}
             </Badge>
@@ -145,19 +144,23 @@ export function LocationLeadsSearchPanel({
             <p className="text-sm text-muted-foreground">
               {search.keyword} · {search.location_name} · depth {search.depth}
             </p>
-          </div>
+          </Surface>
 
           {search.status === "queued" || search.status === "submitted" ? (
-            <p className="rounded-xl border border-border px-4 py-8 text-center text-sm text-muted-foreground">
-              Processing… this can take a few minutes. You can leave this page
-              and return from History.
-            </p>
+            <Surface>
+              <p className="py-4 text-center text-sm text-muted-foreground">
+                Processing… this can take a few minutes. You can leave this page
+                and return from History.
+              </p>
+            </Surface>
           ) : null}
 
           {search.status === "failed" ? (
-            <p className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-6 text-sm text-destructive">
-              {search.error_message ?? "Search failed. Credits were refunded."}
-            </p>
+            <Surface className="border-destructive/30 bg-destructive/5">
+              <p className="text-sm text-destructive">
+                {search.error_message ?? "Search failed. Credits were refunded."}
+              </p>
+            </Surface>
           ) : null}
 
           {search.status === "completed" ? (

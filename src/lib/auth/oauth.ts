@@ -2,11 +2,13 @@ const ALLOWED_OAUTH_NEXT_PATHS = [
   "/products",
   "/dashboard",
   "/location-leads",
+  "/complete-profile",
   "/checkout",
 ] as const;
 
 /** After login/signup, paid users pick a product here. */
 export const PAID_HOME_PATH = "/products";
+export const COMPLETE_PROFILE_PATH = "/complete-profile";
 
 export function getSafeOAuthNextPath(nextPath?: string | null) {
   if (!nextPath) {
@@ -25,8 +27,28 @@ export function getSafeOAuthNextPath(nextPath?: string | null) {
   return nextPath;
 }
 
-export function resolvePostLoginRedirect(hasLifetimeAccess: boolean) {
-  return hasLifetimeAccess ? PAID_HOME_PATH : "/checkout";
+export type PostLoginAccess = {
+  hasLifetimeAccess: boolean;
+  hasMapsAccess?: boolean;
+  profileCompleted?: boolean;
+};
+
+/** Where to send someone right after login / Google callback. */
+export function resolvePostLoginRedirect(access: PostLoginAccess | boolean) {
+  // Backward-compatible: older callers passed a boolean for Product 1 only.
+  if (typeof access === "boolean") {
+    return access ? PAID_HOME_PATH : "/checkout";
+  }
+
+  if (!access.profileCompleted) {
+    return COMPLETE_PROFILE_PATH;
+  }
+
+  if (access.hasLifetimeAccess || access.hasMapsAccess) {
+    return PAID_HOME_PATH;
+  }
+
+  return "/checkout";
 }
 
 export function getRequestOrigin(request: Request) {

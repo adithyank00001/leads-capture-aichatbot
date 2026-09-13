@@ -1,6 +1,6 @@
 import { apiError } from "@/lib/api-response";
 import { handleRouteError } from "@/lib/api/request";
-import { requireDashboardApiUser } from "@/lib/auth/dashboard-session";
+import { requireMapsApiUser } from "@/lib/auth/dashboard-session";
 import { getCustomerByUserId } from "@/lib/db/customers";
 import { buildLeadsCsv } from "@/lib/location-leads/csv";
 import {
@@ -11,7 +11,7 @@ import { ApiValidationError } from "@/lib/validation/errors";
 
 export async function GET(request: Request) {
   try {
-    const { supabase, user } = await requireDashboardApiUser();
+    const { supabase, user } = await requireMapsApiUser();
     const customer = await getCustomerByUserId(supabase, user.id);
 
     if (!customer) {

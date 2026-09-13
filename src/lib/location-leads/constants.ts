@@ -5,6 +5,9 @@ export const MAPS_SEARCH_DEPTH_MIN = 1;
 export const MAPS_SEARCH_DEPTH_MAX = 700;
 export const MAPS_SEARCH_DEPTH_DEFAULT = 50;
 
+/** Max permanently saved leads per customer. */
+export const MAPS_SAVED_LEADS_MAX = 100;
+
 export type MapsSearchDepth = number;
 
 export const MAPS_SEARCH_STATUSES = [
@@ -20,7 +23,9 @@ export const LEAD_CREDITS_BADGE_LABEL = "100,000 Lead Credits";
 
 export const DEPTH_INPUT_LABEL = "How many leads do you want? (1–700)";
 
-export const DATA_EXPIRES_BADGE = "Data expires in 24 hours.";
+export const DATA_EXPIRES_BADGE = "Search results expire in 24 hours.";
+
+export const SAVED_LEADS_BADGE = `Saved leads stay until you delete them (max ${MAPS_SAVED_LEADS_MAX}).`;
 
 export function isMapsSearchDepth(value: unknown): value is MapsSearchDepth {
   return (

@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { Badge } from "@/components/ui/badge";
 import { fetchJsonWithTimeout } from "@/lib/api/fetch-client";
 import { LEAD_CREDITS_BADGE_LABEL } from "@/lib/location-leads/constants";
 
@@ -50,14 +49,13 @@ export function LocationLeadsCreditsBadge() {
   }, [load]);
 
   return (
-    <Badge variant="outline" className="h-auto max-w-full whitespace-normal px-2.5 py-1">
-      <span className="font-medium">{LEAD_CREDITS_BADGE_LABEL}</span>
+    <div className="inline-flex max-w-full items-center rounded-lg border border-border/80 bg-card px-3 py-1.5 text-xs shadow-sm">
+      <span className="font-semibold text-foreground">{LEAD_CREDITS_BADGE_LABEL}</span>
       {remaining !== null ? (
-        <span className="text-muted-foreground">
-          {" "}
+        <span className="ml-1.5 tabular-nums text-muted-foreground">
           · {remaining.toLocaleString()} / {limit.toLocaleString()} left
         </span>
       ) : null}
-    </Badge>
+    </div>
   );
 }

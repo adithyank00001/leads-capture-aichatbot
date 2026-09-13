@@ -5,24 +5,45 @@ import {
   isCheckoutApiPath,
   isCheckoutLandingPath,
   isCheckoutPath,
+  isCompleteProfilePath,
+  isDashboardPath,
   isGuestAllowedCheckoutPath,
   isHiddenPublicMarketingPath,
+  isLocationLeadsPath,
   isPaidAppPath,
+  isProductsPath,
 } from "@/lib/auth/access-paths";
 import { PAID_HOME_PATH } from "@/lib/auth/oauth";
 import { publicSupabaseConfig } from "@/lib/supabase/config";
 
-async function getHasLifetimeAccess(
+type AccessFlags = {
+  hasLifetimeAccess: boolean;
+  hasMapsAccess: boolean;
+  profileCompleted: boolean;
+};
+
+async function getAccessFlags(
   supabase: ReturnType<typeof createServerClient>,
   userId: string,
-) {
+): Promise<AccessFlags> {
   const { data } = await supabase
     .from("customers")
-    .select("has_lifetime_access")
+    .select("has_lifetime_access, has_maps_access, profile_completed_at")
     .eq("user_id", userId)
     .maybeSingle();
 
-  return data?.has_lifetime_access ?? false;
+  return {
+    hasLifetimeAccess: data?.has_lifetime_access ?? false,
+    hasMapsAccess: data?.has_maps_access ?? false,
+    profileCompleted: Boolean(data?.profile_completed_at),
+  };
+}
+
+function redirectTo(request: NextRequest, pathname: string) {
+  const redirectUrl = request.nextUrl.clone();
+  redirectUrl.pathname = pathname;
+  redirectUrl.search = "";
+  return NextResponse.redirect(redirectUrl);
 }
 
 export async function updateSession(request: NextRequest) {
@@ -59,28 +80,23 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getSession();
   const user = session?.user ?? null;
 
-  // Landing / demo are closed: guests → login, customers → dashboard.
   if (isHiddenPublicMarketingPath(pathname)) {
     if (!user) {
-      const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = "/login";
-      redirectUrl.search = "";
-      return NextResponse.redirect(redirectUrl);
+      return redirectTo(request, "/login");
     }
 
-    const hasLifetimeAccess = await getHasLifetimeAccess(supabase, user.id);
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = hasLifetimeAccess ? PAID_HOME_PATH : "/checkout";
-    redirectUrl.search = "";
-    return NextResponse.redirect(redirectUrl);
+    const access = await getAccessFlags(supabase, user.id);
+    if (!access.profileCompleted) {
+      return redirectTo(request, "/complete-profile");
+    }
+    if (access.hasLifetimeAccess || access.hasMapsAccess) {
+      return redirectTo(request, PAID_HOME_PATH);
+    }
+    return redirectTo(request, "/checkout");
   }
 
   if (!user && isCheckoutPath(pathname)) {
-    if (isGuestAllowedCheckoutPath(pathname)) {
-      return supabaseResponse;
-    }
-
-    if (isCheckoutApiPath(pathname)) {
+    if (isGuestAllowedCheckoutPath(pathname) || isCheckoutApiPath(pathname)) {
       return supabaseResponse;
     }
 
@@ -101,37 +117,63 @@ export async function updateSession(request: NextRequest) {
     const isPostPaymentLogin =
       pathname === "/login" && request.nextUrl.searchParams.get("paid") === "1";
 
-    const hasLifetimeAccess = await getHasLifetimeAccess(supabase, user.id);
+    const access = await getAccessFlags(supabase, user.id);
+    const hasAnyProduct = access.hasLifetimeAccess || access.hasMapsAccess;
 
-    if (isPaidAppPath(pathname) && !hasLifetimeAccess) {
-      const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = "/checkout";
-      redirectUrl.search = "";
-      return NextResponse.redirect(redirectUrl);
+    // Hard wall: finish profile before any other app page (except login/signup).
+    if (
+      !access.profileCompleted &&
+      !isCompleteProfilePath(pathname) &&
+      pathname !== "/login" &&
+      pathname !== "/signup"
+    ) {
+      return redirectTo(request, "/complete-profile");
     }
 
-    if (hasLifetimeAccess && isCheckoutLandingPath(pathname)) {
-      const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = PAID_HOME_PATH;
-      redirectUrl.search = "";
-      return NextResponse.redirect(redirectUrl);
+    if (access.profileCompleted && isCompleteProfilePath(pathname)) {
+      return redirectTo(
+        request,
+        hasAnyProduct ? PAID_HOME_PATH : "/checkout",
+      );
     }
 
-    if (hasLifetimeAccess && pathname === "/thank-you") {
-      const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = PAID_HOME_PATH;
-      redirectUrl.search = "";
-      return NextResponse.redirect(redirectUrl);
+    if (isDashboardPath(pathname) && !access.hasLifetimeAccess) {
+      return redirectTo(
+        request,
+        access.hasMapsAccess ? PAID_HOME_PATH : "/checkout",
+      );
+    }
+
+    if (isLocationLeadsPath(pathname) && !access.hasMapsAccess) {
+      return redirectTo(
+        request,
+        access.hasLifetimeAccess ? PAID_HOME_PATH : "/checkout",
+      );
+    }
+
+    if (isProductsPath(pathname) && !hasAnyProduct) {
+      return redirectTo(request, "/checkout");
+    }
+
+    if (hasAnyProduct && isCheckoutLandingPath(pathname)) {
+      return redirectTo(request, PAID_HOME_PATH);
+    }
+
+    if (hasAnyProduct && pathname === "/thank-you") {
+      return redirectTo(request, PAID_HOME_PATH);
     }
 
     if (
       !isPostPaymentLogin &&
       (pathname === "/login" || pathname === "/signup")
     ) {
-      const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = hasLifetimeAccess ? PAID_HOME_PATH : "/checkout";
-      redirectUrl.search = "";
-      return NextResponse.redirect(redirectUrl);
+      if (!access.profileCompleted) {
+        return redirectTo(request, "/complete-profile");
+      }
+      return redirectTo(
+        request,
+        hasAnyProduct ? PAID_HOME_PATH : "/checkout",
+      );
     }
   }
 

@@ -3,12 +3,15 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+import { PageHeader } from "@/components/app-shell/page-header";
+import { Surface } from "@/components/app-shell/surface";
 import {
   LocationLeadsResultsTable,
   type MapsLeadRow,
 } from "@/components/location-leads/location-leads-results-table";
 import { Button } from "@/components/ui/button";
 import { fetchJsonWithTimeout } from "@/lib/api/fetch-client";
+import { MAPS_SAVED_LEADS_MAX, SAVED_LEADS_BADGE } from "@/lib/location-leads/constants";
 
 type SavedResponse = {
   ok: boolean;
@@ -56,18 +59,15 @@ export function LocationLeadsSavedPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Saved leads</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Saved leads also expire 24 hours after their search was created.
-            Export before they disappear.
-          </p>
-        </div>
-        <Button variant="outline" size="sm" asChild>
-          <a href="/api/location-leads/export?saved=1">Export saved CSV</a>
-        </Button>
-      </div>
+      <PageHeader
+        title="Saved leads"
+        description={`${SAVED_LEADS_BADGE} You can keep up to ${MAPS_SAVED_LEADS_MAX.toLocaleString()} saved leads.`}
+        actions={
+          <Button variant="outline" size="sm" asChild>
+            <a href="/api/location-leads/export?saved=1">Export saved CSV</a>
+          </Button>
+        }
+      />
 
       {loading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
@@ -75,18 +75,25 @@ export function LocationLeadsSavedPanel() {
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       {!loading && !error && leads.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border px-4 py-10 text-center text-sm text-muted-foreground">
-          No saved leads yet.{" "}
-          <Link href="/location-leads/search" className="text-primary hover:underline">
-            Run a search
-          </Link>{" "}
-          and tap Save.
-        </p>
+        <Surface>
+          <p className="text-center text-sm text-muted-foreground">
+            No saved leads yet.{" "}
+            <Link href="/location-leads/search" className="text-primary hover:underline">
+              Run a search
+            </Link>{" "}
+            and tap Save.
+          </p>
+        </Surface>
       ) : null}
 
       {leads.length > 0 ? (
         <LocationLeadsResultsTable
           leads={leads}
+          allowDelete
+          emptyMessage="No saved leads yet."
+          onLeadDeleted={(leadId) => {
+            setLeads((prev) => prev.filter((lead) => lead.id !== leadId));
+          }}
           onLeadUpdated={(updated) => {
             setLeads((prev) => {
               if (!updated.is_saved) {

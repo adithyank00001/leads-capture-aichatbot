@@ -75,20 +75,35 @@ export async function listLeadsForSearch(
   return { search, leads: data ?? [] };
 }
 
+export async function countSavedMapsLeads(
+  supabase: Client,
+  customerId: string,
+) {
+  const { count, error } = await supabase
+    .from("maps_leads")
+    .select("id", { count: "exact", head: true })
+    .eq("customer_id", customerId)
+    .eq("is_saved", true);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return count ?? 0;
+}
+
 export async function listSavedMapsLeads(
   supabase: Client,
   customerId: string,
 ) {
-  const cutoff = twentyFourHoursAgoIso();
-
+  // Saved leads persist until the user deletes them (not tied to 24h search expiry).
   const { data, error } = await supabase
     .from("maps_leads")
     .select(
-      "id, search_id, place_id, title, category, phone, address, website, rating_value, rating_votes, latitude, longitude, cid, is_claimed, snippet, is_saved, rank_absolute, created_at, maps_searches!inner(created_at, keyword, location_name, status)",
+      "id, search_id, place_id, title, category, phone, address, website, rating_value, rating_votes, latitude, longitude, cid, is_claimed, snippet, is_saved, rank_absolute, created_at",
     )
     .eq("customer_id", customerId)
     .eq("is_saved", true)
-    .gt("maps_searches.created_at", cutoff)
     .order("created_at", { ascending: false });
 
   if (error) {

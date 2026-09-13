@@ -3,6 +3,8 @@ import { handleRouteError } from "@/lib/api/request";
 import { getCustomerAccess } from "@/lib/auth/access";
 import { requireAuthUser } from "@/lib/auth/dashboard";
 import { claimPendingLifetimePurchase } from "@/lib/billing/claim-pending-purchase";
+import { syncMapsAccessForEmail } from "@/lib/billing/sync-maps-access";
+import { ensureCustomerOnboarding } from "@/lib/dashboard/onboarding";
 import type { Database } from "@/lib/supabase/admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -23,6 +25,16 @@ export async function POST() {
       email: user.email,
     });
 
+    await ensureCustomerOnboarding(supabase, {
+      userId: user.id,
+      email: user.email,
+    });
+
+    await syncMapsAccessForEmail({
+      userId: user.id,
+      email: user.email,
+    });
+
     const access = await getCustomerAccess(
       supabase as SupabaseClient<Database>,
       user.id,
@@ -31,6 +43,8 @@ export async function POST() {
     return apiSuccess({
       claimed: result.claimed,
       hasLifetimeAccess: access.hasLifetimeAccess,
+      hasMapsAccess: access.hasMapsAccess,
+      profileCompleted: access.profileCompleted,
     });
   } catch (error) {
     const routeError = handleRouteError(error);

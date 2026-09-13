@@ -128,10 +128,9 @@ export function LocationLeadsSearchForm({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-4 rounded-xl border border-border p-4 md:p-5"
-    >
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="rounded-xl border border-border/80 bg-card p-4 shadow-sm md:p-5">
+      <div className="space-y-4">
       <div className="space-y-1.5">
         <label htmlFor="maps-keyword" className="text-sm font-medium">
           Keyword <span className="text-destructive">*</span>
@@ -215,6 +214,8 @@ export function LocationLeadsSearchForm({
       <Button type="submit" disabled={submitting}>
         {submitting ? "Starting…" : "Start search"}
       </Button>
+      </div>
+      </div>
     </form>
   );
 }

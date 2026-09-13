@@ -19,6 +19,7 @@ export default function robots(): MetadataRoute.Robots {
         "/products",
         "/dashboard",
         "/location-leads",
+        "/complete-profile",
         "/embed",
       ],
     },

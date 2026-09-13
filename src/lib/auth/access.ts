@@ -10,6 +10,8 @@ type Client = SupabaseClient<Database>;
 
 export type CustomerAccess = {
   hasLifetimeAccess: boolean;
+  hasMapsAccess: boolean;
+  profileCompleted: boolean;
   customerId: string | null;
 };
 
@@ -19,7 +21,7 @@ export async function getCustomerAccess(
 ): Promise<CustomerAccess> {
   const { data, error } = await supabase
     .from("customers")
-    .select("id, has_lifetime_access")
+    .select("id, has_lifetime_access, has_maps_access, profile_completed_at")
     .eq("user_id", userId)
     .maybeSingle();
 
@@ -29,6 +31,8 @@ export async function getCustomerAccess(
 
   return {
     hasLifetimeAccess: data?.has_lifetime_access ?? false,
+    hasMapsAccess: data?.has_maps_access ?? false,
+    profileCompleted: Boolean(data?.profile_completed_at),
     customerId: data?.id ?? null,
   };
 }

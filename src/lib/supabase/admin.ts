@@ -25,6 +25,11 @@ export type Database = {
           dodo_customer_id: string | null;
           maps_lead_credits_limit: number;
           maps_lead_credits_used: number;
+          has_maps_access: boolean;
+          maps_access_granted_at: string | null;
+          full_name: string | null;
+          mobile_phone: string | null;
+          profile_completed_at: string | null;
         };
         Insert: {
           id?: string;
@@ -37,6 +42,11 @@ export type Database = {
           dodo_customer_id?: string | null;
           maps_lead_credits_limit?: number;
           maps_lead_credits_used?: number;
+          has_maps_access?: boolean;
+          maps_access_granted_at?: string | null;
+          full_name?: string | null;
+          mobile_phone?: string | null;
+          profile_completed_at?: string | null;
         };
         Update: {
           id?: string;
@@ -49,6 +59,32 @@ export type Database = {
           dodo_customer_id?: string | null;
           maps_lead_credits_limit?: number;
           maps_lead_credits_used?: number;
+          has_maps_access?: boolean;
+          maps_access_granted_at?: string | null;
+          full_name?: string | null;
+          mobile_phone?: string | null;
+          profile_completed_at?: string | null;
+        };
+        Relationships: [];
+      };
+      maps_access_emails: {
+        Row: {
+          id: string;
+          email: string;
+          note: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          note?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          note?: string | null;
+          created_at?: string;
         };
         Relationships: [];
       };
@@ -112,7 +148,7 @@ export type Database = {
       maps_leads: {
         Row: {
           id: string;
-          search_id: string;
+          search_id: string | null;
           customer_id: string;
           place_id: string | null;
           title: string | null;
@@ -132,10 +168,11 @@ export type Database = {
           is_saved: boolean;
           rank_absolute: number | null;
           created_at: string;
+          saved_at: string | null;
         };
         Insert: {
           id?: string;
-          search_id: string;
+          search_id?: string | null;
           customer_id: string;
           place_id?: string | null;
           title?: string | null;
@@ -155,10 +192,11 @@ export type Database = {
           is_saved?: boolean;
           rank_absolute?: number | null;
           created_at?: string;
+          saved_at?: string | null;
         };
         Update: {
           id?: string;
-          search_id?: string;
+          search_id?: string | null;
           customer_id?: string;
           place_id?: string | null;
           title?: string | null;
@@ -178,6 +216,7 @@ export type Database = {
           is_saved?: boolean;
           rank_absolute?: number | null;
           created_at?: string;
+          saved_at?: string | null;
         };
         Relationships: [];
       };

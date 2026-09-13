@@ -2,6 +2,7 @@ import { createBotForCustomer, getBotByCustomerId } from "@/lib/db/bots";
 import { createEmptyBotKnowledge } from "@/lib/db/bot-knowledge";
 import { ensureWidgetSettingsForBot } from "@/lib/db/bot-widget-settings";
 import { createCustomer, getCustomerByUserId } from "@/lib/db/customers";
+import { syncMapsAccessForEmail } from "@/lib/billing/sync-maps-access";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/supabase/admin";
@@ -20,6 +21,13 @@ export async function ensureCustomerOnboarding(
       userId: input.userId,
       email: input.email,
     }));
+
+  if (input.email) {
+    await syncMapsAccessForEmail({
+      userId: input.userId,
+      email: input.email,
+    });
+  }
 
   const bot =
     (await getBotByCustomerId(client, customer.id)) ??

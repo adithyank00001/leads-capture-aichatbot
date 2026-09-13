@@ -2,7 +2,7 @@ import { after } from "next/server";
 
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { handleRouteError, parseJsonBody } from "@/lib/api/request";
-import { requireDashboardApiUser } from "@/lib/auth/dashboard-session";
+import { requireMapsApiUser } from "@/lib/auth/dashboard-session";
 import { assertDataForSeoConfigured } from "@/lib/dataforseo/client";
 import {
   buildMapsPostbackUrl,
@@ -41,7 +41,7 @@ function friendlyTaskError(message: string): string {
 
 export async function GET() {
   try {
-    const { supabase, user } = await requireDashboardApiUser();
+    const { supabase, user } = await requireMapsApiUser();
     const customer = await getCustomerByUserId(supabase, user.id);
 
     if (!customer) {
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
   try {
     assertDataForSeoConfigured();
 
-    const { supabase, user } = await requireDashboardApiUser();
+    const { supabase, user } = await requireMapsApiUser();
     const customer = await getCustomerByUserId(supabase, user.id);
 
     if (!customer) {

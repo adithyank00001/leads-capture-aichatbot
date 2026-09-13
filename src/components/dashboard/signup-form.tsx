@@ -62,14 +62,25 @@ export function SignupForm({
         const result = (await response.json()) as {
           data?: {
             hasLifetimeAccess?: boolean;
+            hasMapsAccess?: boolean;
+            profileCompleted?: boolean;
           };
         };
 
-        if (result.data?.hasLifetimeAccess) {
+        const access = {
+          hasLifetimeAccess: result.data?.hasLifetimeAccess ?? false,
+          hasMapsAccess: result.data?.hasMapsAccess ?? false,
+          profileCompleted: result.data?.profileCompleted ?? false,
+        };
+
+        if (!access.profileCompleted) {
+          redirectPath = "/complete-profile";
+        } else if (access.hasLifetimeAccess || access.hasMapsAccess) {
           redirectPath = "/products";
         }
       } catch {
         // Claim is retried on dashboard load if webhook is still processing.
+        redirectPath = "/complete-profile";
       }
 
       router.push(redirectPath);

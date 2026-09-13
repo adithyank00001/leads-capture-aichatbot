@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+import { PageHeader } from "@/components/app-shell/page-header";
+import { Surface } from "@/components/app-shell/surface";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { fetchJsonWithTimeout } from "@/lib/api/fetch-client";
@@ -66,12 +68,10 @@ export function LocationLeadsHistoryPanel() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Search history</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Searches from the last 24 hours. Older data is removed automatically.
-        </p>
-      </div>
+      <PageHeader
+        title="Search history"
+        description="Searches from the last 24 hours. Older data is removed automatically."
+      />
 
       {loading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
@@ -79,21 +79,24 @@ export function LocationLeadsHistoryPanel() {
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       {!loading && !error && searches.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border px-4 py-10 text-center text-sm text-muted-foreground">
-          No recent searches yet.{" "}
-          <Link href="/location-leads/search" className="text-primary hover:underline">
-            Start a search
-          </Link>
-        </p>
+        <Surface>
+          <p className="text-center text-sm text-muted-foreground">
+            No recent searches yet.{" "}
+            <Link href="/location-leads/search" className="text-primary hover:underline">
+              Start a search
+            </Link>
+          </p>
+        </Surface>
       ) : null}
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         {searches.map((search) => (
-          <div
+          <Surface
             key={search.id}
-            className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between"
+            padding="sm"
+            className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
           >
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <p className="font-medium">{search.keyword}</p>
               <p className="text-sm text-muted-foreground">
                 {search.location_name} · depth {search.depth} ·{" "}
@@ -113,7 +116,7 @@ export function LocationLeadsHistoryPanel() {
                 Open
               </Link>
             </Button>
-          </div>
+          </Surface>
         ))}
       </div>
     </div>

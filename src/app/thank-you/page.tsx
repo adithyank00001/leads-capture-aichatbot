@@ -60,7 +60,10 @@ export default async function ThankYouPage({ searchParams }: ThankYouPageProps) 
       user.id,
     );
 
-    if (access.hasLifetimeAccess) {
+    if (access.hasLifetimeAccess || access.hasMapsAccess) {
+      if (!access.profileCompleted) {
+        redirect("/complete-profile");
+      }
       redirect("/products");
     }
   }

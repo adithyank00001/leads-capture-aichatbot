@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { getCustomerAccess } from "@/lib/auth/access";
 import { getRequestOrigin, resolvePostLoginRedirect } from "@/lib/auth/oauth";
 import { claimPendingLifetimePurchase } from "@/lib/billing/claim-pending-purchase";
+import { syncMapsAccessForEmail } from "@/lib/billing/sync-maps-access";
+import { ensureCustomerOnboarding } from "@/lib/dashboard/onboarding";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -22,13 +24,23 @@ export async function GET(request: Request) {
         email: data.user.email,
       });
 
+      await ensureCustomerOnboarding(supabase, {
+        userId: data.user.id,
+        email: data.user.email,
+      });
+
+      await syncMapsAccessForEmail({
+        userId: data.user.id,
+        email: data.user.email,
+      });
+
       const access = await getCustomerAccess(
         supabase as SupabaseClient<Database>,
         data.user.id,
       );
 
       return NextResponse.redirect(
-        `${siteOrigin}${resolvePostLoginRedirect(access.hasLifetimeAccess)}`,
+        `${siteOrigin}${resolvePostLoginRedirect(access)}`,
       );
     }
   }
