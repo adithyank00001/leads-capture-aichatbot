@@ -52,7 +52,7 @@ export function LocationLeadsOverviewPanel() {
     <div className="space-y-6">
       <PageHeader
         title="Overview"
-        description="Location-based B2B lead generation. Search the business database, save leads, and export before data expires in 24 hours."
+        description="Location based B2B lead generation software. Search by location and keyword, save leads, and export before data expires in 24 hours."
         actions={<LocationLeadsCreditsBadge />}
       />
 

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { DashboardLogoutButton } from "@/components/dashboard/logout-button";
 import { BrandLogo } from "@/components/marketing/brand-logo";
 import { requireAnyProductAuth } from "@/lib/auth/dashboard-session";
-import { cn } from "@/lib/utils";
 
 export default async function ProductsPage() {
   const auth = await requireAnyProductAuth();
@@ -23,7 +22,7 @@ export default async function ProductsPage() {
       href: "/location-leads",
       title: "Location based B2B lead generation software",
       description:
-        "Find local businesses by city and keyword, then export phone numbers and websites.",
+        "Location based B2B lead generation software. Search by location and keyword, then export and save leads.",
       unlocked: hasMapsAccess,
       lockedHint:
         "Locked. After you pay for Product 2, ask us to unlock your email.",
@@ -68,18 +67,21 @@ export default async function ProductsPage() {
             ) : (
               <div
                 key={product.href}
-                className={cn(
-                  "rounded-xl border border-dashed border-border bg-muted/30 p-5 text-left opacity-80",
-                )}
+                className="rounded-xl border-2 border-border/80 bg-card/70 p-5 text-left shadow-sm"
                 aria-disabled="true"
               >
-                <span className="block text-base font-semibold text-foreground sm:text-lg">
-                  {product.title}
-                </span>
-                <span className="mt-2 block text-sm text-muted-foreground">
+                <div className="flex items-start justify-between gap-3">
+                  <span className="block text-base font-semibold text-foreground/70 sm:text-lg">
+                    {product.title}
+                  </span>
+                  <span className="shrink-0 rounded-md border border-border bg-muted px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    Locked
+                  </span>
+                </div>
+                <span className="mt-2 block text-sm text-muted-foreground/90">
                   {product.description}
                 </span>
-                <span className="mt-3 inline-block text-xs font-medium text-muted-foreground">
+                <span className="mt-3 block border-t border-border/70 pt-3 text-xs font-medium text-muted-foreground">
                   {product.lockedHint}
                 </span>
               </div>

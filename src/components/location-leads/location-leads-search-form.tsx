@@ -139,7 +139,7 @@ export function LocationLeadsSearchForm({
           id="maps-keyword"
           value={keyword}
           onChange={(event) => setKeyword(event.target.value)}
-          placeholder="Example: dentists, software companies"
+          placeholder="Example: dentists, clinics"
           required
           maxLength={700}
         />
