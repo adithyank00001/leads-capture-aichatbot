@@ -3,7 +3,7 @@
 export const WHATSAPP_PHONE_E164 = "918891993882";
 
 export const WHATSAPP_DEFAULT_MESSAGE =
-  "Hi, I want to get the lifetime access for GrowScaleX AI counsellor. How do I activate it?";
+  "Hi, I want lifetime access to the B2B lead generation software for ₹999. How do I get it?";
 
 /** Opens WhatsApp with a pre-filled message. */
 export function getWhatsAppHref(message: string = WHATSAPP_DEFAULT_MESSAGE): string {

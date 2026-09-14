@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 
 export const landingPageTitle =
-  "Generate More Qualified Student Leads With a 24/7 AI Counselor";
+  "Generate Fresh B2B Leads in 30 Seconds | growscalex";
 
 export const landingPageDescription =
-  "Turn anonymous website visitors into qualified student leads. Your AI counselor answers questions, qualifies students, and captures their contact details 24/7 — built for study abroad agencies and consultants.";
+  "Stop buying dead databases and paying monthly fees. Get the fastest, easiest, most affordable B2B lead generation software. Fresh leads in 30 seconds. Lifetime access for just ₹999.";
 
 export const landingPageMetadata: Metadata = {
   title: {

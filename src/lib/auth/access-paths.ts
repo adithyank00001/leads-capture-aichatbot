@@ -41,7 +41,8 @@ export function isHiddenPublicMarketingPath(pathname: string) {
       : pathname;
 
   return (
-    normalized === "/" || normalized === "/landing-b" || normalized === "/demo"
+    normalized === "/landing-old" ||
+    normalized === "/demo"
   );
 }
 

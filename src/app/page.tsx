@@ -1,25 +1,23 @@
 import type { Metadata } from "next";
 
-import { SalesLandingPage } from "@/components/marketing/sales-landing-page";
+import { B2bLeadsLandingPage } from "@/components/marketing/b2b-leads-landing-page";
+import { getHasLifetimeAccessForMarketing } from "@/lib/marketing/access";
 import { landingPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = {
   ...landingPageMetadata,
   robots: {
-    index: false,
-    follow: false,
+    index: true,
+    follow: true,
     googleBot: {
-      index: false,
-      follow: false,
+      index: true,
+      follow: true,
     },
   },
 };
 
-/**
- * Marketing home is closed via middleware:
- * guests → /login, customers → /products (or /checkout).
- * Component kept only as a fallback if middleware is bypassed.
- */
-export default function HomePage() {
-  return <SalesLandingPage />;
+export default async function HomePage() {
+  const hasLifetimeAccess = await getHasLifetimeAccessForMarketing();
+
+  return <B2bLeadsLandingPage hasLifetimeAccess={hasLifetimeAccess} />;
 }

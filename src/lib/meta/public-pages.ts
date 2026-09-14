@@ -2,7 +2,6 @@
 
 export const PUBLIC_META_PAGE_PATHS = [
   "/",
-  "/landing-b",
   "/login",
   "/signup",
   "/checkout",
@@ -19,7 +18,6 @@ const PUBLIC_PAGE_EXACT = new Set<string>(PUBLIC_META_PAGE_PATHS);
 /** Friendly labels for Meta PageView custom_data.content_name */
 export const META_PAGE_CONTENT_NAMES: Record<string, string> = {
   "/": "Home",
-  "/landing-b": "Landing B",
   "/login": "Login",
   "/signup": "Signup",
   "/checkout": "Checkout",

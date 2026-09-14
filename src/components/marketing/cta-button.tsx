@@ -151,7 +151,7 @@ export function CtaButton({
           <span
             className={cn(
               "leading-snug text-balance",
-              isWhatsApp && "max-w-[12.5rem] text-center sm:max-w-[14rem]",
+              isWhatsApp && "max-w-[18rem] text-center sm:max-w-[22rem]",
             )}
           >
             {label}

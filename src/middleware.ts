@@ -8,10 +8,9 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Public marketing pages are gated (redirect guests to login).
-    "/",
-    "/landing-b",
-    "/landing-b/",
+    // Hidden marketing pages are gated (redirect guests to login).
+    "/landing-old",
+    "/landing-old/",
     "/demo",
     "/demo/",
     "/login",
