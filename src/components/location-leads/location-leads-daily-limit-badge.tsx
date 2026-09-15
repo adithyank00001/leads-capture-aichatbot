@@ -17,7 +17,7 @@ type CreditsResponse = {
   };
 };
 
-/** Shown only on the Search page — daily IST lead budget. */
+/** Shown only on the Overview page — daily IST lead budget. */
 export function LocationLeadsDailyLimitBadge() {
   const [dailyUsed, setDailyUsed] = useState<number | null>(null);
   const [dailyLimit, setDailyLimit] = useState(MAPS_DAILY_LEADS_LIMIT);

@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 
-import { LocationLeadsDailyLimitBadge } from "@/components/location-leads/location-leads-daily-limit-badge";
 import { LocationLeadsSearchForm } from "@/components/location-leads/location-leads-search-form";
 import {
   LocationLeadsResultsTable,
@@ -125,7 +124,6 @@ export function LocationLeadsSearchPanel({
       <PageHeader
         title="Search leads"
         description="Run a B2B database search by keyword and location. Results expire in 24 hours."
-        actions={<LocationLeadsDailyLimitBadge />}
       />
 
       <Alert className="border-border/80 bg-muted/40 px-4 py-3">
