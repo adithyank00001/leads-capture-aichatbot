@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 
 export const landingPageTitle =
-  "Generate Fresh B2B Leads in 30 Seconds | growscalex";
+  "Generate Unlimited Fresh B2B Leads in a Minute | growscalex";
 
 export const landingPageDescription =
-  "Stop buying dead databases and paying monthly fees. Get the fastest, easiest, most affordable B2B lead generation software. Fresh leads in 30 seconds. Lifetime access for just ₹999.";
+  "Stop buying dead databases and paying monthly fees. Get the fastest, easiest, most affordable B2B lead generation software. Fresh leads in a minute. Lifetime access for just ₹999.";
 
 export const landingPageMetadata: Metadata = {
   title: {

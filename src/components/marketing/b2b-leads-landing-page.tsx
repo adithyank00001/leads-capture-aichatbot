@@ -79,7 +79,7 @@ const steps = [
     number: "03",
     icon: FileSpreadsheet,
     title: "Click Generate & Export",
-    text: "Wait just 30 seconds. Watch the software build a fresh list of live businesses. Click one button to export everything to a clean Excel or CSV file.",
+    text: "Wait just a minute. Watch the software build a fresh list of live businesses. Click one button to export everything to a clean Excel or CSV file.",
   },
 ] as const;
 
@@ -102,7 +102,7 @@ const features = [
   {
     icon: Clock3,
     title: "30-Second Lead Generation Speed",
-    text: "Your time is money. Don't wait hours for a software to run. Get your targeted list in 30 seconds.",
+    text: "Your time is money. Don't wait hours for a software to run. Get your targeted list in a minute.",
   },
   {
     icon: FileSpreadsheet,
@@ -122,7 +122,7 @@ const pricingPerks = [
   "Extremely Simple to Use",
   "Free Future Updates included",
   "250 Million+ B2B Leads",
-  "Get Leads in 30 Seconds",
+  "Get Leads in a Minute",
   "1-Click CSV / Excel Export",
   "Category & Location Based Filtering",
 ] as const;
@@ -297,7 +297,7 @@ function LeadPreviewPanel({ className }: { className?: string }) {
           <div className="overflow-hidden rounded-xl border border-white/10 bg-white/[0.05]">
             <div className="flex items-center justify-between border-b border-white/10 px-3.5 py-2.5">
               <p className="text-[12px] font-semibold text-white">Fresh leads ready</p>
-              <p className="text-[12px] font-medium text-[#93C5FD]">Generated in 30s</p>
+              <p className="text-[12px] font-medium text-[#93C5FD]">Generated in a minute</p>
             </div>
             <ul className="divide-y divide-white/10">
               {sampleLeads.map((lead, index) => (
@@ -426,7 +426,8 @@ export function B2bLeadsLandingPage({
                 Fresh & Live B2B Leads
               </div>
               <h1 className="max-w-xl font-[family-name:var(--font-leads-display)] text-[32px] leading-[1.05] tracking-[-0.03em] text-[var(--leads-ink)] sm:text-[44px] lg:text-[52px]">
-                Generate Fresh B2B Leads in 30 Seconds. Pay Only Once.
+                Generate Unlimited Fresh B2B Leads in a Minute. Pay Once Use it
+                forever.
               </h1>
               <p className="mt-4 max-w-xl text-[16px] leading-relaxed text-[var(--leads-muted)] sm:text-[18px]">
                 Stop buying dead databases and paying monthly software fees. Get
