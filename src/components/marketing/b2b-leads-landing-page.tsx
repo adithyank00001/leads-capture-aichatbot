@@ -417,8 +417,7 @@ export function B2bLeadsLandingPage({
               </LandingReveal>
               <LandingReveal immediate delay={140}>
                 <h1 className="max-w-xl font-[family-name:var(--font-leads-display)] text-[32px] leading-[1.05] tracking-[-0.03em] text-[var(--leads-ink)] sm:text-[44px] lg:text-[52px]">
-                  Generate Unlimited Fresh B2B Leads in a Minute. Pay Once Use it
-                  forever.
+                  Generate Unlimited Fresh B2B Leads. Pay Once Use it forever.
                 </h1>
               </LandingReveal>
               <LandingReveal immediate delay={200}>
