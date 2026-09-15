@@ -15,8 +15,7 @@ import {
   refundMapsCredits,
 } from "@/lib/location-leads/credits";
 import {
-  MAPS_SEARCH_DEPTH_MAX,
-  MAPS_SEARCH_DEPTH_MIN,
+  MAPS_SEARCH_DEPTH_OPTIONS,
   parseMapsSearchDepth,
 } from "@/lib/location-leads/constants";
 import { listRecentMapsSearches } from "@/lib/location-leads/db";
@@ -94,7 +93,7 @@ export async function POST(request: Request) {
     if (depth === null) {
       throw new ApiValidationError(
         "INVALID_DEPTH",
-        `Enter a whole number from ${MAPS_SEARCH_DEPTH_MIN} to ${MAPS_SEARCH_DEPTH_MAX}.`,
+        `Select one of these lead counts: ${MAPS_SEARCH_DEPTH_OPTIONS.join(", ")}.`,
         400,
       );
     }

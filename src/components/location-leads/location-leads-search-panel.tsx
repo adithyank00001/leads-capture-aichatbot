@@ -17,7 +17,6 @@ import { fetchJsonWithTimeout } from "@/lib/api/fetch-client";
 import {
   DATA_EXPIRES_BADGE,
   getProcessingStatusLabel,
-  MAPS_SEARCH_DEPTH_MAX,
   type MapsSearchStatus,
 } from "@/lib/location-leads/constants";
 
@@ -132,8 +131,7 @@ export function LocationLeadsSearchPanel({
         </AlertTitle>
         <AlertDescription className="text-sm leading-relaxed text-muted-foreground">
           To get the most B2B leads from each search, use smaller areas such as a
-          city or district instead of an entire state or country. Each search can
-          return a maximum of {MAPS_SEARCH_DEPTH_MAX} leads.
+          city or district instead of an entire state or country.
         </AlertDescription>
       </Alert>
 

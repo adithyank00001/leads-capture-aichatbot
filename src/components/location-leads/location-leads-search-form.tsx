@@ -13,10 +13,10 @@ import {
   getDepthCostHelperText,
   isMapsSearchDepth,
   MAPS_SEARCH_DEPTH_DEFAULT,
-  MAPS_SEARCH_DEPTH_MAX,
-  MAPS_SEARCH_DEPTH_MIN,
+  MAPS_SEARCH_DEPTH_OPTIONS,
   type MapsSearchDepth,
 } from "@/lib/location-leads/constants";
+import { cn } from "@/lib/utils";
 
 type SearchResponse = {
   ok: boolean;
@@ -42,15 +42,8 @@ export function LocationLeadsSearchForm({
   const [countryCode, setCountryCode] = useState("");
   const [stateCode, setStateCode] = useState("");
   const [cityName, setCityName] = useState("");
-  const [depthInput, setDepthInput] = useState(
-    String(MAPS_SEARCH_DEPTH_DEFAULT),
-  );
+  const [depth, setDepth] = useState<MapsSearchDepth>(MAPS_SEARCH_DEPTH_DEFAULT);
   const [submitting, setSubmitting] = useState(false);
-
-  const parsedDepth = Number(depthInput);
-  const depth: MapsSearchDepth | null = isMapsSearchDepth(parsedDepth)
-    ? parsedDepth
-    : null;
 
   const countries = useMemo(
     () =>
@@ -85,10 +78,8 @@ export function LocationLeadsSearchForm({
       toast.error("Select a country.");
       return;
     }
-    if (depth === null) {
-      toast.error(
-        `Enter a whole number from ${MAPS_SEARCH_DEPTH_MIN} to ${MAPS_SEARCH_DEPTH_MAX}.`,
-      );
+    if (!isMapsSearchDepth(depth)) {
+      toast.error("Select how many leads you want.");
       return;
     }
 
@@ -193,21 +184,30 @@ export function LocationLeadsSearchForm({
         <label htmlFor="maps-depth" className="text-sm font-medium">
           {DEPTH_INPUT_LABEL}
         </label>
-        <Input
+        <select
           id="maps-depth"
-          type="number"
-          inputMode="numeric"
-          min={MAPS_SEARCH_DEPTH_MIN}
-          max={MAPS_SEARCH_DEPTH_MAX}
-          step={1}
-          value={depthInput}
-          onChange={(event) => setDepthInput(event.target.value)}
+          value={depth}
+          onChange={(event) => {
+            const next = Number(event.target.value);
+            if (isMapsSearchDepth(next)) {
+              setDepth(next);
+            }
+          }}
           required
-        />
+          className={cn(
+            "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base outline-none transition-colors",
+            "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
+            "disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+          )}
+        >
+          {MAPS_SEARCH_DEPTH_OPTIONS.map((option) => (
+            <option key={option} value={option}>
+              {option} leads
+            </option>
+          ))}
+        </select>
         <p className="text-xs text-muted-foreground">
-          {depth !== null
-            ? getDepthCostHelperText(depth)
-            : `Enter a whole number from ${MAPS_SEARCH_DEPTH_MIN} to ${MAPS_SEARCH_DEPTH_MAX}.`}
+          {getDepthCostHelperText(depth)}
         </p>
       </div>
 

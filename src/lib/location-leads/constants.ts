@@ -8,15 +8,20 @@ export const DAILY_LEADS_LIMIT_BADGE_LABEL = "1,000 Daily Search";
 export const DAILY_LEADS_LIMIT_REACHED_MESSAGE =
   "You hit the 1,000 daily search limit. Credits will reset at midnight.";
 
-/** DataForSEO Maps depth: any integer from 1 to 700. */
-export const MAPS_SEARCH_DEPTH_MIN = 1;
-export const MAPS_SEARCH_DEPTH_MAX = 700;
-export const MAPS_SEARCH_DEPTH_DEFAULT = 50;
+/** DataForSEO Maps depth presets shown in the search dropdown. */
+export const MAPS_SEARCH_DEPTH_OPTIONS = [
+  100, 200, 300, 400, 500, 600, 700,
+] as const;
+
+export const MAPS_SEARCH_DEPTH_MIN = MAPS_SEARCH_DEPTH_OPTIONS[0];
+export const MAPS_SEARCH_DEPTH_MAX =
+  MAPS_SEARCH_DEPTH_OPTIONS[MAPS_SEARCH_DEPTH_OPTIONS.length - 1];
+export const MAPS_SEARCH_DEPTH_DEFAULT = 100;
+
+export type MapsSearchDepth = (typeof MAPS_SEARCH_DEPTH_OPTIONS)[number];
 
 /** Max permanently saved leads per customer. */
 export const MAPS_SAVED_LEADS_MAX = 100;
-
-export type MapsSearchDepth = number;
 
 export const MAPS_SEARCH_STATUSES = [
   "queued",
@@ -27,7 +32,7 @@ export const MAPS_SEARCH_STATUSES = [
 
 export type MapsSearchStatus = (typeof MAPS_SEARCH_STATUSES)[number];
 
-export const DEPTH_INPUT_LABEL = "How many leads do you want? (1–700)";
+export const DEPTH_INPUT_LABEL = "How many leads do you want?";
 
 export const DATA_EXPIRES_BADGE = "Search results expire in 24 hours.";
 
@@ -37,8 +42,7 @@ export function isMapsSearchDepth(value: unknown): value is MapsSearchDepth {
   return (
     typeof value === "number" &&
     Number.isInteger(value) &&
-    value >= MAPS_SEARCH_DEPTH_MIN &&
-    value <= MAPS_SEARCH_DEPTH_MAX
+    (MAPS_SEARCH_DEPTH_OPTIONS as readonly number[]).includes(value)
   );
 }
 
