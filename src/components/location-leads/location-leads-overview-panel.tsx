@@ -5,7 +5,6 @@ import Link from "next/link";
 
 import { PageHeader } from "@/components/app-shell/page-header";
 import { Surface } from "@/components/app-shell/surface";
-import { LocationLeadsCreditsBadge } from "@/components/location-leads/location-leads-credits-badge";
 import { Button } from "@/components/ui/button";
 import { fetchJsonWithTimeout } from "@/lib/api/fetch-client";
 import type { MapsSearchStatus } from "@/lib/location-leads/constants";
@@ -53,7 +52,6 @@ export function LocationLeadsOverviewPanel() {
       <PageHeader
         title="Overview"
         description="Location based B2B lead generation software. Search by location and keyword, save leads, and export before data expires in 24 hours."
-        actions={<LocationLeadsCreditsBadge />}
       />
 
       <Surface className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

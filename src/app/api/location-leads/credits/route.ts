@@ -3,6 +3,7 @@ import { handleRouteError } from "@/lib/api/request";
 import { requireMapsApiUser } from "@/lib/auth/dashboard-session";
 import { getCustomerByUserId } from "@/lib/db/customers";
 import { getMapsCreditBalance } from "@/lib/location-leads/credits";
+import { MAPS_DAILY_LEADS_LIMIT, MAPS_LEAD_CREDIT_LIMIT } from "@/lib/location-leads/constants";
 
 export async function GET() {
   try {
@@ -11,9 +12,12 @@ export async function GET() {
 
     if (!customer) {
       return apiSuccess({
-        limit: 100_000,
+        limit: MAPS_LEAD_CREDIT_LIMIT,
         used: 0,
-        remaining: 100_000,
+        remaining: MAPS_LEAD_CREDIT_LIMIT,
+        dailyLimit: MAPS_DAILY_LEADS_LIMIT,
+        dailyUsed: 0,
+        dailyRemaining: MAPS_DAILY_LEADS_LIMIT,
       });
     }
 

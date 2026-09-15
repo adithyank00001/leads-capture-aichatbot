@@ -25,6 +25,8 @@ export type Database = {
           dodo_customer_id: string | null;
           maps_lead_credits_limit: number;
           maps_lead_credits_used: number;
+          maps_daily_leads_used: number;
+          maps_daily_leads_on: string | null;
           has_maps_access: boolean;
           maps_access_granted_at: string | null;
           full_name: string | null;
@@ -42,6 +44,8 @@ export type Database = {
           dodo_customer_id?: string | null;
           maps_lead_credits_limit?: number;
           maps_lead_credits_used?: number;
+          maps_daily_leads_used?: number;
+          maps_daily_leads_on?: string | null;
           has_maps_access?: boolean;
           maps_access_granted_at?: string | null;
           full_name?: string | null;
@@ -59,6 +63,8 @@ export type Database = {
           dodo_customer_id?: string | null;
           maps_lead_credits_limit?: number;
           maps_lead_credits_used?: number;
+          maps_daily_leads_used?: number;
+          maps_daily_leads_on?: string | null;
           has_maps_access?: boolean;
           maps_access_granted_at?: string | null;
           full_name?: string | null;
@@ -486,7 +492,13 @@ export type Database = {
           id: string;
           bot_id: string;
           website_url: string;
-          status: "idle" | "discovering" | "processing" | "ready" | "partial" | "failed";
+          status:
+            | "idle"
+            | "discovering"
+            | "processing"
+            | "ready"
+            | "partial"
+            | "failed";
           total_pages: number;
           completed_pages: number;
           failed_pages: number;
@@ -504,7 +516,13 @@ export type Database = {
           id?: string;
           bot_id: string;
           website_url?: string;
-          status?: "idle" | "discovering" | "processing" | "ready" | "partial" | "failed";
+          status?:
+            | "idle"
+            | "discovering"
+            | "processing"
+            | "ready"
+            | "partial"
+            | "failed";
           total_pages?: number;
           completed_pages?: number;
           failed_pages?: number;
@@ -522,7 +540,13 @@ export type Database = {
           id?: string;
           bot_id?: string;
           website_url?: string;
-          status?: "idle" | "discovering" | "processing" | "ready" | "partial" | "failed";
+          status?:
+            | "idle"
+            | "discovering"
+            | "processing"
+            | "ready"
+            | "partial"
+            | "failed";
           total_pages?: number;
           completed_pages?: number;
           failed_pages?: number;
@@ -935,7 +959,7 @@ export type Database = {
           p_customer_id: string;
           p_amount: number;
         };
-        Returns: boolean;
+        Returns: string;
       };
       maps_refund_credits: {
         Args: {
@@ -987,7 +1011,10 @@ export async function checkSupabaseConnection() {
 
   try {
     const supabase = getSupabaseAdmin();
-    const { error } = await supabase.from("chatbot_leads").select("id").limit(1);
+    const { error } = await supabase
+      .from("chatbot_leads")
+      .select("id")
+      .limit(1);
 
     if (error) {
       return {
@@ -1005,7 +1032,8 @@ export async function checkSupabaseConnection() {
     return {
       connected: false,
       reason: "query_failed" as const,
-      message: error instanceof Error ? error.message : "Unknown Supabase error",
+      message:
+        error instanceof Error ? error.message : "Unknown Supabase error",
     };
   }
 }

@@ -115,7 +115,7 @@ export async function POST(request: Request) {
       city: typeof body.city === "string" ? body.city : null,
     });
 
-    await deductMapsCredits(supabase, customer.id, depth);
+    await deductMapsCredits(customer.id, depth);
 
     const { data: search, error: insertError } = await supabase
       .from("maps_searches")
@@ -136,7 +136,7 @@ export async function POST(request: Request) {
       .single();
 
     if (insertError || !search) {
-      await refundMapsCredits(supabase, customer.id, depth);
+      await refundMapsCredits(customer.id, depth);
       throw new Error(insertError?.message ?? "Could not create search.");
     }
 

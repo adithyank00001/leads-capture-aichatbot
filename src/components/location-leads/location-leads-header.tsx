@@ -1,4 +1,3 @@
-import { LocationLeadsCreditsBadge } from "@/components/location-leads/location-leads-credits-badge";
 import { requireMapsAuth } from "@/lib/auth/dashboard-session";
 
 export async function LocationLeadsHeader() {
@@ -13,7 +12,6 @@ export async function LocationLeadsHeader() {
           </p>
           <p className="truncate text-sm text-foreground/80">{user.email}</p>
         </div>
-        <LocationLeadsCreditsBadge />
       </div>
     </header>
   );

@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 
-import { LocationLeadsCreditsBadge } from "@/components/location-leads/location-leads-credits-badge";
 import { LocationLeadsHeader } from "@/components/location-leads/location-leads-header";
 import { LocationLeadsMobileNav } from "@/components/location-leads/location-leads-mobile-nav";
 import { LocationLeadsSidebar } from "@/components/location-leads/location-leads-sidebar";
@@ -26,9 +25,6 @@ export default async function LocationLeadsLayout({
           >
             <LocationLeadsHeader />
           </Suspense>
-          <div className="border-b border-border/80 bg-card/60 px-4 py-3 md:hidden">
-            <LocationLeadsCreditsBadge />
-          </div>
           <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:px-8 md:py-8">
             {children}
           </main>

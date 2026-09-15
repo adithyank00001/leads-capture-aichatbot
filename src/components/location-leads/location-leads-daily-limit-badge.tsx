@@ -3,20 +3,24 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { fetchJsonWithTimeout } from "@/lib/api/fetch-client";
-import { LEAD_CREDITS_BADGE_LABEL } from "@/lib/location-leads/constants";
+import {
+  DAILY_LEADS_LIMIT_BADGE_LABEL,
+  MAPS_DAILY_LEADS_LIMIT,
+} from "@/lib/location-leads/constants";
 
 type CreditsResponse = {
   ok: boolean;
   data?: {
-    limit: number;
-    used: number;
-    remaining: number;
+    dailyLimit: number;
+    dailyUsed: number;
+    dailyRemaining: number;
   };
 };
 
-export function LocationLeadsCreditsBadge() {
-  const [remaining, setRemaining] = useState<number | null>(null);
-  const [limit, setLimit] = useState(100_000);
+/** Shown only on the Search page — daily IST lead budget. */
+export function LocationLeadsDailyLimitBadge() {
+  const [dailyUsed, setDailyUsed] = useState<number | null>(null);
+  const [dailyLimit, setDailyLimit] = useState(MAPS_DAILY_LEADS_LIMIT);
 
   const load = useCallback(async () => {
     try {
@@ -24,8 +28,8 @@ export function LocationLeadsCreditsBadge() {
         "/api/location-leads/credits",
       );
       if (body.ok && body.data) {
-        setRemaining(body.data.remaining);
-        setLimit(body.data.limit);
+        setDailyUsed(body.data.dailyUsed);
+        setDailyLimit(body.data.dailyLimit);
       }
     } catch {
       // Badge stays on fallback label.
@@ -50,10 +54,13 @@ export function LocationLeadsCreditsBadge() {
 
   return (
     <div className="inline-flex max-w-full items-center rounded-lg border border-border/80 bg-card px-3 py-1.5 text-xs shadow-sm">
-      <span className="font-semibold text-foreground">{LEAD_CREDITS_BADGE_LABEL}</span>
-      {remaining !== null ? (
+      <span className="font-semibold text-foreground">
+        {DAILY_LEADS_LIMIT_BADGE_LABEL}
+      </span>
+      {dailyUsed !== null ? (
         <span className="ml-1.5 tabular-nums text-muted-foreground">
-          · {remaining.toLocaleString()} / {limit.toLocaleString()} left
+          · {dailyUsed.toLocaleString()} / {dailyLimit.toLocaleString()} used
+          today
         </span>
       ) : null}
     </div>
