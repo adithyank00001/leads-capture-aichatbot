@@ -17,6 +17,10 @@ import { Manrope, Syne } from "next/font/google";
 import { BrandLogo } from "@/components/marketing/brand-logo";
 import { CtaButton } from "@/components/marketing/cta-button";
 import {
+  LandingReveal,
+  LandingRevealStyles,
+} from "@/components/marketing/landing-reveal";
+import {
   Accordion,
   AccordionContent,
   AccordionItem,
@@ -39,8 +43,8 @@ const bodyFont = Manrope({
 
 const heroChecks = [
   "Live & Daily Updated Data (99% Accuracy)",
-  "250 Million+ B2B Leads Ready to Pitch",
-  "30-Second Lead Generation Speed",
+  "Unlimited Fresh B2B Leads Ready to Pitch",
+  "Get Leads in a Minute",
   "No Hidden Fees (₹999 One-Time Payment)",
 ] as const;
 
@@ -91,8 +95,8 @@ const features = [
   },
   {
     icon: Globe2,
-    title: "250 Million+ B2B Leads",
-    text: "Our tool gives you access to a massive global network of businesses.",
+    title: "Generate Unlimited Fresh B2B Leads",
+    text: "Generate unlimited fresh B2B leads on demand whenever you need them.",
   },
   {
     icon: Filter,
@@ -101,7 +105,7 @@ const features = [
   },
   {
     icon: Clock3,
-    title: "30-Second Lead Generation Speed",
+    title: "Get Leads in a Minute",
     text: "Your time is money. Don't wait hours for a software to run. Get your targeted list in a minute.",
   },
   {
@@ -121,7 +125,7 @@ const pricingPerks = [
   "Live & 99% Accurate Data",
   "Extremely Simple to Use",
   "Free Future Updates included",
-  "250 Million+ B2B Leads",
+  "Generate Unlimited Fresh B2B Leads",
   "Get Leads in a Minute",
   "1-Click CSV / Excel Export",
   "Category & Location Based Filtering",
@@ -147,9 +151,21 @@ const faqItems = [
 ] as const;
 
 const sampleLeads = [
-  { name: "Horizon Dental Clinic", place: "Andheri West, Mumbai", phone: "+91 98••• ••214" },
-  { name: "Northline Logistics", place: "Whitefield, Bengaluru", phone: "+91 80••• ••901" },
-  { name: "Cedar Real Estate", place: "Koramangala 5th Block", phone: "+91 97••• ••448" },
+  {
+    name: "Horizon Dental Clinic",
+    place: "Andheri West, Mumbai",
+    phone: "+91 98••• ••214",
+  },
+  {
+    name: "Northline Logistics",
+    place: "Whitefield, Bengaluru",
+    phone: "+91 80••• ••901",
+  },
+  {
+    name: "Cedar Real Estate",
+    place: "Koramangala 5th Block",
+    phone: "+91 97••• ••448",
+  },
 ] as const;
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
@@ -211,31 +227,6 @@ function MapBackdrop({ className }: { className?: string }) {
   );
 }
 
-function FloatingPin({
-  className,
-  label,
-  delay = "0s",
-}: {
-  className?: string;
-  label: string;
-  delay?: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "pointer-events-none absolute z-20 flex items-center gap-2 rounded-full border border-[#B7CBE2] bg-white px-3 py-1.5 text-[12px] font-semibold text-[var(--leads-ink)] shadow-[0_10px_30px_rgba(11,31,51,0.14)]",
-        className,
-      )}
-      style={{ animationDelay: delay }}
-    >
-      <span className="flex size-6 items-center justify-center rounded-full bg-[var(--leads-accent)] text-white">
-        <MapPin className="size-3.5" />
-      </span>
-      {label}
-    </div>
-  );
-}
-
 function LeadPreviewPanel({ className }: { className?: string }) {
   return (
     <div className={cn("relative px-1 pb-2 pt-3 sm:px-2 sm:pb-3 sm:pt-4", className)}>
@@ -248,15 +239,6 @@ function LeadPreviewPanel({ className }: { className?: string }) {
         <div className="pointer-events-none absolute inset-0 opacity-50">
           <MapBackdrop className="text-[#7BA4D4]" />
         </div>
-
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-4 -top-4 size-20 rounded-full border border-[#93B4D8]/45 animate-[leads-pulse_3.5s_ease-out_infinite]"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-8 -top-8 size-32 rounded-full border border-[#93B4D8]/25 animate-[leads-pulse_3.5s_ease-out_0.6s_infinite]"
-        />
 
         <div className="relative border-b border-white/10 px-4 py-3 sm:px-5">
           <div className="flex items-center justify-between gap-3">
@@ -274,7 +256,7 @@ function LeadPreviewPanel({ className }: { className?: string }) {
 
         <div className="relative space-y-3 p-4 sm:p-5">
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-white/10 bg-white/[0.06] px-3.5 py-3">
+            <LandingReveal immediate delay={220} from="left" className="rounded-xl border border-white/10 bg-white/[0.06] px-3.5 py-3">
               <p className="text-[11px] font-semibold tracking-wide text-white/45 uppercase">
                 Category
               </p>
@@ -282,60 +264,66 @@ function LeadPreviewPanel({ className }: { className?: string }) {
                 <Search className="size-3.5 shrink-0 text-[#93C5FD]" />
                 Software Companies
               </div>
-            </div>
-            <div className="rounded-xl border border-white/10 bg-white/[0.06] px-3.5 py-3">
+            </LandingReveal>
+            <LandingReveal immediate delay={300} from="right" className="rounded-xl border border-white/10 bg-white/[0.06] px-3.5 py-3">
               <p className="text-[11px] font-semibold tracking-wide text-white/45 uppercase">
                 Location
               </p>
               <div className="mt-1.5 flex items-center gap-2 text-[14px] font-medium text-white">
                 <MapPin className="size-3.5 shrink-0 text-[#93C5FD]" />
-                Mumbai, 400053
+                Mumbai
               </div>
-            </div>
+            </LandingReveal>
           </div>
 
-          <div className="overflow-hidden rounded-xl border border-white/10 bg-white/[0.05]">
+          <LandingReveal immediate delay={380} className="overflow-hidden rounded-xl border border-white/10 bg-white/[0.05]">
             <div className="flex items-center justify-between border-b border-white/10 px-3.5 py-2.5">
               <p className="text-[12px] font-semibold text-white">Fresh leads ready</p>
               <p className="text-[12px] font-medium text-[#93C5FD]">Generated in a minute</p>
             </div>
-            <ul className="divide-y divide-white/10">
-              {sampleLeads.map((lead, index) => (
-                <li
-                  key={lead.name}
-                  className="flex items-start justify-between gap-3 px-3.5 py-3 opacity-0 animate-[leads-rise_0.55s_ease-out_forwards]"
-                  style={{ animationDelay: `${0.45 + index * 0.1}s` }}
-                >
-                  <div className="flex items-start gap-2.5">
-                    <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-[#2563EB]/20 text-[#93C5FD]">
-                      <MapPin className="size-3.5" />
-                    </span>
-                    <div>
-                      <p className="text-[14px] font-semibold text-white">{lead.name}</p>
-                      <p className="mt-0.5 text-[12px] text-white/50">{lead.place}</p>
-                    </div>
-                  </div>
-                  <p className="shrink-0 text-[12px] font-medium text-white/70">
-                    {lead.phone}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </div>
+            <div className="px-3 py-1 sm:px-3.5">
+              <div className="grid grid-cols-[minmax(0,1.15fr)_minmax(0,0.95fr)_auto_auto] items-center gap-x-1.5 border-b border-white/10 py-2 sm:gap-x-2">
+                <p className="truncate text-[9px] font-semibold tracking-wide text-white/40 uppercase sm:text-[10px]">
+                  Company
+                </p>
+                <p className="truncate text-[9px] font-semibold tracking-wide text-white/40 uppercase sm:text-[10px]">
+                  Place
+                </p>
+                <p className="text-[9px] font-semibold tracking-wide text-white/40 uppercase sm:text-[10px]">
+                  Mobile
+                </p>
+                <p className="text-right text-[9px] font-semibold tracking-wide text-white/40 uppercase sm:text-[10px]">
+                  Other data
+                </p>
+              </div>
+              <ul className="divide-y divide-white/10">
+                {sampleLeads.map((lead, index) => (
+                  <LandingReveal
+                    key={lead.name}
+                    immediate
+                    delay={460 + index * 90}
+                    as="li"
+                    className="grid grid-cols-[minmax(0,1.15fr)_minmax(0,0.95fr)_auto_auto] items-center gap-x-1.5 py-2.5 sm:gap-x-2 sm:py-3"
+                  >
+                    <p className="truncate text-[12px] font-semibold text-white sm:text-[13px]">
+                      {lead.name}
+                    </p>
+                    <p className="truncate text-[10px] text-white/50 sm:text-[11px]">
+                      {lead.place}
+                    </p>
+                    <p className="whitespace-nowrap text-[10px] font-medium tabular-nums text-white/70 sm:text-[11px]">
+                      {lead.phone}
+                    </p>
+                    <p className="text-right text-[10px] font-medium tracking-widest text-white/45 sm:text-[11px]">
+                      ***
+                    </p>
+                  </LandingReveal>
+                ))}
+              </ul>
+            </div>
+          </LandingReveal>
         </div>
       </div>
-
-      {/* Pins overlay the card edges — not the headline above */}
-      <FloatingPin
-        className="left-0 top-[42%] -translate-y-1/2 animate-[leads-float_4.5s_ease-in-out_infinite] sm:left-1"
-        label="Mumbai"
-        delay="0s"
-      />
-      <FloatingPin
-        className="right-0 top-[68%] -translate-y-1/2 animate-[leads-float_5.2s_ease-in-out_infinite] sm:right-1"
-        label="Bengaluru"
-        delay="0.35s"
-      />
     </div>
   );
 }
@@ -415,30 +403,38 @@ export function B2bLeadsLandingPage({
         </div>
 
         <div className="relative mx-auto flex max-w-6xl flex-col px-4 pb-28 pt-5 sm:px-6 lg:min-h-svh lg:pb-24 lg:pt-7">
-          <header className="relative z-20 flex items-center opacity-0 animate-[leads-rise_0.5s_ease-out_forwards]">
+          <LandingReveal immediate className="relative z-20 flex items-center">
             <BrandLogo size="md" href="/" className="relative z-20 h-7 w-auto shrink-0 sm:h-8" />
-          </header>
+          </LandingReveal>
 
           <div className="relative z-10 mt-8 grid flex-1 items-center gap-8 lg:mt-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
-            <div className="opacity-0 animate-[leads-rise_0.65s_ease-out_0.08s_forwards]">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#BFD0E6] bg-white px-3 py-1.5 text-[12px] font-semibold text-[var(--leads-accent)] shadow-sm">
-                <span className="size-1.5 rounded-full bg-[var(--leads-accent)]" />
-                Fresh & Live B2B Leads
-              </div>
-              <h1 className="max-w-xl font-[family-name:var(--font-leads-display)] text-[32px] leading-[1.05] tracking-[-0.03em] text-[var(--leads-ink)] sm:text-[44px] lg:text-[52px]">
-                Generate Unlimited Fresh B2B Leads in a Minute. Pay Once Use it
-                forever.
-              </h1>
-              <p className="mt-4 max-w-xl text-[16px] leading-relaxed text-[var(--leads-muted)] sm:text-[18px]">
-                Stop buying dead databases and paying monthly software fees. Get
-                the fastest, easiest, reliable, most affordable B2B lead
-                generation software and find your perfect clients instantly.
-              </p>
-              <p className="mt-2 hidden text-[15px] font-medium text-[var(--leads-ink)]/80 sm:mt-3 sm:block sm:text-[16px]">
-                Join smart sales teams who generate fresh leads on demand.
-              </p>
+            <div>
+              <LandingReveal immediate delay={80}>
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#BFD0E6] bg-white px-3 py-1.5 text-[12px] font-semibold text-[var(--leads-accent)] shadow-sm">
+                  <span className="size-1.5 rounded-full bg-[var(--leads-accent)]" />
+                  Fresh & Live B2B Leads
+                </div>
+              </LandingReveal>
+              <LandingReveal immediate delay={140}>
+                <h1 className="max-w-xl font-[family-name:var(--font-leads-display)] text-[32px] leading-[1.05] tracking-[-0.03em] text-[var(--leads-ink)] sm:text-[44px] lg:text-[52px]">
+                  Generate Unlimited Fresh B2B Leads in a Minute. Pay Once Use it
+                  forever.
+                </h1>
+              </LandingReveal>
+              <LandingReveal immediate delay={200}>
+                <p className="mt-4 max-w-xl text-[16px] leading-relaxed text-[var(--leads-muted)] sm:text-[18px]">
+                  Stop buying dead databases and paying monthly software fees. Get
+                  the fastest, easiest, reliable, most affordable B2B lead
+                  generation software and find your perfect clients instantly.
+                </p>
+              </LandingReveal>
+              <LandingReveal immediate delay={260}>
+                <p className="mt-2 hidden text-[15px] font-medium text-[var(--leads-ink)]/80 sm:mt-3 sm:block sm:text-[16px]">
+                  Join smart sales teams who generate fresh leads on demand.
+                </p>
+              </LandingReveal>
 
-              <div className="mt-7 hidden flex-col items-start gap-1 lg:flex">
+              <LandingReveal immediate delay={320} className="mt-7 hidden flex-col items-start gap-1 lg:flex">
                 <CtaButton
                   size="large"
                   className="w-full max-w-[22rem] sm:w-auto sm:max-w-none"
@@ -447,33 +443,35 @@ export function B2bLeadsLandingPage({
                 {!hasLifetimeAccess ? (
                   <CtaNote className="text-left sm:max-w-[22rem]" />
                 ) : null}
-              </div>
+              </LandingReveal>
             </div>
 
             {/* Preview comes early so graphics show in the first screen on mobile */}
-            <div className="opacity-0 animate-[leads-rise_0.7s_ease-out_0.16s_forwards]">
+            <LandingReveal immediate delay={180} from="right">
               <LeadPreviewPanel className="mx-auto w-full max-w-lg lg:ml-auto lg:mr-0" />
-            </div>
+            </LandingReveal>
           </div>
 
-          <div className="relative z-10 mt-6 opacity-0 animate-[leads-rise_0.55s_ease-out_0.28s_forwards] lg:mt-8">
-            <div className="mb-5 flex flex-col items-center lg:hidden">
+          <div className="relative z-10 mt-6 lg:mt-8">
+            <LandingReveal immediate delay={380} className="mb-5 flex flex-col items-center lg:hidden">
               <CtaButton
                 size="large"
                 className="w-full max-w-[22rem]"
                 {...heroCta}
               />
               {!hasLifetimeAccess ? <CtaNote /> : null}
-            </div>
+            </LandingReveal>
 
             <ul className="mx-auto grid max-w-lg gap-2 lg:ml-auto lg:mr-0 lg:max-w-none lg:grid-cols-2 xl:max-w-5xl">
               {heroChecks.map((item, index) => {
                 const [main, extra] = item.split(" (");
                 return (
-                  <li
+                  <LandingReveal
                     key={item}
-                    className="flex items-start gap-2.5 rounded-xl border border-[#D5DEE8] bg-white px-3 py-2.5 text-[14px] leading-snug text-[var(--leads-ink)] shadow-sm opacity-0 animate-[leads-rise_0.5s_ease-out_forwards] sm:text-[15px]"
-                    style={{ animationDelay: `${0.36 + index * 0.07}s` }}
+                    immediate
+                    delay={420 + index * 70}
+                    as="li"
+                    className="flex items-start gap-2.5 rounded-xl border border-[#D5DEE8] bg-white px-3 py-2.5 text-[14px] leading-snug text-[var(--leads-ink)] shadow-sm sm:text-[15px]"
                   >
                     <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--leads-accent)]/12 text-[var(--leads-accent)]">
                       <Check className="size-3.5 stroke-[2.5]" />
@@ -484,7 +482,7 @@ export function B2bLeadsLandingPage({
                         <span className="text-[var(--leads-muted)]"> ({extra}</span>
                       ) : null}
                     </span>
-                  </li>
+                  </LandingReveal>
                 );
               })}
             </ul>
@@ -499,20 +497,28 @@ export function B2bLeadsLandingPage({
           className="pointer-events-none absolute -left-20 top-10 size-64 rounded-full bg-[#DBEAFE] blur-3xl"
         />
         <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-          <SectionLabel>The problem</SectionLabel>
-          <h2 className="max-w-3xl font-[family-name:var(--font-leads-display)] text-[30px] leading-[1.1] tracking-tight sm:text-[40px]">
-            Are you tired of wasting time and money on bad leads?
-          </h2>
-          <p className="mt-4 max-w-2xl text-[16px] leading-relaxed text-[var(--leads-muted)] sm:text-[17px]">
-            If you are trying to sell B2B, you already know the big problems:
-          </p>
+          <LandingReveal>
+            <SectionLabel>The problem</SectionLabel>
+          </LandingReveal>
+          <LandingReveal delay={70}>
+            <h2 className="max-w-3xl font-[family-name:var(--font-leads-display)] text-[30px] leading-[1.1] tracking-tight sm:text-[40px]">
+              Are you tired of wasting time and money on bad leads?
+            </h2>
+          </LandingReveal>
+          <LandingReveal delay={140}>
+            <p className="mt-4 max-w-2xl text-[16px] leading-relaxed text-[var(--leads-muted)] sm:text-[17px]">
+              If you are trying to sell B2B, you already know the big problems:
+            </p>
+          </LandingReveal>
 
           <div className="mt-10 grid gap-5 md:grid-cols-3">
-            {problemPoints.map((point) => {
+            {problemPoints.map((point, index) => {
               const Icon = point.icon;
               return (
-                <div
+                <LandingReveal
                   key={point.title}
+                  delay={210 + index * 90}
+                  from={index === 0 ? "left" : index === 2 ? "right" : "up"}
                   className="relative rounded-2xl border border-[var(--leads-line)] bg-[#F7FAFD] p-6"
                 >
                   <div
@@ -528,19 +534,19 @@ export function B2bLeadsLandingPage({
                   <p className="relative mt-2 text-[15px] leading-relaxed text-[var(--leads-muted)]">
                     {point.text}
                   </p>
-                </div>
+                </LandingReveal>
               );
             })}
           </div>
 
-          <div className="mt-12 flex items-start gap-3 rounded-2xl border border-[#BFDBFE] bg-[#EFF6FF] px-5 py-4">
+          <LandingReveal delay={480} className="mt-12 flex items-start gap-3 rounded-2xl border border-[#BFDBFE] bg-[#EFF6FF] px-5 py-4">
             <span className="mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--leads-accent)] text-white">
               <Zap className="size-4" />
             </span>
             <p className="font-[family-name:var(--font-leads-display)] text-[22px] leading-snug text-[var(--leads-ink)] sm:text-[28px]">
               There is a better, faster, and cheaper way.
             </p>
-          </div>
+          </LandingReveal>
         </div>
       </section>
 
@@ -553,25 +559,34 @@ export function B2bLeadsLandingPage({
           <MapBackdrop />
         </div>
         <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-          <SectionLabel>How it works</SectionLabel>
-          <h2 className="max-w-3xl font-[family-name:var(--font-leads-display)] text-[30px] leading-[1.1] tracking-tight sm:text-[40px]">
-            So simple, anyone can use it. Generate leads in 3 clicks.
-          </h2>
-          <p className="mt-4 max-w-2xl text-[16px] leading-relaxed text-[var(--leads-muted)] sm:text-[17px]">
-            We built this software to be{" "}
-            <span className="font-semibold text-[var(--leads-ink)]">
-              very easy and simple to use
-            </span>
-            . You don&apos;t need any technical skills. If you can type on a
-            keyboard, you can generate B2B leads ready to pitch today.
-          </p>
+          <LandingReveal>
+            <SectionLabel>How it works</SectionLabel>
+          </LandingReveal>
+          <LandingReveal delay={70}>
+            <h2 className="max-w-3xl font-[family-name:var(--font-leads-display)] text-[30px] leading-[1.1] tracking-tight sm:text-[40px]">
+              So simple, anyone can use it. Generate leads in 3 clicks.
+            </h2>
+          </LandingReveal>
+          <LandingReveal delay={140}>
+            <p className="mt-4 max-w-2xl text-[16px] leading-relaxed text-[var(--leads-muted)] sm:text-[17px]">
+              We built this software to be{" "}
+              <span className="font-semibold text-[var(--leads-ink)]">
+                very easy and simple to use
+              </span>
+              . You don&apos;t need any technical skills. If you can type on a
+              keyboard, you can generate B2B leads ready to pitch today.
+            </p>
+          </LandingReveal>
 
           <ol className="mt-12 grid gap-5 lg:grid-cols-3">
             {steps.map((step, index) => {
               const Icon = step.icon;
               return (
-                <li
+                <LandingReveal
                   key={step.number}
+                  as="li"
+                  delay={210 + index * 100}
+                  from={index === 0 ? "left" : index === 2 ? "right" : "up"}
                   className="relative rounded-2xl border border-[#C9D7E8] bg-white p-6 shadow-[0_12px_30px_rgba(11,31,51,0.05)]"
                 >
                   {index < steps.length - 1 ? (
@@ -594,39 +609,48 @@ export function B2bLeadsLandingPage({
                   <p className="mt-2 text-[15px] leading-relaxed text-[var(--leads-muted)]">
                     {step.text}
                   </p>
-                </li>
+                </LandingReveal>
               );
             })}
           </ol>
 
-          <div className="mt-12 flex flex-col items-start">
+          <LandingReveal delay={520} className="mt-12 flex flex-col items-start">
             <CtaButton
               size="large"
               className="w-full max-w-[26rem] sm:w-auto"
               {...stepsCta}
             />
-          </div>
+          </LandingReveal>
         </div>
       </section>
 
       {/* Features */}
       <section className="relative z-10 border-t border-[var(--leads-line)] bg-white">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-          <SectionLabel>What you get</SectionLabel>
-          <h2 className="max-w-3xl font-[family-name:var(--font-leads-display)] text-[30px] leading-[1.1] tracking-tight sm:text-[40px]">
-            Everything you need to fill your sales pipeline.
-          </h2>
-          <p className="mt-4 max-w-2xl text-[16px] leading-relaxed text-[var(--leads-muted)] sm:text-[17px]">
-            We packed this software with only the features that actually make
-            you money. No fluff, just results.
-          </p>
+          <LandingReveal>
+            <SectionLabel>What you get</SectionLabel>
+          </LandingReveal>
+          <LandingReveal delay={70}>
+            <h2 className="max-w-3xl font-[family-name:var(--font-leads-display)] text-[30px] leading-[1.1] tracking-tight sm:text-[40px]">
+              Everything you need to fill your sales pipeline.
+            </h2>
+          </LandingReveal>
+          <LandingReveal delay={140}>
+            <p className="mt-4 max-w-2xl text-[16px] leading-relaxed text-[var(--leads-muted)] sm:text-[17px]">
+              We packed this software with only the features that actually make
+              you money. No fluff, just results.
+            </p>
+          </LandingReveal>
 
           <div className="mt-12 grid gap-5 md:grid-cols-2">
-            {features.map((feature) => {
+            {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <article
+                <LandingReveal
                   key={feature.title}
+                  as="article"
+                  delay={210 + index * 80}
+                  from={index % 2 === 0 ? "left" : "right"}
                   className="group relative overflow-hidden rounded-2xl border border-[var(--leads-line)] bg-[#F8FAFC] p-6 transition-transform duration-300 hover:-translate-y-0.5"
                 >
                   <div
@@ -646,7 +670,7 @@ export function B2bLeadsLandingPage({
                       </p>
                     </div>
                   </div>
-                </article>
+                </LandingReveal>
               );
             })}
           </div>
@@ -664,36 +688,44 @@ export function B2bLeadsLandingPage({
           className="pointer-events-none absolute -right-8 top-10 size-72 rounded-full bg-[#93C5FD]/30 blur-3xl"
         />
         <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-          <SectionLabel>Pricing</SectionLabel>
-          <h2 className="max-w-3xl font-[family-name:var(--font-leads-display)] text-[30px] leading-[1.1] tracking-tight sm:text-[40px]">
-            Why rent your leads when you can own the machine?
-          </h2>
-          <p className="mt-4 max-w-2xl text-[16px] leading-relaxed text-[var(--leads-muted)] sm:text-[17px]">
-            Other lead generation tools charge you monthly fees forever or a huge
-            upfront payment for a lead database. We do things differently.
-          </p>
+          <LandingReveal>
+            <SectionLabel>Pricing</SectionLabel>
+          </LandingReveal>
+          <LandingReveal delay={70}>
+            <h2 className="max-w-3xl font-[family-name:var(--font-leads-display)] text-[30px] leading-[1.1] tracking-tight sm:text-[40px]">
+              Why rent your leads when you can own the machine?
+            </h2>
+          </LandingReveal>
+          <LandingReveal delay={140}>
+            <p className="mt-4 max-w-2xl text-[16px] leading-relaxed text-[var(--leads-muted)] sm:text-[17px]">
+              Other lead generation tools charge you monthly fees forever or a huge
+              upfront payment for a lead database. We do things differently.
+            </p>
+          </LandingReveal>
 
           <div className="mt-12 grid gap-6 lg:grid-cols-2">
-            <div className="rounded-2xl border border-[var(--leads-line)] bg-white/90 p-6 backdrop-blur-sm sm:p-8">
+            <LandingReveal delay={220} from="left" className="rounded-2xl border border-[var(--leads-line)] bg-white/90 p-6 backdrop-blur-sm sm:p-8">
               <p className="text-[13px] font-semibold tracking-[0.12em] text-[var(--leads-muted)] uppercase">
                 Standard SaaS Tools
               </p>
               <ul className="mt-6 space-y-4 text-[18px] text-[var(--leads-muted)]">
-                {["₹5,000 / Month", "Hidden Fees", "Hard to Learn"].map((item) => (
-                  <li
+                {["₹5,000 / Month", "Hidden Fees", "Hard to Learn"].map((item, index) => (
+                  <LandingReveal
                     key={item}
+                    as="li"
+                    delay={300 + index * 70}
                     className="flex items-center gap-3 line-through decoration-[var(--leads-ink)]/30"
                   >
                     <span className="flex size-7 items-center justify-center rounded-full bg-[#FEE2E2] text-[#B91C1C]">
                       ×
                     </span>
                     {item}
-                  </li>
+                  </LandingReveal>
                 ))}
               </ul>
-            </div>
+            </LandingReveal>
 
-            <div className="relative overflow-hidden rounded-2xl border border-[#3B82F6]/30 bg-[var(--leads-deep)] p-6 text-white sm:p-8">
+            <LandingReveal delay={320} from="right" className="relative overflow-hidden rounded-2xl border border-[#3B82F6]/30 bg-[var(--leads-deep)] p-6 text-white sm:p-8">
               <div
                 aria-hidden
                 className="pointer-events-none absolute -right-10 -top-10 size-48 rounded-full bg-[#2563EB]/35 blur-2xl"
@@ -713,25 +745,30 @@ export function B2bLeadsLandingPage({
                 </p>
                 <p className="mt-2 text-[15px] text-white/65">One-Time Payment</p>
                 <ul className="mt-7 space-y-3">
-                  {pricingPerks.map((perk) => (
-                    <li key={perk} className="flex items-start gap-2.5 text-[15px]">
+                  {pricingPerks.map((perk, index) => (
+                    <LandingReveal
+                      key={perk}
+                      as="li"
+                      delay={400 + index * 50}
+                      className="flex items-start gap-2.5 text-[15px]"
+                    >
                       <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-[#2563EB]/30 text-[#93C5FD]">
                         <Check className="size-3.5 stroke-[2.5]" />
                       </span>
                       <span>{perk}</span>
-                    </li>
+                    </LandingReveal>
                   ))}
                 </ul>
-                <div className="mt-8">
+                <LandingReveal delay={820} className="mt-8">
                   <CtaButton
                     size="large"
                     className="w-full max-w-none"
                     {...pricingCta}
                   />
                   {!hasLifetimeAccess ? <CtaNote light /> : null}
-                </div>
+                </LandingReveal>
               </div>
-            </div>
+            </LandingReveal>
           </div>
         </div>
       </section>
@@ -739,25 +776,30 @@ export function B2bLeadsLandingPage({
       {/* FAQ */}
       <section className="relative z-10 border-t border-[var(--leads-line)] bg-white">
         <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-20">
-          <SectionLabel>FAQ</SectionLabel>
-          <h2 className="font-[family-name:var(--font-leads-display)] text-[30px] leading-[1.1] tracking-tight sm:text-[40px]">
-            Frequently Asked Questions
-          </h2>
+          <LandingReveal>
+            <SectionLabel>FAQ</SectionLabel>
+          </LandingReveal>
+          <LandingReveal delay={70}>
+            <h2 className="font-[family-name:var(--font-leads-display)] text-[30px] leading-[1.1] tracking-tight sm:text-[40px]">
+              Frequently Asked Questions
+            </h2>
+          </LandingReveal>
 
           <Accordion type="single" collapsible className="mt-8 w-full">
             {faqItems.map((item, index) => (
-              <AccordionItem
-                key={item.q}
-                value={`faq-${index}`}
-                className="border-[var(--leads-line)]"
-              >
-                <AccordionTrigger className="text-left text-[16px] font-semibold text-[var(--leads-ink)] hover:no-underline sm:text-[17px]">
-                  {item.q}
-                </AccordionTrigger>
-                <AccordionContent className="text-[15px] leading-relaxed text-[var(--leads-muted)]">
-                  {item.a}
-                </AccordionContent>
-              </AccordionItem>
+              <LandingReveal key={item.q} delay={140 + index * 80}>
+                <AccordionItem
+                  value={`faq-${index}`}
+                  className="border-[var(--leads-line)]"
+                >
+                  <AccordionTrigger className="text-left text-[16px] font-semibold text-[var(--leads-ink)] hover:no-underline sm:text-[17px]">
+                    {item.q}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-[15px] leading-relaxed text-[var(--leads-muted)]">
+                    {item.a}
+                  </AccordionContent>
+                </AccordionItem>
+              </LandingReveal>
             ))}
           </Accordion>
         </div>
@@ -775,70 +817,43 @@ export function B2bLeadsLandingPage({
           </div>
         </div>
         <div className="relative mx-auto max-w-4xl px-4 py-16 text-center sm:px-6 sm:py-20">
-          <h2 className="font-[family-name:var(--font-leads-display)] text-[30px] leading-[1.1] tracking-tight sm:text-[42px]">
-            Ready to stop searching for clients and start closing them?
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-[16px] leading-relaxed text-white/70 sm:text-[17px]">
-            Stop wasting hours doing manual research. Get the fresh, accurate
-            data you need to grow your business today.
-          </p>
-          <div className="mt-8 flex flex-col items-center">
+          <LandingReveal>
+            <h2 className="font-[family-name:var(--font-leads-display)] text-[30px] leading-[1.1] tracking-tight sm:text-[42px]">
+              Ready to stop searching for clients and start closing them?
+            </h2>
+          </LandingReveal>
+          <LandingReveal delay={90}>
+            <p className="mx-auto mt-4 max-w-2xl text-[16px] leading-relaxed text-white/70 sm:text-[17px]">
+              Stop wasting hours doing manual research. Get the fresh, accurate
+              data you need to grow your business today.
+            </p>
+          </LandingReveal>
+          <LandingReveal delay={180} className="mt-8 flex flex-col items-center">
             <CtaButton
               size="large"
               className="w-full max-w-[28rem]"
               {...finalCta}
             />
             {!hasLifetimeAccess ? <CtaNote light /> : null}
-          </div>
+          </LandingReveal>
         </div>
       </section>
 
       <footer className="relative z-[130] border-t border-[var(--leads-line)] bg-[#F3F6F9] pb-28 lg:pb-32">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-10 text-center sm:px-6">
-          <BrandLogo size="sm" href="/" />
-          <p className="text-[12px] text-[var(--leads-muted)]">
-            © {new Date().getFullYear()} growscalex. All rights reserved.
-          </p>
+          <LandingReveal>
+            <BrandLogo size="sm" href="/" />
+          </LandingReveal>
+          <LandingReveal delay={80}>
+            <p className="text-[12px] text-[var(--leads-muted)]">
+              © {new Date().getFullYear()} growscalex. All rights reserved.
+            </p>
+          </LandingReveal>
         </div>
       </footer>
 
       <StickyBuyBar label={stickyCtaLabel} hasLifetimeAccess={hasLifetimeAccess} />
-
-      <style>{`
-        @keyframes leads-rise {
-          from {
-            opacity: 0;
-            transform: translateY(14px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        @keyframes leads-float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-6px); }
-        }
-        @keyframes leads-pulse {
-          0% { transform: scale(0.92); opacity: 0.5; }
-          70% { transform: scale(1.1); opacity: 0; }
-          100% { transform: scale(1.1); opacity: 0; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .animate-\\[leads-rise_0\\.5s_ease-out_forwards\\],
-          .animate-\\[leads-rise_0\\.65s_ease-out_0\\.08s_forwards\\],
-          .animate-\\[leads-rise_0\\.7s_ease-out_0\\.18s_forwards\\],
-          .animate-\\[leads-rise_0\\.55s_ease-out_forwards\\],
-          .animate-\\[leads-float_4\\.5s_ease-in-out_infinite\\],
-          .animate-\\[leads-float_5\\.2s_ease-in-out_infinite\\],
-          .animate-\\[leads-pulse_3\\.5s_ease-out_infinite\\],
-          .animate-\\[leads-pulse_3\\.5s_ease-out_0\\.6s_infinite\\] {
-            animation: none !important;
-            opacity: 1 !important;
-            transform: none !important;
-          }
-        }
-      `}</style>
+      <LandingRevealStyles />
     </div>
   );
 }
