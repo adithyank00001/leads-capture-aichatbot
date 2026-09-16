@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -224,15 +224,221 @@ export function FounderDashboard({ data }: FounderDashboardProps) {
           onRevoke={(targetEmail) => revokeAccess(targetEmail, "product1")}
         />
       ) : (
-        <Product2Panels
-          data={data}
-          busy={busy}
-          onRevoke={(targetEmail) => revokeAccess(targetEmail, "product2")}
-        />
+        <>
+          <TrialLinksPanel />
+          <Product2Panels
+            data={data}
+            busy={busy}
+            onRevoke={(targetEmail) => revokeAccess(targetEmail, "product2")}
+          />
+        </>
       )}
 
       <p className="text-xs text-zinc-400">Private founder console</p>
     </div>
+  );
+}
+
+type TrialLinkRow = {
+  id: string;
+  token: string;
+  note: string | null;
+  status: string;
+  search_used: boolean;
+  trial_started_at: string | null;
+  expires_at: string | null;
+  created_at: string;
+  url: string;
+};
+
+function TrialLinksPanel() {
+  const [links, setLinks] = useState<TrialLinkRow[]>([]);
+  const [note, setNote] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    void loadLinks();
+  }, []);
+
+  async function loadLinks() {
+    try {
+      const response = await fetch("/api/founder/trial-links");
+      const json = (await response.json()) as {
+        ok: boolean;
+        data?: { links?: TrialLinkRow[] };
+        error?: { message?: string };
+      };
+      if (!response.ok || !json.ok) {
+        toast.error(json.error?.message ?? "Could not load trial links");
+        return;
+      }
+      setLinks(json.data?.links ?? []);
+    } catch {
+      toast.error("Could not load trial links.");
+    }
+  }
+
+  async function createLink() {
+    setBusy(true);
+    try {
+      const response = await fetch("/api/founder/trial-links", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ note }),
+      });
+      const json = (await response.json()) as {
+        ok: boolean;
+        data?: { url?: string };
+        error?: { message?: string };
+      };
+      if (!response.ok || !json.ok || !json.data?.url) {
+        toast.error(json.error?.message ?? "Could not create trial link");
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(json.data.url);
+        toast.success("Trial link created and copied");
+      } catch {
+        toast.success("Trial link created");
+      }
+      setNote("");
+      await loadLinks();
+    } catch {
+      toast.error("Could not reach the server.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function copyUrl(url: string) {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Copied");
+    } catch {
+      toast.error("Could not copy");
+    }
+  }
+
+  async function disableLink(id: string) {
+    if (!window.confirm("Disable this trial link?")) {
+      return;
+    }
+    setBusy(true);
+    try {
+      const response = await fetch("/api/founder/trial-links/disable", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const json = (await response.json()) as {
+        ok: boolean;
+        error?: { message?: string };
+      };
+      if (!response.ok || !json.ok) {
+        toast.error(json.error?.message ?? "Disable failed");
+        return;
+      }
+      toast.success("Trial link disabled");
+      await loadLinks();
+    } catch {
+      toast.error("Could not reach the server.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-5">
+      <div>
+        <h2 className="text-lg font-semibold text-zinc-900">
+          Product 2 — Temporary trial links
+        </h2>
+        <p className="mt-1 text-sm text-zinc-500">
+          Create a random link guests can open without login. One search, 10
+          phone leads, view only, expires 2 hours after first success.
+        </p>
+      </div>
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="min-w-[200px] flex-1 space-y-2">
+          <Label htmlFor="trial-note">Note (optional)</Label>
+          <Input
+            id="trial-note"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Prospect name"
+          />
+        </div>
+        <Button type="button" disabled={busy} onClick={createLink}>
+          Create trial link
+        </Button>
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border border-zinc-200">
+        <table className="min-w-full text-left text-sm">
+          <thead className="border-b bg-zinc-50 text-zinc-600">
+            <tr>
+              <th className="px-3 py-2 font-medium">Link</th>
+              <th className="px-3 py-2 font-medium">Status</th>
+              <th className="px-3 py-2 font-medium">Used</th>
+              <th className="px-3 py-2 font-medium">Expires</th>
+              <th className="px-3 py-2 font-medium">Note</th>
+              <th className="px-3 py-2 font-medium">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {links.length === 0 ? (
+              <tr>
+                <td className="px-3 py-4 text-zinc-500" colSpan={6}>
+                  No trial links yet.
+                </td>
+              </tr>
+            ) : (
+              links.map((row) => (
+                <tr key={row.id} className="border-b last:border-0">
+                  <td className="max-w-[220px] truncate px-3 py-2 font-mono text-xs">
+                    {row.token}
+                  </td>
+                  <td className="px-3 py-2">
+                    <Badge variant="outline">{row.status}</Badge>
+                  </td>
+                  <td className="px-3 py-2">
+                    {row.search_used ? "Yes" : "No"}
+                  </td>
+                  <td className="px-3 py-2 text-zinc-500">
+                    {formatDate(row.expires_at)}
+                  </td>
+                  <td className="px-3 py-2 text-zinc-500">{row.note ?? "—"}</td>
+                  <td className="px-3 py-2">
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={busy}
+                        onClick={() => copyUrl(row.url)}
+                      >
+                        Copy
+                      </Button>
+                      {row.status !== "disabled" && row.status !== "expired" ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={busy}
+                          onClick={() => disableLink(row.id)}
+                        >
+                          Disable
+                        </Button>
+                      ) : null}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }
 

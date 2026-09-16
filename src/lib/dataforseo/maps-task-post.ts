@@ -64,6 +64,17 @@ export function buildMapsPostbackUrl(searchId: string): string {
   return url.toString();
 }
 
+/** Trial-only postback — paid maps webhook URL is unchanged. */
+export function buildTrialMapsPostbackUrl(trialSearchId: string): string {
+  assertDataForSeoConfigured();
+  const url = new URL(
+    `${getPublicAppOrigin()}/api/webhooks/dataforseo/maps-trial`,
+  );
+  url.searchParams.set("secret", serverEnv.dataforseoPostbackSecret!);
+  url.searchParams.set("trial_search_id", trialSearchId);
+  return url.toString();
+}
+
 /**
  * Standard queue Task POST.
  * Docs: https://docs.dataforseo.com/v3/serp/google/maps/task_post/

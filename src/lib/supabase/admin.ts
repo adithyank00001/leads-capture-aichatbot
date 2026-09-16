@@ -172,6 +172,132 @@ export type Database = {
         };
         Relationships: [];
       };
+      trial_links: {
+        Row: {
+          id: string;
+          token: string;
+          note: string | null;
+          status: "unused" | "active" | "expired" | "disabled";
+          search_used: boolean;
+          trial_started_at: string | null;
+          expires_at: string | null;
+          created_at: string;
+          disabled_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          token: string;
+          note?: string | null;
+          status?: "unused" | "active" | "expired" | "disabled";
+          search_used?: boolean;
+          trial_started_at?: string | null;
+          expires_at?: string | null;
+          created_at?: string;
+          disabled_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          token?: string;
+          note?: string | null;
+          status?: "unused" | "active" | "expired" | "disabled";
+          search_used?: boolean;
+          trial_started_at?: string | null;
+          expires_at?: string | null;
+          created_at?: string;
+          disabled_at?: string | null;
+        };
+        Relationships: [];
+      };
+      trial_searches: {
+        Row: {
+          id: string;
+          trial_link_id: string;
+          keyword: string;
+          country: string;
+          state: string | null;
+          city: string | null;
+          location_name: string;
+          depth: number;
+          status: "queued" | "submitted" | "completed" | "failed";
+          dataforseo_task_id: string | null;
+          error_message: string | null;
+          results_count: number;
+          created_at: string;
+          updated_at: string;
+          completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          trial_link_id: string;
+          keyword: string;
+          country: string;
+          state?: string | null;
+          city?: string | null;
+          location_name: string;
+          depth: number;
+          status?: "queued" | "submitted" | "completed" | "failed";
+          dataforseo_task_id?: string | null;
+          error_message?: string | null;
+          results_count?: number;
+          created_at?: string;
+          updated_at?: string;
+          completed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          trial_link_id?: string;
+          keyword?: string;
+          country?: string;
+          state?: string | null;
+          city?: string | null;
+          location_name?: string;
+          depth?: number;
+          status?: "queued" | "submitted" | "completed" | "failed";
+          dataforseo_task_id?: string | null;
+          error_message?: string | null;
+          results_count?: number;
+          created_at?: string;
+          updated_at?: string;
+          completed_at?: string | null;
+        };
+        Relationships: [];
+      };
+      trial_leads: {
+        Row: {
+          id: string;
+          trial_link_id: string;
+          trial_search_id: string;
+          place_id: string | null;
+          title: string | null;
+          category: string | null;
+          phone: string;
+          rank_absolute: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          trial_link_id: string;
+          trial_search_id: string;
+          place_id?: string | null;
+          title?: string | null;
+          category?: string | null;
+          phone: string;
+          rank_absolute?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          trial_link_id?: string;
+          trial_search_id?: string;
+          place_id?: string | null;
+          title?: string | null;
+          category?: string | null;
+          phone?: string;
+          rank_absolute?: number | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       maps_leads: {
         Row: {
           id: string;
@@ -969,6 +1095,10 @@ export type Database = {
         Returns: boolean;
       };
       cleanup_expired_maps_searches: {
+        Args: Record<string, never>;
+        Returns: undefined;
+      };
+      cleanup_expired_trial_links: {
         Args: Record<string, never>;
         Returns: undefined;
       };
