@@ -186,7 +186,7 @@ export function TrialSearchForm({
                 className="text-base font-medium md:text-sm"
               >
                 City{" "}
-                <span className="font-normal text-muted-foreground">
+                <span className="font-normal text-destructive">
                   (unlock lifetime access to choose city or district)
                 </span>
               </label>
@@ -218,7 +218,7 @@ export function TrialSearchForm({
                 {TRIAL_VISIBLE_LEADS} leads (Trial)
               </option>
             </select>
-            <p className="text-sm leading-snug text-muted-foreground md:text-xs">
+            <p className="text-sm leading-snug text-destructive md:text-xs">
               Trial is locked to {TRIAL_VISIBLE_LEADS} leads with phone numbers.
             </p>
           </div>
