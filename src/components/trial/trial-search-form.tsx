@@ -41,7 +41,6 @@ export function TrialSearchForm({
   const [keyword, setKeyword] = useState("");
   const [countryCode, setCountryCode] = useState("");
   const [stateCode, setStateCode] = useState("");
-  const [cityName, setCityName] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const countries = useMemo(
@@ -93,7 +92,7 @@ export function TrialSearchForm({
             country: selectedCountry.label,
             countryIso: countryCode,
             state: selectedState?.label ?? null,
-            city: cityName.trim() || null,
+            city: null,
           }),
           timeoutMs: 45_000,
         },
@@ -162,7 +161,6 @@ export function TrialSearchForm({
               onChange={(next) => {
                 setCountryCode(next);
                 setStateCode("");
-                setCityName("");
               }}
             />
             <SearchableSelect
@@ -171,13 +169,16 @@ export function TrialSearchForm({
               placeholder={countryCode ? "Optional" : "Select country first"}
               options={states}
               value={stateCode}
-              disabled={
-                disabled || submitting || !countryCode || states.length === 0
-              }
+              disabled={disabled || submitting}
               labelClassName="text-base md:text-sm"
               inputClassName="h-11 text-base md:h-9 md:text-sm"
               optionClassName="py-2.5 text-base md:py-1.5 md:text-sm"
-              onChange={setStateCode}
+              onChange={(next) => {
+                if (!countryCode) {
+                  return;
+                }
+                setStateCode(next);
+              }}
             />
             <div className="space-y-2 sm:col-span-2 md:col-span-1 md:space-y-1.5">
               <label
@@ -186,21 +187,16 @@ export function TrialSearchForm({
               >
                 City{" "}
                 <span className="font-normal text-muted-foreground">
-                  (optional)
+                  (unlock lifetime access to choose city or district)
                 </span>
               </label>
               <Input
                 id="trial-city"
-                value={cityName}
-                onChange={(event) => setCityName(event.target.value)}
-                placeholder={
-                  countryCode
-                    ? "Type the exact city name"
-                    : "Select country first"
-                }
-                disabled={disabled || submitting || !countryCode}
-                maxLength={120}
-                className="h-11 text-base md:h-9 md:text-sm"
+                value=""
+                readOnly
+                disabled
+                placeholder="locked in trial"
+                className="h-11 text-base opacity-80 md:h-9 md:text-sm"
               />
             </div>
           </div>
