@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 
-import { TrialExportLockedButton, TrialLockedFeatures } from "@/components/trial/trial-locked-features";
+import {
+  TrialExportLockedButton,
+  TrialLockedFeatures,
+} from "@/components/trial/trial-locked-features";
 import {
   TrialResultsTable,
   type TrialLeadRow,
@@ -13,9 +15,13 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { fetchJsonWithTimeout } from "@/lib/api/fetch-client";
+import { getWhatsAppHref } from "@/lib/marketing/whatsapp";
 import {
   TRIAL_EXPIRED_MESSAGE,
+  TRIAL_PROCESSING_MESSAGE,
+  TRIAL_PROCESSING_TITLE,
   TRIAL_SEARCH_USED_MESSAGE,
+  TRIAL_UNLOCK_LIFETIME,
 } from "@/lib/trial/constants";
 
 type TrialStatusResponse = {
@@ -180,20 +186,32 @@ export function TrialShell({ token }: TrialShellProps) {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-16 text-sm text-muted-foreground">
-        Loading trial…
+      <div className="min-h-screen overflow-x-hidden bg-background">
+        <div className="mx-auto max-w-5xl px-4 py-16 text-sm text-muted-foreground">
+          Loading trial…
+        </div>
       </div>
     );
   }
 
   if (fatal) {
     return (
-      <div className="mx-auto max-w-lg space-y-4 px-4 py-16 text-center">
-        <h1 className="text-xl font-semibold">Trial unavailable</h1>
-        <p className="text-sm text-muted-foreground">{fatal}</p>
-        <Button asChild>
-          <Link href="/checkout">Get lifetime access</Link>
-        </Button>
+      <div className="min-h-screen overflow-x-hidden bg-background">
+        <div className="mx-auto max-w-lg space-y-4 px-4 py-16 text-center">
+          <h1 className="text-xl font-semibold text-foreground">
+            Trial unavailable
+          </h1>
+          <p className="text-sm text-muted-foreground">{fatal}</p>
+          <Button asChild>
+            <a
+              href={getWhatsAppHref()}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {TRIAL_UNLOCK_LIFETIME}
+            </a>
+          </Button>
+        </div>
       </div>
     );
   }
@@ -202,30 +220,38 @@ export function TrialShell({ token }: TrialShellProps) {
     searchStatus === "queued" || searchStatus === "submitted";
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border/80 bg-card/90">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-4">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+    <div className="min-h-screen overflow-x-hidden bg-background">
+      <header className="border-b border-sidebar-border bg-sidebar text-sidebar-foreground shadow-sm">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-4 md:py-4">
+          <div className="min-w-0">
+            <p className="text-sm font-medium uppercase tracking-wide text-sidebar-foreground/55 md:text-xs">
               growscalex
             </p>
-            <h1 className="text-lg font-semibold">B2B lead generation trial</h1>
+            <h1 className="truncate text-xl font-semibold leading-snug md:text-lg">
+              B2B lead generation trial
+            </h1>
           </div>
-          <Badge variant="secondary">Trial · 10 leads</Badge>
+          <Badge className="shrink-0 bg-sidebar-primary px-2.5 py-1 text-sm text-sidebar-primary-foreground hover:bg-sidebar-primary md:text-xs">
+            Trial · 10 leads
+          </Badge>
         </div>
       </header>
 
-      <main className="mx-auto grid max-w-5xl gap-6 px-4 py-6 md:grid-cols-[1fr_240px] md:py-8">
-        <div className="space-y-6">
+      <main className="mx-auto grid max-w-5xl gap-5 px-4 py-5 md:grid-cols-[minmax(0,1fr)_240px] md:gap-6 md:py-8">
+        <div className="min-w-0 space-y-5 md:space-y-6">
           {searchUsed ? (
-            <Alert>
-              <AlertTitle>Trial search used</AlertTitle>
-              <AlertDescription>{TRIAL_SEARCH_USED_MESSAGE}</AlertDescription>
+            <Alert className="border-border/80 bg-card text-base md:text-sm">
+              <AlertTitle className="text-base md:text-sm">
+                Trial search used
+              </AlertTitle>
+              <AlertDescription className="text-base leading-relaxed md:text-sm">
+                {TRIAL_SEARCH_USED_MESSAGE}
+              </AlertDescription>
             </Alert>
           ) : null}
 
           {expiresAt ? (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground md:text-xs">
               Results available until {new Date(expiresAt).toLocaleString()}.
             </p>
           ) : null}
@@ -242,38 +268,54 @@ export function TrialShell({ token }: TrialShellProps) {
               }}
             />
           ) : !searchUsed && !processing ? (
-            <Alert>
-              <AlertTitle>Search unavailable</AlertTitle>
-              <AlertDescription>
+            <Alert className="border-border/80 bg-card text-base md:text-sm">
+              <AlertTitle className="text-base md:text-sm">
+                Search unavailable
+              </AlertTitle>
+              <AlertDescription className="text-base leading-relaxed md:text-sm">
                 This trial cannot start a new search right now.
               </AlertDescription>
             </Alert>
           ) : null}
 
           {processing ? (
-            <Alert>
-              <AlertTitle>Processing…</AlertTitle>
-              <AlertDescription>
-                Finding leads for your trial. This usually takes a short time.
-              </AlertDescription>
-            </Alert>
+            <div className="rounded-xl border border-border/80 bg-card p-4 shadow-sm md:p-5">
+              <div className="flex items-start gap-3">
+                <span
+                  aria-hidden
+                  className="mt-1 inline-block size-6 shrink-0 animate-spin rounded-full border-2 border-primary/20 border-t-primary md:mt-0.5 md:size-5"
+                />
+                <div>
+                  <p className="text-lg font-semibold text-foreground md:text-base">
+                    {TRIAL_PROCESSING_TITLE}
+                  </p>
+                  <p className="mt-1 text-base leading-relaxed text-muted-foreground md:text-sm">
+                    {TRIAL_PROCESSING_MESSAGE}
+                  </p>
+                </div>
+              </div>
+            </div>
           ) : null}
 
           {searchStatus === "failed" && searchError ? (
-            <Alert variant="destructive">
-              <AlertTitle>Search failed</AlertTitle>
-              <AlertDescription>
+            <Alert variant="destructive" className="text-base md:text-sm">
+              <AlertTitle className="text-base md:text-sm">
+                Search failed
+              </AlertTitle>
+              <AlertDescription className="text-base leading-relaxed md:text-sm">
                 {searchError} You can try once more.
               </AlertDescription>
             </Alert>
           ) : null}
 
           {searchMeta && searchStatus === "completed" ? (
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-base font-semibold">Trial results</h2>
-                  <p className="text-sm text-muted-foreground">
+            <div className="min-w-0 space-y-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <h2 className="text-lg font-semibold text-foreground md:text-base">
+                    Trial results
+                  </h2>
+                  <p className="text-base text-muted-foreground md:truncate md:text-sm">
                     {searchMeta.keyword} · {searchMeta.locationName}
                   </p>
                 </div>
@@ -284,7 +326,9 @@ export function TrialShell({ token }: TrialShellProps) {
           ) : null}
         </div>
 
-        <TrialLockedFeatures />
+        <div className="min-w-0">
+          <TrialLockedFeatures />
+        </div>
       </main>
     </div>
   );

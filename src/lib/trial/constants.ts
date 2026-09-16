@@ -9,8 +9,17 @@ export const TRIAL_DEPTH_HELPER =
 export const TRIAL_EXPORT_LOCKED_MESSAGE =
   "Export is not available on trial. Buy lifetime access to unlock.";
 
-export const TRIAL_OTHER_DETAILS_UNLOCK =
-  "Unlock lifetime access to see.";
+export const TRIAL_OTHER_DETAILS_UNLOCK = "Unlock lifetime access to see.";
+
+export const TRIAL_UNLOCK_GENERATE_MORE =
+  "Unlock lifetime access to generate more";
+
+export const TRIAL_UNLOCK_LIFETIME = "Unlock lifetime access";
+
+export const TRIAL_PROCESSING_TITLE = "Generating your leads…";
+
+export const TRIAL_PROCESSING_MESSAGE =
+  "This can take about a minute. Please keep this page open.";
 
 export const TRIAL_SEARCH_USED_MESSAGE =
   "This trial already used its one search. You can view results until the link expires.";

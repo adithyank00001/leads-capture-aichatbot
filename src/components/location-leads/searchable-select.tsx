@@ -20,6 +20,10 @@ type SearchableSelectProps = {
   disabled?: boolean;
   required?: boolean;
   allowClear?: boolean;
+  className?: string;
+  labelClassName?: string;
+  inputClassName?: string;
+  optionClassName?: string;
 };
 
 export function SearchableSelect({
@@ -32,6 +36,10 @@ export function SearchableSelect({
   disabled = false,
   required = false,
   allowClear = true,
+  className,
+  labelClassName,
+  inputClassName,
+  optionClassName,
 }: SearchableSelectProps) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -66,8 +74,11 @@ export function SearchableSelect({
   }, [options, query]);
 
   return (
-    <div ref={rootRef} className="relative space-y-1.5">
-      <label htmlFor={id} className="text-sm font-medium text-foreground">
+    <div ref={rootRef} className={cn("relative space-y-1.5", className)}>
+      <label
+        htmlFor={id}
+        className={cn("text-sm font-medium text-foreground", labelClassName)}
+      >
         {label}
         {required ? <span className="text-destructive"> *</span> : null}
       </label>
@@ -77,6 +88,7 @@ export function SearchableSelect({
         disabled={disabled}
         placeholder={placeholder}
         autoComplete="off"
+        className={inputClassName}
         onFocus={() => {
           if (!disabled) {
             setOpen(true);
@@ -95,7 +107,10 @@ export function SearchableSelect({
           {allowClear ? (
             <button
               type="button"
-              className="w-full rounded-md px-2 py-1.5 text-left text-sm text-muted-foreground hover:bg-muted"
+              className={cn(
+                "w-full rounded-md px-2 py-1.5 text-left text-sm text-muted-foreground hover:bg-muted",
+                optionClassName,
+              )}
               onClick={() => {
                 onChange("");
                 setQuery("");
@@ -106,7 +121,12 @@ export function SearchableSelect({
             </button>
           ) : null}
           {filtered.length === 0 ? (
-            <p className="px-2 py-1.5 text-sm text-muted-foreground">
+            <p
+              className={cn(
+                "px-2 py-1.5 text-sm text-muted-foreground",
+                optionClassName,
+              )}
+            >
               No matches
             </p>
           ) : (
@@ -117,6 +137,7 @@ export function SearchableSelect({
                 className={cn(
                   "w-full rounded-md px-2 py-1.5 text-left text-sm hover:bg-muted",
                   option.value === value && "bg-muted font-medium",
+                  optionClassName,
                 )}
                 onClick={() => {
                   onChange(option.value);
