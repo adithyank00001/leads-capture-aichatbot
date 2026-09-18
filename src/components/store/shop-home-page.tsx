@@ -108,13 +108,29 @@ export function ShopHomePage() {
       </main>
 
       <footer className="shop-footer">
-        <div className="store-shell flex flex-col gap-2 py-8 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-[var(--store-muted)]">
-            Instant digital delivery · Secure checkout
-          </p>
-          <Link href="/store/product" className="text-sm font-semibold text-[var(--store-ink)]">
-            Get the top selling database →
-          </Link>
+        <div className="store-shell flex flex-col gap-4 py-8">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-[var(--store-muted)]">
+              Instant digital delivery · Secure checkout
+            </p>
+            <Link href="/store/product" className="text-sm font-semibold text-[var(--store-ink)]">
+              Get the top selling database →
+            </Link>
+          </div>
+          <nav className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-[var(--store-muted)]">
+            <Link href="/privacy-policy" className="hover:text-[var(--store-ink)] hover:underline">
+              Privacy
+            </Link>
+            <Link href="/terms-of-service" className="hover:text-[var(--store-ink)] hover:underline">
+              Terms
+            </Link>
+            <Link href="/refund-policy" className="hover:text-[var(--store-ink)] hover:underline">
+              Refunds
+            </Link>
+            <Link href="/contact" className="hover:text-[var(--store-ink)] hover:underline">
+              Contact
+            </Link>
+          </nav>
         </div>
       </footer>
     </div>

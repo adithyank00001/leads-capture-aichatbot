@@ -1,200 +1,174 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
-import { BrandLogo } from "@/components/marketing/brand-logo";
+import {
+  LegalH2,
+  LegalH3,
+  LegalP,
+  LegalPageShell,
+  LegalSection,
+} from "@/components/legal/legal-page-shell";
 import { publicConfig } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: `Privacy Policy — ${publicConfig.appName}`,
   description:
-    "How growscalex AI collects, uses, and protects information when you use our website and AI software.",
+    "Privacy practices applicable to the growscaleX digital products storefront, transactional identifiers, and support correspondence.",
 };
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-white text-[var(--landing-navy)]">
-      <header className="border-b border-[#D8E2EC]">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-6 sm:px-6">
-          <BrandLogo size="sm" href="/login" />
-          <Link
-            href="/login"
-            className="text-sm font-medium text-[#5B6B7C] hover:text-[var(--landing-navy)] hover:underline"
+    <LegalPageShell title="Privacy Policy" updated="18/09/2026">
+      <LegalP>
+        This Privacy Policy constitutes the controlling disclosure regarding the
+        manner in which growscaleX (&quot;Operator,&quot; &quot;we,&quot;
+        &quot;us,&quot; or &quot;our&quot;) collects, processes, retains,
+        discloses, and otherwise effectuates dealings in informational elements
+        arising from your interaction with the digital products storefront
+        operated at growscalex.com (including without limitation product listing
+        pages, checkout initiation flows, payment-confirmation surfaces, and
+        ancillary support channels). By accessing the storefront or completing a
+        transaction for digitally delivered merchandise (including lead-database
+        packages and associated downloadable materials), you acknowledge that
+        you have read this instrument and consent to the processing described
+        herein to the maximum extent permitted under applicable law.
+      </LegalP>
+
+      <LegalSection>
+        <LegalH2>1. Scope of Contemplated Processing</LegalH2>
+        <LegalP>
+          The Operator&apos;s processing activities are circumscribed to those
+          categories of data reasonably necessary to (a) authenticate purchase
+          intent, (b) consummate payment through third-party payment
+          infrastructure, (c) effectuate irreversible digital delivery of
+          purchased assets, (d) respond to inbound support solicitations, and
+          (e) maintain rudimentary fraud-prevention, dispute-handling, and
+          operational continuity records. This Policy does not purport to govern
+          third-party websites, payment processors, cloud-storage providers, or
+          analytics vendors except insofar as their receipt of data is
+          instrumentally required for the foregoing purposes.
+        </LegalP>
+      </LegalSection>
+
+      <LegalSection>
+        <LegalH2>2. Categories of Information Collected</LegalH2>
+        <LegalH3>2.1 Transactional and identity-adjacent data</LegalH3>
+        <LegalP>
+          In connection with order formation you may furnish, or payment
+          infrastructure may transmit to us, identifiers such as name fragments,
+          electronic mail addresses, telephonic numbers, billing locality
+          metadata, order identifiers, payment-status enumerations, and such
+          other commercially reasonable fields as are returned by Razorpay or
+          successor processors. Card primary account numbers and analogous
+          sensitive payment instruments are processed by the payment provider
+          and are not stored by the Operator as enduring cardholder data.
+        </LegalP>
+        <LegalH3>2.2 Technical telemetry</LegalH3>
+        <LegalP>
+          Automatic collection may include Internet Protocol addresses, browser
+          and device characteristics, referring URLs, timestamps, cookie or
+          local-storage tokens used for session continuity or offer-timer
+          persistence, and diagnostic logs incidental to request routing. Such
+          telemetry is processed for security hardening, abuse mitigation, and
+          service diagnostics rather than for sale as an independent data
+          product.
+        </LegalP>
+        <LegalH3>2.3 Support correspondence</LegalH3>
+        <LegalP>
+          Where you elect to communicate via{" "}
+          <a
+            href="mailto:support@growscalex.com"
+            className="font-medium text-[var(--landing-orange)] hover:underline"
           >
-            Back to login
-          </Link>
-        </div>
-      </header>
+            support@growscalex.com
+          </a>{" "}
+          or the contact form, we process the contents of your message, reply
+          address, and any attachments or identifiers you voluntarily include,
+          solely for triage and response.
+        </LegalP>
+      </LegalSection>
 
-      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
-        <article className="space-y-8">
-          <header className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Privacy Policy
-            </h1>
-            <p className="text-sm text-[#8B9AAB]">
-              <strong className="font-medium text-[#5B6B7C]">
-                Last Updated:
-              </strong>{" "}
-              12/08/2026
-            </p>
-          </header>
+      <LegalSection>
+        <LegalH2>3. Purposes and Legal Bases (as applicable)</LegalH2>
+        <LegalP>
+          Processing is undertaken to perform contractual obligations incident
+          to digital-goods sales; to comply with bookkeeping, tax, and
+          dispute-resolution duties; to pursue legitimate interests in securing
+          the storefront against fraud; and, where mandated, pursuant to consent
+          you provide for communications. Failure to supply data necessary for
+          checkout may render fulfillment impossible without constituting a
+          waiver of the Operator&apos;s all-sales-final posture described in the
+          Refund Policy.
+        </LegalP>
+      </LegalSection>
 
-          <p className="text-[17px] leading-relaxed text-[#3D4F63]">
-            At growscalex, we take privacy seriously. This policy explains how we
-            collect, use, and protect information when you use our website
-            (growscalex.com) and the growscalex AI software.
-          </p>
+      <LegalSection>
+        <LegalH2>4. Disclosures to Processors and Service Providers</LegalH2>
+        <LegalP>
+          Without converting such disclosure into a sale of personal data for
+          unrelated commercial exploitation, the Operator may transmit relevant
+          subsets of information to: (i) Razorpay or alternative payment
+          facilitators for authorization, capture, settlement, and chargeback
+          workflows; (ii) hosting, database, and content-delivery providers
+          necessary to operate the storefront; (iii) electronic-mail
+          transmission vendors used to deliver transactional notices or support
+          replies; and (iv) professional advisers under confidentiality
+          constraints when required for legal or accounting purposes. Each such
+          recipient is expected to process data only as instructed for the
+          disclosed purpose, subject to their independent privacy terms.
+        </LegalP>
+      </LegalSection>
 
-          <section className="space-y-4">
-            <h2 className="text-xl font-bold tracking-tight sm:text-2xl">
-              1. Information We Collect
-            </h2>
-            <p className="text-[17px] leading-relaxed text-[#3D4F63]">
-              We collect information in two distinct ways, depending on how you
-              interact with our service:
-            </p>
+      <LegalSection>
+        <LegalH2>5. Retention, Security, and Cross-Border Considerations</LegalH2>
+        <LegalP>
+          Records are retained for durations commensurate with operational need,
+          statutory limitation periods, and chargeback windows, after which they
+          are deleted or irreversibly anonymized where feasible. The Operator
+          employs commercially reasonable administrative and technical
+          safeguards; nevertheless, no method of electronic transmission or
+          storage is infallible, and absolute security is not warranted.
+          Infrastructure may reside in multiple jurisdictions; by using the
+          storefront you consent to such transfers to the extent permitted by
+          law.
+        </LegalP>
+      </LegalSection>
 
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <h3 className="text-lg font-semibold">
-                  A. Information from Our Customers (Business Owners)
-                </h3>
-                <p className="text-[17px] leading-relaxed text-[#3D4F63]">
-                  When you purchase growscalex AI, we collect basic account
-                  details necessary to provide the service. All payment and
-                  billing information is securely processed by our Merchant of
-                  Record, Dodo Payments, and is subject to their privacy and
-                  security standards.
-                </p>
-              </div>
+      <LegalSection>
+        <LegalH2>6. Purchaser responsibilities regarding acquired datasets</LegalH2>
+        <LegalP>
+          Digital lead-database products deliver informational assets for the
+          purchaser&apos;s independent commercial use. The Operator does not,
+          by virtue of sale, assume the role of joint controller for any
+          subsequent outreach, enrichment, or further processing the purchaser
+          undertakes with acquired files. Compliance with telemarketing,
+          anti-spam, data-protection, and consent regimes applicable to the
+          purchaser&apos;s campaigns remains solely the purchaser&apos;s
+          obligation.
+        </LegalP>
+      </LegalSection>
 
-              <div className="space-y-2">
-                <h3 className="text-lg font-semibold">
-                  B. Information from Website Visitors (End-Users)
-                </h3>
-                <p className="text-[17px] leading-relaxed text-[#3D4F63]">
-                  When installed on a customer&apos;s website, the growscalex AI
-                  widget interacts with website visitors.
-                </p>
-                <ul className="list-disc space-y-2 pl-6 text-[17px] leading-relaxed text-[#3D4F63]">
-                  <li>
-                    <strong className="font-semibold text-[var(--landing-navy)]">
-                      Voluntary Data:
-                    </strong>{" "}
-                    The AI counselor is designed to collect lead information
-                    (such as Name, Email, and Phone Number) only when the visitor
-                    explicitly and voluntarily provides it during the chat.
-                  </li>
-                  <li>
-                    <strong className="font-semibold text-[var(--landing-navy)]">
-                      No Hidden Tracking:
-                    </strong>{" "}
-                    We do not use hidden methods to extract personal data from
-                    visitors.
-                  </li>
-                  <li>
-                    <strong className="font-semibold text-[var(--landing-navy)]">
-                      Customization:
-                    </strong>{" "}
-                    Business owners have the ability to customize what
-                    information the AI counselor requests from their visitors.
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl font-bold tracking-tight sm:text-2xl">
-              2. How We Use the Data
-            </h2>
-            <ul className="list-disc space-y-2 pl-6 text-[17px] leading-relaxed text-[#3D4F63]">
-              <li>
-                <strong className="font-semibold text-[var(--landing-navy)]">
-                  To Provide the Service:
-                </strong>{" "}
-                The primary use of collected end-user data is to pass the
-                generated leads directly to the business owner who installed the
-                software.
-              </li>
-              <li>
-                <strong className="font-semibold text-[var(--landing-navy)]">
-                  Third-Party AI Processing:
-                </strong>{" "}
-                To generate intelligent, conversational responses, the chat
-                transcripts are securely processed using third-party AI models.
-                These third-party services act as data processors strictly for the
-                purpose of powering the chat interface.
-              </li>
-            </ul>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl font-bold tracking-tight sm:text-2xl">
-              3. Data Storage and Security
-            </h2>
-            <p className="text-[17px] leading-relaxed text-[#3D4F63]">
-              All collected lead information and account data are stored in a
-              highly secured database. We implement strict industry-standard
-              security measures to prevent unauthorized access, alteration,
-              disclosure, or destruction of your data.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl font-bold tracking-tight sm:text-2xl">
-              4. Data Sharing
-            </h2>
-            <p className="text-[17px] leading-relaxed text-[#3D4F63]">
-              We do not sell, rent, or trade your personal data or your collected
-              leads to outside companies. Data is only shared with:
-            </p>
-            <ul className="list-disc space-y-2 pl-6 text-[17px] leading-relaxed text-[#3D4F63]">
-              <li>
-                <strong className="font-semibold text-[var(--landing-navy)]">
-                  Dodo Payments:
-                </strong>{" "}
-                For managing purchases, billing, and global tax compliance.
-              </li>
-              <li>
-                <strong className="font-semibold text-[var(--landing-navy)]">
-                  Third-Party AI Providers:
-                </strong>{" "}
-                Exclusively for processing the chat text to generate responses.
-              </li>
-            </ul>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl font-bold tracking-tight sm:text-2xl">
-              5. Your Rights and Contact
-            </h2>
-            <p className="text-[17px] leading-relaxed text-[#3D4F63]">
-              If you are a customer and wish to access, correct, or delete your
-              account data, or if you have any questions about how your data is
-              handled, please reach out to us.
-            </p>
-            <p className="text-[17px] leading-relaxed text-[#3D4F63]">
-              Contact Email:{" "}
-              <a
-                href="mailto:support@growscalex.com"
-                className="font-medium text-[var(--landing-orange)] hover:underline"
-              >
-                support@growscalex.com
-              </a>
-            </p>
-          </section>
-        </article>
-      </main>
-
-      <footer className="border-t border-[#D8E2EC]">
-        <div className="mx-auto max-w-3xl px-4 py-8 text-center sm:px-6">
-          <p className="text-[13px] text-[#8B9AAB]">
-            © {new Date().getFullYear()} {publicConfig.appName}. All rights
-            reserved.
-          </p>
-        </div>
-      </footer>
-    </div>
+      <LegalSection>
+        <LegalH2>7. Rights, inquiries, and contact channel</LegalH2>
+        <LegalP>
+          Subject to jurisdictional limitations, you may request access,
+          rectification, or deletion of account-adjacent records we control by
+          writing to{" "}
+          <a
+            href="mailto:support@growscalex.com"
+            className="font-medium text-[var(--landing-orange)] hover:underline"
+          >
+            support@growscalex.com
+          </a>
+          , or by submitting the form at{" "}
+          <a href="/contact" className="font-medium text-[var(--landing-orange)] hover:underline">
+            /contact
+          </a>
+          . We may require reasonable identity verification before acting on a
+          request. This Policy may be revised prospectively; continued use of
+          the storefront after posting constitutes acceptance of the updated
+          text.
+        </LegalP>
+      </LegalSection>
+    </LegalPageShell>
   );
 }

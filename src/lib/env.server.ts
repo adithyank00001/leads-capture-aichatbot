@@ -80,6 +80,12 @@ export const serverEnv = {
   founderPassword: readOptionalEnv("FOUNDER_PASSWORD"),
   founderDashboardSecret: readOptionalEnv("FOUNDER_DASHBOARD_SECRET"),
   founderSessionSecret: readOptionalEnv("FOUNDER_SESSION_SECRET"),
+  resendApiKey: readOptionalEnv("RESEND_API_KEY"),
+  resendFromEmail:
+    readOptionalEnv("RESEND_FROM_EMAIL") ??
+    "growscaleX Support <onboarding@resend.dev>",
+  contactInboxEmail:
+    readOptionalEnv("CONTACT_INBOX_EMAIL") ?? "support@growscalex.com",
 } as const;
 
 export function getServiceStatus(): {
