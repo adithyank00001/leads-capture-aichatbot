@@ -6,6 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: [
         "/",
+        "/store/product",
         "/privacy-policy",
         "/terms-of-service",
         "/refund-policy",
@@ -16,6 +17,7 @@ export default function robots(): MetadataRoute.Robots {
       // Do not use Disallow: "/" — that can block the whole site for crawlers.
       disallow: [
         "/landing-old",
+        "/landing-old-b2b",
         "/demo",
         "/products",
         "/dashboard",

@@ -11,6 +11,8 @@ export const config = {
     // Hidden marketing pages are gated (redirect guests to login).
     "/landing-old",
     "/landing-old/",
+    "/landing-old-b2b",
+    "/landing-old-b2b/",
     "/demo",
     "/demo/",
     "/login",

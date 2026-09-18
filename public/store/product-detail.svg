@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1500" viewBox="0 0 1200 1500" fill="none">
+  <rect width="1200" height="1500" fill="#F4F7FB"/>
+  <rect x="120" y="180" width="960" height="1140" rx="24" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2"/>
+  <text x="180" y="280" fill="#0B1220" font-family="Arial, sans-serif" font-size="36" font-weight="700">What's inside</text>
+  <rect x="180" y="340" width="840" height="160" rx="16" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="220" y="410" fill="#0B1220" font-family="Arial, sans-serif" font-size="28" font-weight="600">12 educational posters</text>
+  <text x="220" y="455" fill="#64748B" font-family="Arial, sans-serif" font-size="22">High-resolution PNG + PDF</text>
+  <rect x="180" y="530" width="840" height="160" rx="16" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="220" y="600" fill="#0B1220" font-family="Arial, sans-serif" font-size="28" font-weight="600">Canva-ready layouts</text>
+  <text x="220" y="645" fill="#64748B" font-family="Arial, sans-serif" font-size="22">Edit text and colors in minutes</text>
+  <rect x="180" y="720" width="840" height="160" rx="16" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="220" y="790" fill="#0B1220" font-family="Arial, sans-serif" font-size="28" font-weight="600">Caption templates</text>
+  <text x="220" y="835" fill="#64748B" font-family="Arial, sans-serif" font-size="22">Post-ready copy for each design</text>
+  <rect x="180" y="910" width="840" height="160" rx="16" fill="#EFF6FF" stroke="#BFDBFE"/>
+  <text x="220" y="980" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="28" font-weight="600">Commercial license option</text>
+  <text x="220" y="1025" fill="#3B82F6" font-family="Arial, sans-serif" font-size="22">Use for clients and your brand</text>
+</svg>
