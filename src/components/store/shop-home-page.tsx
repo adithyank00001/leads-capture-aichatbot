@@ -4,6 +4,7 @@ import { BadgeCheck, ChevronRight } from "lucide-react";
 
 import { BrandLogo } from "@/components/marketing/brand-logo";
 import { ShopProductCard } from "@/components/store/shop-product-card";
+import { StoreTrackedLink } from "@/components/store/store-tracked-link";
 import { shopCatalog } from "@/lib/store/catalog";
 
 function formatMoney(amount: number, symbol: string) {
@@ -29,9 +30,13 @@ export function ShopHomePage() {
             </span>
           </div>
           <nav className="flex items-center gap-4 text-sm text-[var(--store-muted)]">
-            <Link href="/store/product" className="hover:text-[var(--store-ink)]">
+            <StoreTrackedLink
+              href="/store/product"
+              className="hover:text-[var(--store-ink)]"
+              trackProductClick
+            >
               Top selling
-            </Link>
+            </StoreTrackedLink>
             <Link href="#products" className="hidden sm:inline hover:text-[var(--store-ink)]">
               All products
             </Link>
@@ -49,17 +54,25 @@ export function ShopHomePage() {
                 High quality. High Accuracy. Affordable price
               </p>
               <div className="shop-hero-actions">
-                <Link href={featured.href ?? "#products"} className="store-btn-primary shop-hero-btn">
+                <StoreTrackedLink
+                  href={featured.href ?? "#products"}
+                  className="store-btn-primary shop-hero-btn"
+                  trackProductClick={Boolean(featured.href)}
+                >
                   Shop top selling
                   <ChevronRight className="size-4" />
-                </Link>
+                </StoreTrackedLink>
                 <Link href="#products" className="shop-hero-secondary">
                   Browse all products
                 </Link>
               </div>
             </div>
 
-            <Link href={featured.href ?? "#products"} className="shop-hero-feature">
+            <StoreTrackedLink
+              href={featured.href ?? "#products"}
+              className="shop-hero-feature"
+              trackProductClick={Boolean(featured.href)}
+            >
               <div className="shop-hero-feature-media">
                 <Image
                   src={featured.image}
@@ -86,7 +99,7 @@ export function ShopHomePage() {
                   ) : null}
                 </div>
               </div>
-            </Link>
+            </StoreTrackedLink>
           </div>
         </section>
 
@@ -113,9 +126,13 @@ export function ShopHomePage() {
             <p className="text-sm text-[var(--store-muted)]">
               Instant digital delivery · Secure checkout
             </p>
-            <Link href="/store/product" className="text-sm font-semibold text-[var(--store-ink)]">
+            <StoreTrackedLink
+              href="/store/product"
+              className="text-sm font-semibold text-[var(--store-ink)]"
+              trackProductClick
+            >
               Get the top selling database →
-            </Link>
+            </StoreTrackedLink>
           </div>
           <nav className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-[var(--store-muted)]">
             <Link href="/privacy-policy" className="hover:text-[var(--store-ink)] hover:underline">

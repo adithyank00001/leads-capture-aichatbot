@@ -3,7 +3,15 @@
 import Image from "next/image";
 import Script from "next/script";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, type FormEvent, type PointerEvent, type WheelEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type PointerEvent,
+  type WheelEvent,
+} from "react";
 import {
   BadgeCheck,
   Check,
@@ -22,6 +30,10 @@ import {
 
 import type { StoreProductContent } from "@/lib/store/product-content";
 import { BrandLogo } from "@/components/marketing/brand-logo";
+import {
+  trackStoreInitiateCheckout,
+  trackStoreViewContent,
+} from "@/lib/meta/store-track";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -36,10 +48,15 @@ type RazorpaySuccessResponse = {
 
 type RazorpayCheckoutInstance = {
   open: () => void;
-  on: (event: "payment.failed", handler: (response: { error: { description?: string } }) => void) => void;
+  on: (
+    event: "payment.failed",
+    handler: (response: { error: { description?: string } }) => void,
+  ) => void;
 };
 
-type RazorpayConstructor = new (options: Record<string, unknown>) => RazorpayCheckoutInstance;
+type RazorpayConstructor = new (
+  options: Record<string, unknown>,
+) => RazorpayCheckoutInstance;
 
 declare global {
   interface Window {
@@ -62,7 +79,9 @@ function RazorpayLogo({ className }: { className?: string }) {
           d="M22.436 0l-11.91 7.773-1.174 4.276 6.625-4.297L11.65 24h4.391l6.395-24zM14.26 10.098L3.389 17.166 1.564 24h9.008l3.688-13.902Z"
         />
       </svg>
-      <span className="font-semibold tracking-tight text-[#072654]">Razorpay</span>
+      <span className="font-semibold tracking-tight text-[#072654]">
+        Razorpay
+      </span>
     </span>
   );
 }
@@ -71,7 +90,9 @@ function formatMoney(amount: number, symbol: string) {
   const whole = Number.isInteger(amount) ? String(amount) : amount.toFixed(2);
   const [intPart, decPart] = whole.split(".");
   const withCommas = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return decPart ? `${symbol}${withCommas}.${decPart}` : `${symbol}${withCommas}`;
+  return decPart
+    ? `${symbol}${withCommas}.${decPart}`
+    : `${symbol}${withCommas}`;
 }
 
 function formatReviewCount(count: number) {
@@ -103,7 +124,11 @@ function ProductImage({
   if (isSvg(src)) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
-      <img src={src} alt={alt} className={cn("absolute inset-0 size-full p-2", fitClass)} />
+      <img
+        src={src}
+        alt={alt}
+        className={cn("absolute inset-0 size-full p-2", fitClass)}
+      />
     );
   }
 
@@ -155,7 +180,9 @@ function ReviewForm() {
   const [message, setMessage] = useState<string | null>(null);
 
   function showBuyerOnlyMessage() {
-    setMessage("Only buyers can leave a review. Purchase this product to share your experience.");
+    setMessage(
+      "Only buyers can leave a review. Purchase this product to share your experience.",
+    );
   }
 
   function handleSubmit(event: FormEvent) {
@@ -166,7 +193,9 @@ function ReviewForm() {
   return (
     <form className="store-review-form" onSubmit={handleSubmit}>
       <h3>Write a review</h3>
-      <p className="store-review-form-note">Share your experience with this product.</p>
+      <p className="store-review-form-note">
+        Share your experience with this product.
+      </p>
 
       <label className="store-review-field">
         <span>Rating</span>
@@ -249,7 +278,10 @@ function OfferCountdown() {
 
 function Stars({ rating }: { rating: number }) {
   return (
-    <div className="flex items-center gap-0.5" aria-label={`${rating} out of 5 stars`}>
+    <div
+      className="flex items-center gap-0.5"
+      aria-label={`${rating} out of 5 stars`}
+    >
       {Array.from({ length: 5 }).map((_, i) => {
         const filled = i + 1 <= Math.round(rating);
         return (
@@ -257,7 +289,9 @@ function Stars({ rating }: { rating: number }) {
             key={i}
             className={cn(
               "size-3.5",
-              filled ? "fill-[var(--store-ink)] text-[var(--store-ink)]" : "text-[var(--store-line)]",
+              filled
+                ? "fill-[var(--store-ink)] text-[var(--store-ink)]"
+                : "text-[var(--store-line)]",
             )}
           />
         );
@@ -350,8 +384,15 @@ function ImageZoomLightbox({
       aria-label="Zoomed product image"
       onClick={onClose}
     >
-      <div className="store-zoom-toolbar" onClick={(event) => event.stopPropagation()}>
-        <button type="button" onClick={() => zoomBy(-0.25)} aria-label="Zoom out">
+      <div
+        className="store-zoom-toolbar"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          type="button"
+          onClick={() => zoomBy(-0.25)}
+          aria-label="Zoom out"
+        >
           <ZoomOut className="size-4" />
         </button>
         <span>{Math.round(zoom * 100)}%</span>
@@ -371,7 +412,10 @@ function ImageZoomLightbox({
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
-        style={{ cursor: zoom > 1 ? (dragging.current ? "grabbing" : "grab") : "zoom-in" }}
+        style={{
+          cursor:
+            zoom > 1 ? (dragging.current ? "grabbing" : "grab") : "zoom-in",
+        }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -392,7 +436,9 @@ function ImageZoomLightbox({
           }}
         />
       </div>
-      <p className="store-zoom-hint">Scroll to zoom · Drag to move · Esc to close</p>
+      <p className="store-zoom-hint">
+        Scroll to zoom · Drag to move · Esc to close
+      </p>
     </div>
   );
 }
@@ -433,7 +479,9 @@ async function waitForRazorpay(timeoutMs = 10000) {
     if (window.Razorpay) return window.Razorpay;
     await sleep(50);
   }
-  throw new Error("Payment checkout is taking too long to load. Please refresh and try again.");
+  throw new Error(
+    "Payment checkout is taking too long to load. Please refresh and try again.",
+  );
 }
 
 async function createOrderWithRetry(
@@ -463,7 +511,12 @@ async function createOrderWithRetry(
 
       const orderData = JSON.parse(raw) as OrderResponse;
 
-      if (!orderRes.ok || !orderData.ok || !orderData.orderId || !orderData.keyId) {
+      if (
+        !orderRes.ok ||
+        !orderData.ok ||
+        !orderData.orderId ||
+        !orderData.keyId
+      ) {
         throw new Error(orderData.error?.message ?? "Could not start payment.");
       }
 
@@ -476,7 +529,9 @@ async function createOrderWithRetry(
     }
   }
 
-  throw lastError instanceof Error ? lastError : new Error("Could not start payment.");
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("Could not start payment.");
 }
 
 export function StoreProductPage({ product }: Props) {
@@ -504,19 +559,33 @@ export function StoreProductPage({ product }: Props) {
   const buyDisabled = paying;
   const buyLabel = paying ? "Opening Razorpay..." : product.buyButtonLabel;
 
+  const viewContentSent = useRef(false);
+
+  useEffect(() => {
+    // Meta ViewContent after first paint — PageView already fired early in <head>.
+    if (viewContentSent.current) return;
+    viewContentSent.current = true;
+    trackStoreViewContent({
+      value: product.price,
+      currency: product.currency,
+      contentName: product.title,
+      contentIds: ["pan-india-leads-2026"],
+    });
+  }, [product.currency, product.price, product.title]);
+
   useEffect(() => {
     ensureRazorpayScript();
+    let timer: number | undefined;
     if (window.Razorpay) {
       setScriptReady(true);
-      return;
+    } else {
+      timer = window.setInterval(() => {
+        if (window.Razorpay) {
+          setScriptReady(true);
+          if (timer) window.clearInterval(timer);
+        }
+      }, 100);
     }
-
-    const timer = window.setInterval(() => {
-      if (window.Razorpay) {
-        setScriptReady(true);
-        window.clearInterval(timer);
-      }
-    }, 100);
 
     // Warm the order API so the first click is faster.
     void fetch("/api/store/razorpay/order", {
@@ -524,7 +593,9 @@ export function StoreProductPage({ product }: Props) {
       cache: "no-store",
     }).catch(() => undefined);
 
-    return () => window.clearInterval(timer);
+    return () => {
+      if (timer) window.clearInterval(timer);
+    };
   }, []);
 
   function selectOption(optionId: string, value: string) {
@@ -537,6 +608,14 @@ export function StoreProductPage({ product }: Props) {
     setPayError(null);
     setPaying(true);
 
+    trackStoreInitiateCheckout({
+      value: lineTotal,
+      currency: product.currency,
+      quantity,
+      contentName: product.title,
+      contentIds: ["pan-india-leads-2026"],
+    });
+
     try {
       const [orderData] = await Promise.all([
         createOrderWithRetry(quantity, selections),
@@ -545,7 +624,9 @@ export function StoreProductPage({ product }: Props) {
 
       const RazorpayCtor = window.Razorpay;
       if (!RazorpayCtor) {
-        throw new Error("Payment checkout failed to load. Please refresh and try again.");
+        throw new Error(
+          "Payment checkout failed to load. Please refresh and try again.",
+        );
       }
 
       const razorpay = new RazorpayCtor({
@@ -571,7 +652,9 @@ export function StoreProductPage({ product }: Props) {
             };
 
             if (!verifyRes.ok || !verifyData.ok || !verifyData.redirectUrl) {
-              throw new Error(verifyData.error?.message ?? "Payment verify failed.");
+              throw new Error(
+                verifyData.error?.message ?? "Payment verify failed.",
+              );
             }
 
             router.push(verifyData.redirectUrl);
@@ -605,7 +688,9 @@ export function StoreProductPage({ product }: Props) {
 
       razorpay.open();
     } catch (error) {
-      setPayError(error instanceof Error ? error.message : "Could not start payment.");
+      setPayError(
+        error instanceof Error ? error.message : "Could not start payment.",
+      );
       setPaying(false);
       buyingLock.current = false;
     }
@@ -650,7 +735,9 @@ export function StoreProductPage({ product }: Props) {
                 sizes="(max-width: 1024px) 100vw, 52vw"
               />
               {product.socialProofTag ? (
-                <span className="store-social-proof">{product.socialProofTag}</span>
+                <span className="store-social-proof">
+                  {product.socialProofTag}
+                </span>
               ) : null}
               <span className="store-zoom-cue">
                 <ZoomIn className="size-3.5" />
@@ -685,19 +772,22 @@ export function StoreProductPage({ product }: Props) {
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <Stars rating={product.rating} />
               <span className="text-sm text-[var(--store-muted)]">
-                {product.rating.toFixed(1)} · {formatReviewCount(product.reviewCount)}{" "}
-                customers
+                {product.rating.toFixed(1)} ·{" "}
+                {formatReviewCount(product.reviewCount)} customers
               </span>
             </div>
 
             <div className="mt-6 flex flex-wrap items-end gap-3">
-              <p className="store-price">{formatMoney(unitPrice, product.currencySymbol)}</p>
+              <p className="store-price">
+                {formatMoney(unitPrice, product.currencySymbol)}
+              </p>
               {product.compareAtPrice != null ? (
                 <p className="store-compare">
                   {formatMoney(product.compareAtPrice, product.currencySymbol)}
                 </p>
               ) : null}
-              {product.compareAtPrice != null && product.compareAtPrice > unitPrice ? (
+              {product.compareAtPrice != null &&
+              product.compareAtPrice > unitPrice ? (
                 <span className="store-save">
                   Save{" "}
                   {formatMoney(
@@ -724,7 +814,11 @@ export function StoreProductPage({ product }: Props) {
                   <div className="mb-2.5 flex items-baseline justify-between gap-3">
                     <p className="store-option-label">{option.name}</p>
                     <p className="text-sm text-[var(--store-muted)]">
-                      {option.values.find((v) => v.value === selections[option.id])?.label}
+                      {
+                        option.values.find(
+                          (v) => v.value === selections[option.id],
+                        )?.label
+                      }
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -741,7 +835,11 @@ export function StoreProductPage({ product }: Props) {
                           {value.priceAdjust ? (
                             <span className="opacity-70">
                               {" "}
-                              +{formatMoney(value.priceAdjust, product.currencySymbol)}
+                              +
+                              {formatMoney(
+                                value.priceAdjust,
+                                product.currencySymbol,
+                              )}
                             </span>
                           ) : null}
                         </button>
@@ -774,19 +872,28 @@ export function StoreProductPage({ product }: Props) {
             </div>
 
             <div id="buy" className="mt-8 space-y-3">
-              <button
-                type="button"
-                className="store-btn-primary"
-                onClick={handleBuy}
-                disabled={buyDisabled}
-              >
-                {buyLabel}
-                {!buyDisabled ? <ChevronRight className="size-4" /> : null}
-              </button>
+              <div className="flex justify-center">
+                <div className="hover:scale-[1.04] transition-all duration-200 will-change-transform rounded-[14px] p-[1px] bg-gradient-to-b from-[#FFB06A] to-[#FF8A3D] hover:from-[#E8883A] hover:to-[#D46A1C] w-full">
+                  <button
+                    type="button"
+                    onClick={handleBuy}
+                    disabled={buyDisabled}
+                    className="rounded-[13px] font-medium transition-all will-change-transform flex items-center justify-center gap-2 bg-gradient-to-b from-[#E36F02] to-[#FC7B02] text-white shadow-[0px_2px_10.1px_0px_#FC7B0233] hover:shadow-[0px_2px_10.1px_0px_#FC7B0244] relative overflow-hidden z-10 before:absolute before:inset-0 before:bg-gradient-to-b before:from-[#D45E00] before:to-[#F07310] before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-200 before:z-0 before:content-[''] text-[16px] py-[11.7px] px-[22px] w-full disabled:opacity-60 disabled:pointer-events-none"
+                  >
+                    <span className="relative z-10 flex items-center gap-2">
+                      {buyLabel}
+                      {!buyDisabled ? <ChevronRight className="size-4" /> : null}
+                    </span>
+                  </button>
+                </div>
+              </div>
               {payError ? (
                 <p className="text-center text-sm text-red-600">{payError}</p>
               ) : null}
-              <div className="store-pay-secure" aria-label="Pay securely with Razorpay">
+              <div
+                className="store-pay-secure"
+                aria-label="Pay securely with Razorpay"
+              >
                 <Lock className="size-3.5 shrink-0 text-[var(--store-accent)]" />
                 <span>Pay securely with</span>
                 <RazorpayLogo />
@@ -816,13 +923,18 @@ export function StoreProductPage({ product }: Props) {
         <section className="store-details" aria-label="Product details">
           <article className="store-included">
             <h2>What&apos;s included</h2>
-            <p className="store-included-headline">{product.includedHeadline}</p>
+            <p className="store-included-headline">
+              {product.includedHeadline}
+            </p>
             <p className="store-included-note">{product.includedNote}</p>
             <ul className="store-category-grid">
               {product.included.map((item) => {
                 const isMore = item.toLowerCase().includes("and many more");
                 return (
-                  <li key={item} className={isMore ? "store-category-more" : undefined}>
+                  <li
+                    key={item}
+                    className={isMore ? "store-category-more" : undefined}
+                  >
                     <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[var(--store-accent)]" />
                     <span>{item}</span>
                   </li>
@@ -836,7 +948,10 @@ export function StoreProductPage({ product }: Props) {
                   {product.bonusIncluded.map((item) => {
                     const isMore = item.toLowerCase().includes("and many more");
                     return (
-                      <li key={item} className={isMore ? "store-bonus-more" : undefined}>
+                      <li
+                        key={item}
+                        className={isMore ? "store-bonus-more" : undefined}
+                      >
                         <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[var(--store-accent)]" />
                         <span>{item}</span>
                       </li>
@@ -871,7 +986,10 @@ export function StoreProductPage({ product }: Props) {
               <h2>Customer reviews</h2>
               <ul className="store-reviews-list">
                 {product.reviews.map((review) => (
-                  <li key={`${review.name}-${review.avatar}`} className="store-review">
+                  <li
+                    key={`${review.name}-${review.avatar}`}
+                    className="store-review"
+                  >
                     <div className="store-review-head">
                       <div className="store-review-avatar">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -936,16 +1054,23 @@ export function StoreProductPage({ product }: Props) {
             ) : null}
           </div>
           <div className="store-sticky-buy-actions">
-            <button
-              type="button"
-              className="store-btn-primary store-sticky-buy-btn"
-              onClick={handleBuy}
-              disabled={buyDisabled}
+            <div className="hover:scale-[1.04] transition-all duration-200 will-change-transform rounded-[14px] p-[1px] bg-gradient-to-b from-[#FFB06A] to-[#FF8A3D] hover:from-[#E8883A] hover:to-[#D46A1C] w-full">
+              <button
+                type="button"
+                onClick={handleBuy}
+                disabled={buyDisabled}
+                className="rounded-[13px] font-medium transition-all will-change-transform flex items-center justify-center gap-2 bg-gradient-to-b from-[#E36F02] to-[#FC7B02] text-white shadow-[0px_2px_10.1px_0px_#FC7B0233] hover:shadow-[0px_2px_10.1px_0px_#FC7B0244] relative overflow-hidden z-10 before:absolute before:inset-0 before:bg-gradient-to-b before:from-[#D45E00] before:to-[#F07310] before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-200 before:z-0 before:content-[''] text-[16px] py-[11.7px] px-[22px] w-full min-h-[2.85rem] disabled:opacity-60 disabled:pointer-events-none"
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  {buyLabel}
+                  {!buyDisabled ? <ChevronRight className="size-4" /> : null}
+                </span>
+              </button>
+            </div>
+            <div
+              className="store-pay-secure store-pay-secure-sticky"
+              aria-label="Pay securely with Razorpay"
             >
-              {buyLabel}
-              {!buyDisabled ? <ChevronRight className="size-4" /> : null}
-            </button>
-            <div className="store-pay-secure store-pay-secure-sticky" aria-label="Pay securely with Razorpay">
               <Lock className="size-2.5 shrink-0 text-[var(--store-accent)]" />
               <span>Pay securely with</span>
               <RazorpayLogo className="store-razorpay-logo-sm" />

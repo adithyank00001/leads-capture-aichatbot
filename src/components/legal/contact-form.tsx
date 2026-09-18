@@ -2,6 +2,8 @@
 
 import { useState, type FormEvent } from "react";
 
+import { trackPixelAndCapi } from "@/lib/meta/browser-track";
+
 type DeliveryResult = {
   ok: boolean;
   delivery?: "email" | "mailto" | "accepted";
@@ -42,6 +44,10 @@ export function ContactForm() {
       }
 
       if (data.delivery === "mailto" && data.mailto) {
+        trackPixelAndCapi("Contact", {
+          content_name: "Store Contact Form",
+          content_category: "support",
+        });
         window.location.href = data.mailto;
         setStatus("success");
         setStatusText(
@@ -51,6 +57,10 @@ export function ContactForm() {
         return;
       }
 
+      trackPixelAndCapi("Contact", {
+        content_name: "Store Contact Form",
+        content_category: "support",
+      });
       setStatus("success");
       setStatusText("Message sent. We will reply to your email soon.");
       setName("");

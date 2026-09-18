@@ -19,6 +19,7 @@ const GRAPH_API_VERSION = "v22.0";
 
 export const CLIENT_FORWARDABLE_CAPI_EVENTS = [
   "PageView",
+  "ViewContent",
   "InitiateCheckout",
   "Contact",
 ] as const;
@@ -187,6 +188,8 @@ export type SendPurchaseEventInput = {
   attribution?: MetaAttribution;
   eventSourceUrl?: string;
   eventTimeSeconds?: number;
+  /** Overrides default LTD USD custom_data when set (e.g. store INR purchase). */
+  customData?: Record<string, unknown>;
 };
 
 /**
@@ -213,6 +216,7 @@ export async function sendPurchaseEvent(
       value: publicConfig.lifetimeAccessPriceUsd,
       currency: "USD",
       order_id: input.paymentId,
+      ...(input.customData ?? {}),
     },
     eventTimeSeconds: input.eventTimeSeconds,
   });
@@ -228,6 +232,7 @@ export async function sendPurchaseEventFromPageRequest(input: {
   customer?: MetaCustomerInfo | null;
   eventSourceUrl: string;
   requestHeaders: Headers;
+  customData?: Record<string, unknown>;
 }): Promise<void> {
   const paymentId = input.paymentId.trim();
   if (!paymentId) {
@@ -248,6 +253,7 @@ export async function sendPurchaseEventFromPageRequest(input: {
     customer: input.customer,
     attribution,
     eventSourceUrl: input.eventSourceUrl,
+    customData: input.customData,
   });
 }
 

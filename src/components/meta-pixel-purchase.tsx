@@ -9,9 +9,21 @@ const PURCHASE_TRACK_KEY = "leady_meta_pixel_purchase";
 
 type MetaPixelPurchaseProps = {
   eventId: string;
+  value?: number;
+  currency?: string;
+  contentName?: string;
+  contentIds?: string[];
+  numItems?: number;
 };
 
-export function MetaPixelPurchase({ eventId }: MetaPixelPurchaseProps) {
+export function MetaPixelPurchase({
+  eventId,
+  value,
+  currency,
+  contentName,
+  contentIds,
+  numItems,
+}: MetaPixelPurchaseProps) {
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
@@ -30,13 +42,16 @@ export function MetaPixelPurchase({ eventId }: MetaPixelPurchaseProps) {
     track(
       "Purchase",
       {
-        value: publicConfig.lifetimeAccessPriceUsd,
-        currency: "USD",
+        value: value ?? publicConfig.lifetimeAccessPriceUsd,
+        currency: currency ?? "USD",
+        ...(contentName ? { content_name: contentName } : {}),
+        ...(contentIds?.length ? { content_ids: contentIds, content_type: "product" } : {}),
+        ...(numItems != null ? { num_items: numItems } : {}),
       },
       { eventID: trimmedEventId },
     );
     window.sessionStorage.setItem(storageKey, "1");
-  }, [eventId]);
+  }, [contentIds, contentName, currency, eventId, numItems, value]);
 
   return null;
 }

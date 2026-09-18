@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 
+import { serverEnv } from "@/lib/env.server";
+import { getMetaAttributionFromRequest } from "@/lib/meta/attribution";
+import { sendPurchaseEvent } from "@/lib/meta/capi";
 import { markStorePurchasePaid } from "@/lib/store/purchases";
 import { verifyRazorpayPaymentSignature } from "@/lib/store/verify";
 
@@ -46,6 +49,30 @@ export async function POST(request: Request) {
       customerEmail: body.customer_email ?? null,
       customerPhone: body.customer_phone ?? null,
       customerName: body.customer_name ?? null,
+    });
+
+    // Fast Purchase CAPI (same event_id as Pixel on success page for dedupe).
+    const origin = serverEnv.appUrl.replace(/\/+$/, "") || "http://localhost:3000";
+    const eventSourceUrl = `${origin}/store/success`;
+    const attribution = getMetaAttributionFromRequest(request, { eventSourceUrl });
+    void sendPurchaseEvent({
+      paymentId,
+      email: purchase.customer_email,
+      customer: {
+        email: purchase.customer_email,
+        fullName: purchase.customer_name,
+      },
+      attribution,
+      eventSourceUrl,
+      customData: {
+        value: purchase.amount_paise / 100,
+        currency: (purchase.currency || "INR").toUpperCase(),
+        order_id: purchase.razorpay_order_id,
+        content_ids: [purchase.product_slug],
+        content_name: purchase.product_title,
+        content_type: "product",
+        num_items: purchase.quantity,
+      },
     });
 
     return NextResponse.json({

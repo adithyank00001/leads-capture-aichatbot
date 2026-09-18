@@ -1,8 +1,12 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 
+import { MetaPixelPurchase } from "@/components/meta-pixel-purchase";
+import { sendPurchaseEventFromPageRequest } from "@/lib/meta/capi";
 import { STORE_DOWNLOAD_FILE } from "@/lib/store/download";
 import { getPaidPurchaseByDownloadToken } from "@/lib/store/purchases";
 import { storeProduct } from "@/lib/store/product-content";
+import { serverEnv } from "@/lib/env.server";
 
 type Props = {
   searchParams: Promise<{ token?: string }>;
@@ -12,9 +16,44 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
   const params = await searchParams;
   const token = params.token?.trim() ?? "";
   const purchase = token ? await getPaidPurchaseByDownloadToken(token) : null;
+  const requestHeaders = await headers();
+
+  if (purchase?.razorpay_payment_id) {
+    const origin = serverEnv.appUrl.replace(/\/+$/, "") || "http://localhost:3000";
+    const value = purchase.amount_paise / 100;
+    await sendPurchaseEventFromPageRequest({
+      paymentId: purchase.razorpay_payment_id,
+      email: purchase.customer_email,
+      customer: {
+        email: purchase.customer_email,
+        fullName: purchase.customer_name,
+      },
+      eventSourceUrl: `${origin}/store/success`,
+      requestHeaders,
+      customData: {
+        value,
+        currency: (purchase.currency || "INR").toUpperCase(),
+        order_id: purchase.razorpay_order_id,
+        content_ids: [purchase.product_slug],
+        content_name: purchase.product_title,
+        content_type: "product",
+        num_items: purchase.quantity,
+      },
+    });
+  }
 
   return (
     <div className="store-root min-h-full">
+      {purchase?.razorpay_payment_id ? (
+        <MetaPixelPurchase
+          eventId={purchase.razorpay_payment_id}
+          value={purchase.amount_paise / 100}
+          currency={(purchase.currency || "INR").toUpperCase()}
+          contentName={purchase.product_title}
+          contentIds={[purchase.product_slug]}
+          numItems={purchase.quantity}
+        />
+      ) : null}
       <main className="store-shell flex min-h-[70vh] items-center py-16">
         <div className="mx-auto w-full max-w-xl rounded-[1.5rem] border border-[var(--store-line)] bg-white p-8 shadow-[var(--store-shadow)] sm:p-10">
           {purchase ? (

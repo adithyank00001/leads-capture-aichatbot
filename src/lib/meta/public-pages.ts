@@ -2,6 +2,9 @@
 
 export const PUBLIC_META_PAGE_PATHS = [
   "/",
+  "/store/product",
+  "/store/success",
+  "/contact",
   "/login",
   "/signup",
   "/checkout",
@@ -17,7 +20,10 @@ const PUBLIC_PAGE_EXACT = new Set<string>(PUBLIC_META_PAGE_PATHS);
 
 /** Friendly labels for Meta PageView custom_data.content_name */
 export const META_PAGE_CONTENT_NAMES: Record<string, string> = {
-  "/": "Home",
+  "/": "Digital Products Store Home",
+  "/store/product": "PAN India Leads Database Product",
+  "/store/success": "Store Purchase Success",
+  "/contact": "Contact",
   "/login": "Login",
   "/signup": "Signup",
   "/checkout": "Checkout",
@@ -34,7 +40,12 @@ export function isPublicMetaPagePath(pathname: string): boolean {
     return false;
   }
 
-  if (pathname.startsWith("/dashboard") || pathname.startsWith("/products") || pathname.startsWith("/location-leads") || pathname.startsWith("/complete-profile")) {
+  if (
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/products") ||
+    pathname.startsWith("/location-leads") ||
+    pathname.startsWith("/complete-profile")
+  ) {
     return false;
   }
 

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { ChevronRight, Star, X } from "lucide-react";
 
 import type { CatalogProduct } from "@/lib/store/catalog";
+import { trackStoreHomeProductClick } from "@/lib/meta/store-track";
 import { cn } from "@/lib/utils";
 
 function formatMoney(amount: number, symbol: string) {
@@ -107,6 +108,11 @@ export function ShopProductCard({ product }: { product: CatalogProduct }) {
       <Link
         href={product.href}
         className={cn("shop-card", product.topSelling && "shop-card-featured")}
+        onClick={() => {
+          if (product.topSelling) {
+            trackStoreHomeProductClick();
+          }
+        }}
       >
         {inner}
       </Link>

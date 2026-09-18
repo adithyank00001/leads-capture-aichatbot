@@ -5,6 +5,7 @@ import { getMetaPageContentName } from "@/lib/meta/public-pages";
 
 export type BrowserTrackableEvent =
   | "PageView"
+  | "ViewContent"
   | "InitiateCheckout"
   | "Contact";
 
@@ -114,6 +115,14 @@ export function trackInitiateCheckout(eventSourceUrl?: string): void {
     },
     eventSourceUrl,
   );
+}
+
+/** Generic ViewContent — prefer store-track helpers for the digital product store. */
+export function trackViewContent(
+  params: Record<string, unknown> = {},
+  eventSourceUrl?: string,
+): void {
+  trackPixelAndCapi("ViewContent", params, eventSourceUrl);
 }
 
 /** WhatsApp CTA click — Pixel + CAPI Contact with shared event_id (dedupe). */

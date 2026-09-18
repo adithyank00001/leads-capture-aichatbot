@@ -13,8 +13,16 @@
 .store-root {
   font-family: var(--font-store-sans), ui-sans-serif, system-ui, sans-serif;
   background:
-    radial-gradient(1200px 600px at 10% -10%, rgba(37, 99, 235, 0.08), transparent 55%),
-    radial-gradient(900px 500px at 100% 0%, rgba(15, 23, 42, 0.04), transparent 50%),
+    radial-gradient(
+      1200px 600px at 10% -10%,
+      rgba(37, 99, 235, 0.08),
+      transparent 55%
+    ),
+    radial-gradient(
+      900px 500px at 100% 0%,
+      rgba(15, 23, 42, 0.04),
+      transparent 50%
+    ),
     linear-gradient(180deg, #f7f8fb 0%, var(--store-paper) 40%, #eef1f6 100%);
   color: var(--store-ink);
   padding-bottom: 6.75rem;
