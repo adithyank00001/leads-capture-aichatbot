@@ -348,6 +348,21 @@
   color: var(--store-ink);
 }
 
+.store-highlight-badge {
+  display: inline-block;
+  margin-right: 0.45rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  color: #9a3412;
+  background: #ffedd5;
+  border: 1px solid #fdba74;
+}
+
 .store-option-label {
   font-size: 0.8rem;
   font-weight: 600;

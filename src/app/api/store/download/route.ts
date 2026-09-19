@@ -5,21 +5,33 @@ import { NextResponse } from "next/server";
 
 import { STORE_DOWNLOAD_FILE } from "@/lib/store/download";
 import { getPaidPurchaseByDownloadToken } from "@/lib/store/purchases";
+import { verifyStoreDodoPayment } from "@/lib/store/verify-dodo-payment";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const token = searchParams.get("token")?.trim();
+    const paymentId = searchParams.get("payment_id")?.trim();
 
-    if (!token) {
+    let allowed = false;
+
+    if (token) {
+      const purchase = await getPaidPurchaseByDownloadToken(token);
+      allowed = Boolean(purchase);
+    } else if (paymentId) {
+      const verification = await verifyStoreDodoPayment({
+        paymentId,
+        status: "succeeded",
+      });
+      allowed = verification.ok;
+    } else {
       return NextResponse.json(
         { ok: false, error: { message: "Missing download token." } },
         { status: 400 },
       );
     }
 
-    const purchase = await getPaidPurchaseByDownloadToken(token);
-    if (!purchase) {
+    if (!allowed) {
       return NextResponse.json(
         { ok: false, error: { message: "Download not available." } },
         { status: 403 },

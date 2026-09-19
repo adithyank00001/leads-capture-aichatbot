@@ -2,83 +2,104 @@ import Link from "next/link";
 import { headers } from "next/headers";
 
 import { MetaPixelPurchase } from "@/components/meta-pixel-purchase";
+import { serverEnv } from "@/lib/env.server";
 import { sendPurchaseEventFromPageRequest } from "@/lib/meta/capi";
 import { STORE_DOWNLOAD_FILE } from "@/lib/store/download";
-import { getPaidPurchaseByDownloadToken } from "@/lib/store/purchases";
 import { storeProduct } from "@/lib/store/product-content";
-import { serverEnv } from "@/lib/env.server";
+import { verifyStoreDodoPayment } from "@/lib/store/verify-dodo-payment";
 
 type Props = {
-  searchParams: Promise<{ token?: string }>;
+  searchParams: Promise<{
+    payment_id?: string;
+    status?: string;
+    token?: string;
+  }>;
 };
 
 export default async function StoreSuccessPage({ searchParams }: Props) {
   const params = await searchParams;
-  const token = params.token?.trim() ?? "";
-  const purchase = token ? await getPaidPurchaseByDownloadToken(token) : null;
-  const requestHeaders = await headers();
+  const paymentId = params.payment_id?.trim() ?? "";
+  const status = params.status?.trim() ?? "";
 
-  if (purchase?.razorpay_payment_id) {
-    const origin = serverEnv.appUrl.replace(/\/+$/, "") || "http://localhost:3000";
-    const value = purchase.amount_paise / 100;
+  const verification = paymentId
+    ? await verifyStoreDodoPayment({ paymentId, status: status || "succeeded" })
+    : { ok: false as const };
+
+  const requestHeaders = await headers();
+  const origin = serverEnv.appUrl.replace(/\/+$/, "") || "http://localhost:3000";
+
+  if (verification.ok) {
     await sendPurchaseEventFromPageRequest({
-      paymentId: purchase.razorpay_payment_id,
-      email: purchase.customer_email,
-      customer: {
-        email: purchase.customer_email,
-        fullName: purchase.customer_name,
-      },
+      paymentId: verification.paymentId,
+      email: verification.email,
+      customer: verification.customer,
       eventSourceUrl: `${origin}/store/success`,
       requestHeaders,
       customData: {
-        value,
-        currency: (purchase.currency || "INR").toUpperCase(),
-        order_id: purchase.razorpay_order_id,
-        content_ids: [purchase.product_slug],
-        content_name: purchase.product_title,
+        value: verification.value,
+        currency: verification.currency,
+        order_id: verification.paymentId,
+        content_ids: [verification.productSlug],
+        content_name: verification.productTitle,
         content_type: "product",
-        num_items: purchase.quantity,
+        num_items: verification.quantity,
       },
     });
   }
 
+  const downloadHref = paymentId
+    ? `/api/store/download?payment_id=${encodeURIComponent(paymentId)}`
+    : null;
+
   return (
     <div className="store-root min-h-full">
-      {purchase?.razorpay_payment_id ? (
+      {verification.ok ? (
         <MetaPixelPurchase
-          eventId={purchase.razorpay_payment_id}
-          value={purchase.amount_paise / 100}
-          currency={(purchase.currency || "INR").toUpperCase()}
-          contentName={purchase.product_title}
-          contentIds={[purchase.product_slug]}
-          numItems={purchase.quantity}
+          eventId={verification.paymentId}
+          value={verification.value}
+          currency={verification.currency}
+          contentName={verification.productTitle}
+          contentIds={[verification.productSlug]}
+          numItems={verification.quantity}
         />
       ) : null}
+
       <main className="store-shell flex min-h-[70vh] items-center py-16">
         <div className="mx-auto w-full max-w-xl rounded-[1.5rem] border border-[var(--store-line)] bg-white p-8 shadow-[var(--store-shadow)] sm:p-10">
-          {purchase ? (
+          {verification.ok ? (
             <>
               <p className="store-eyebrow">Payment successful</p>
               <h1 className="store-title text-[2rem]">You can download now</h1>
               <p className="mt-3 text-[var(--store-muted)]">
-                Thanks for buying <strong>{purchase.product_title}</strong>. Your
-                payment is confirmed.
+                Thanks for buying <strong>{verification.productTitle}</strong>.
+                Your payment is confirmed. Download the PDF package below.
               </p>
 
+              {verification.digitalProductsDelivered ? (
+                <p className="mt-3 text-sm text-[var(--store-muted)]">
+                  You may also get a copy by email
+                  {verification.email ? (
+                    <>
+                      {" "}
+                      (<strong>{verification.email}</strong>)
+                    </>
+                  ) : null}
+                  . Check inbox (and spam).
+                </p>
+              ) : null}
+
               <div className="mt-8 space-y-3">
-                <a
-                  className="store-btn-primary"
-                  href={`/api/store/download?token=${encodeURIComponent(token)}`}
-                >
-                  Download {STORE_DOWNLOAD_FILE.fileName}
-                </a>
-                <Link href="/store/product" className="store-btn-secondary">
-                  Back to product
-                </Link>
+                {downloadHref ? (
+                  <a className="store-btn-primary" href={downloadHref} download>
+                    Download PDF package
+                  </a>
+                ) : null}
               </div>
 
               <p className="mt-6 text-xs text-[var(--store-muted)]">
-                Payment ID: {purchase.razorpay_payment_id}
+                File: {STORE_DOWNLOAD_FILE.fileName}
+                <br />
+                Payment ID: {verification.paymentId}
               </p>
             </>
           ) : (
@@ -86,8 +107,9 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
               <p className="store-eyebrow">Download locked</p>
               <h1 className="store-title text-[2rem]">Payment not found</h1>
               <p className="mt-3 text-[var(--store-muted)]">
-                We could not find a paid order for this link. Please complete
-                checkout on the product page first.
+                We could not confirm a paid Dodo order for this link. Complete
+                checkout on the product page, or open the success link from your
+                payment email.
               </p>
               <div className="mt-8">
                 <Link href="/store/product" className="store-btn-primary">

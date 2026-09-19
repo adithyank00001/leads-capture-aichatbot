@@ -57,7 +57,14 @@ export type StoreProductContent = {
   rating: number;
   reviewCount: number;
   /** Short bullets near the buy button */
-  highlights: string[];
+  highlights: Array<
+    | string
+    | {
+        text: string;
+        /** Optional small tag next to the line (e.g. "Bonus") */
+        badge?: string;
+      }
+  >;
   /** Overlay tag on the main product image */
   socialProofTag: string;
   /** Gallery — first image is the main one */
@@ -114,7 +121,10 @@ export const storeProduct: StoreProductContent = {
     "110 Crore+ High Quality Verified B2B & B2C Contacts",
     "Includes Name, Email, Phone, WhatsApp & Location details",
     "Lifetime access to all downloaded files",
-    "150 Millions + free USA Leads database with 300+ categories",
+    {
+      text: "150 Millions + free USA Leads database with 300+ categories",
+      badge: "Bonus",
+    },
   ],
   socialProofTag: "🔥 150+ sold yesterday!",
   images: [
@@ -292,7 +302,7 @@ export const storeProduct: StoreProductContent = {
         "Yes, the database is structured to generate high-quality leads that are actively interested in a wide variety of products and services.",
     },
   ],
-  buyButtonLabel: "Get now",
+  buyButtonLabel: "Download My Leads Now",
   secondaryButtonLabel: "Add to cart",
   buyUrl: "#buy",
   footerNote:

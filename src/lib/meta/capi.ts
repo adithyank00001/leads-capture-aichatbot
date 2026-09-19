@@ -301,3 +301,67 @@ export async function trackLtdPurchaseFromPayment(input: {
     metadata: input.metadata,
   });
 }
+
+/**
+ * Store digital product Purchase for Dodo webhooks (INR / leads database).
+ * Never throws.
+ */
+export async function trackStorePurchaseFromPayment(input: {
+  paymentId: string;
+  email?: string | null;
+  name?: string | null;
+  cardHolderName?: string | null;
+  dodoCustomerId?: string | null;
+  billing?: MetaBillingAddress | null;
+  metadata: Record<string, unknown>;
+  productCart?: Array<{ product_id: string; quantity: number }> | null;
+  expectedProductId: string;
+  value?: number;
+  currency?: string;
+  contentName?: string;
+  contentIds?: string[];
+  numItems?: number;
+  eventSourceUrl?: string;
+}): Promise<void> {
+  const cart = input.productCart;
+  if (cart?.length) {
+    const isStore = cart.some(
+      (item) => item.product_id === input.expectedProductId,
+    );
+    if (!isStore) {
+      return;
+    }
+  }
+
+  const quantity =
+    input.numItems ??
+    cart?.reduce((sum, item) => sum + (item.quantity || 1), 0) ??
+    1;
+
+  await sendPurchaseEvent({
+    paymentId: input.paymentId,
+    email: input.email,
+    customer: metaCustomerInfoFromDodo({
+      email: input.email,
+      name: input.name,
+      cardHolderName: input.cardHolderName,
+      billing: input.billing,
+      dodoCustomerId: input.dodoCustomerId,
+    }),
+    metadata: input.metadata,
+    eventSourceUrl:
+      input.eventSourceUrl?.trim() ||
+      `${serverEnv.appUrl.replace(/\/+$/, "")}/store/success`,
+    customData: {
+      value: input.value ?? 397,
+      currency: (input.currency || "INR").toUpperCase(),
+      order_id: input.paymentId,
+      content_ids: input.contentIds ?? ["pan-india-leads-2026"],
+      content_name:
+        input.contentName ??
+        "110Cr+ All India Latest Leads (PAN INDIA DATABASE) 2026",
+      content_type: "product",
+      num_items: quantity,
+    },
+  });
+}

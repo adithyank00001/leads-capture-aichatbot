@@ -1,8 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Script from "next/script";
-import { useRouter } from "next/navigation";
 import {
   useEffect,
   useMemo,
@@ -30,6 +28,7 @@ import {
 
 import type { StoreProductContent } from "@/lib/store/product-content";
 import { BrandLogo } from "@/components/marketing/brand-logo";
+import { isSafeDodoCheckoutUrl } from "@/lib/billing/start-landing-checkout";
 import {
   trackStoreInitiateCheckout,
   trackStoreViewContent,
@@ -39,52 +38,6 @@ import { cn } from "@/lib/utils";
 type Props = {
   product: StoreProductContent;
 };
-
-type RazorpaySuccessResponse = {
-  razorpay_order_id: string;
-  razorpay_payment_id: string;
-  razorpay_signature: string;
-};
-
-type RazorpayCheckoutInstance = {
-  open: () => void;
-  on: (
-    event: "payment.failed",
-    handler: (response: { error: { description?: string } }) => void,
-  ) => void;
-};
-
-type RazorpayConstructor = new (
-  options: Record<string, unknown>,
-) => RazorpayCheckoutInstance;
-
-declare global {
-  interface Window {
-    Razorpay?: RazorpayConstructor;
-  }
-}
-
-function RazorpayLogo({ className }: { className?: string }) {
-  return (
-    <span className={cn("inline-flex items-center gap-1.5", className)}>
-      <svg
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden
-        focusable="false"
-        className="size-4 shrink-0"
-      >
-        <path
-          fill="#072654"
-          d="M22.436 0l-11.91 7.773-1.174 4.276 6.625-4.297L11.65 24h4.391l6.395-24zM14.26 10.098L3.389 17.166 1.564 24h9.008l3.688-13.902Z"
-        />
-      </svg>
-      <span className="font-semibold tracking-tight text-[#072654]">
-        Razorpay
-      </span>
-    </span>
-  );
-}
 
 function formatMoney(amount: number, symbol: string) {
   const whole = Number.isInteger(amount) ? String(amount) : amount.toFixed(2);
@@ -157,21 +110,114 @@ function formatCountdown(totalSeconds: number) {
   return `${pad2(hours)}:${pad2(minutes)}:${pad2(seconds)}`;
 }
 
-const OFFER_TIMER_KEY = "store-offer-deadline-v2";
-const OFFER_DURATION_MS = (37 * 60 + 24) * 1000; // 37 minutes 24 seconds, then restarts
+const OFFER_TIMER_KEY = "store-offer-timer-v3";
+const OFFER_DURATION_MS = (37 * 60 + 24) * 1000; // 37 minutes 24 seconds
 
-function getOfferDeadline() {
-  if (typeof window === "undefined") return Date.now() + OFFER_DURATION_MS;
+type OfferTimerState = {
+  /** When the active countdown ends (ms since epoch). */
+  deadlineMs: number;
+  /** Local calendar day (YYYY-MM-DD) when this browser hit 00:00:00. */
+  expiredOnDay: string | null;
+};
 
-  const stored = window.localStorage.getItem(OFFER_TIMER_KEY);
-  const storedMs = stored ? Number(stored) : NaN;
-  if (Number.isFinite(storedMs) && storedMs > Date.now()) {
-    return storedMs;
+/** Anonymous day key in the visitor's local timezone. */
+function localDayKey(date = new Date()) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function readOfferTimerState(): OfferTimerState | null {
+  try {
+    const raw = window.localStorage.getItem(OFFER_TIMER_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<OfferTimerState>;
+    if (typeof parsed.deadlineMs !== "number" || !Number.isFinite(parsed.deadlineMs)) {
+      return null;
+    }
+    return {
+      deadlineMs: parsed.deadlineMs,
+      expiredOnDay:
+        typeof parsed.expiredOnDay === "string" ? parsed.expiredOnDay : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writeOfferTimerState(state: OfferTimerState) {
+  try {
+    window.localStorage.setItem(OFFER_TIMER_KEY, JSON.stringify(state));
+  } catch {
+    // ignore quota / private mode
+  }
+}
+
+/**
+ * Anonymous offer timer (localStorage only — no login).
+ * - Counts down once per visit cycle.
+ * - At 0, stays stuck on 00:00:00 for the rest of that local calendar day.
+ * - Next local day → starts a fresh countdown.
+ */
+function resolveOfferTimer(): {
+  deadlineMs: number;
+  remainingSeconds: number;
+  stuckExpired: boolean;
+} {
+  const today = localDayKey();
+  const existing = readOfferTimerState();
+
+  // Already expired today → stay at 00:00:00
+  if (existing?.expiredOnDay === today) {
+    return {
+      deadlineMs: existing.deadlineMs,
+      remainingSeconds: 0,
+      stuckExpired: true,
+    };
   }
 
-  const next = Date.now() + OFFER_DURATION_MS;
-  window.localStorage.setItem(OFFER_TIMER_KEY, String(next));
-  return next;
+  // Expired on a previous day → new cycle for "tomorrow" visitors
+  if (existing?.expiredOnDay && existing.expiredOnDay !== today) {
+    const deadlineMs = Date.now() + OFFER_DURATION_MS;
+    writeOfferTimerState({ deadlineMs, expiredOnDay: null });
+    return {
+      deadlineMs,
+      remainingSeconds: Math.floor(OFFER_DURATION_MS / 1000),
+      stuckExpired: false,
+    };
+  }
+
+  // Active countdown still running
+  if (existing && existing.deadlineMs > Date.now()) {
+    return {
+      deadlineMs: existing.deadlineMs,
+      remainingSeconds: Math.floor((existing.deadlineMs - Date.now()) / 1000),
+      stuckExpired: false,
+    };
+  }
+
+  // Deadline already passed (tab closed) → mark expired for today
+  if (existing && existing.deadlineMs <= Date.now()) {
+    writeOfferTimerState({
+      deadlineMs: existing.deadlineMs,
+      expiredOnDay: today,
+    });
+    return {
+      deadlineMs: existing.deadlineMs,
+      remainingSeconds: 0,
+      stuckExpired: true,
+    };
+  }
+
+  // First visit
+  const deadlineMs = Date.now() + OFFER_DURATION_MS;
+  writeOfferTimerState({ deadlineMs, expiredOnDay: null });
+  return {
+    deadlineMs,
+    remainingSeconds: Math.floor(OFFER_DURATION_MS / 1000),
+    stuckExpired: false,
+  };
 }
 
 function ReviewForm() {
@@ -247,14 +293,24 @@ function OfferCountdown() {
   const [remaining, setRemaining] = useState<number | null>(null);
 
   useEffect(() => {
-    let deadline = getOfferDeadline();
+    const resolved = resolveOfferTimer();
+    let deadlineMs = resolved.deadlineMs;
+    let stuck = resolved.stuckExpired;
 
     function tick() {
-      const leftMs = deadline - Date.now();
+      if (stuck) {
+        setRemaining(0);
+        return;
+      }
+
+      const leftMs = deadlineMs - Date.now();
       if (leftMs <= 0) {
-        deadline = Date.now() + OFFER_DURATION_MS;
-        window.localStorage.setItem(OFFER_TIMER_KEY, String(deadline));
-        setRemaining(Math.floor(OFFER_DURATION_MS / 1000));
+        stuck = true;
+        writeOfferTimerState({
+          deadlineMs,
+          expiredOnDay: localDayKey(),
+        });
+        setRemaining(0);
         return;
       }
       setRemaining(Math.floor(leftMs / 1000));
@@ -443,104 +499,11 @@ function ImageZoomLightbox({
   );
 }
 
-type OrderResponse = {
-  ok: boolean;
-  orderId?: string;
-  amount?: number;
-  currency?: string;
-  keyId?: string;
-  productName?: string;
-  description?: string;
-  error?: { message?: string };
-};
-
-function sleep(ms: number) {
-  return new Promise((resolve) => window.setTimeout(resolve, ms));
-}
-
-function ensureRazorpayScript() {
-  if (typeof window === "undefined") return;
-  if (window.Razorpay) return;
-  if (document.querySelector('script[data-store-razorpay="1"]')) return;
-
-  const script = document.createElement("script");
-  script.src = "https://checkout.razorpay.com/v1/checkout.js";
-  script.async = true;
-  script.dataset.storeRazorpay = "1";
-  document.head.appendChild(script);
-}
-
-async function waitForRazorpay(timeoutMs = 10000) {
-  if (window.Razorpay) return window.Razorpay;
-  ensureRazorpayScript();
-
-  const start = Date.now();
-  while (Date.now() - start < timeoutMs) {
-    if (window.Razorpay) return window.Razorpay;
-    await sleep(50);
-  }
-  throw new Error(
-    "Payment checkout is taking too long to load. Please refresh and try again.",
-  );
-}
-
-async function createOrderWithRetry(
-  quantity: number,
-  selections: Record<string, string>,
-  attempts = 3,
-) {
-  let lastError: unknown;
-
-  for (let attempt = 1; attempt <= attempts; attempt += 1) {
-    try {
-      const orderRes = await fetch("/api/store/razorpay/order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ quantity, selections }),
-        cache: "no-store",
-      });
-
-      const contentType = orderRes.headers.get("content-type") ?? "";
-      const raw = await orderRes.text();
-
-      if (!contentType.includes("application/json")) {
-        throw new Error(
-          `Payment server returned a non-JSON response (${orderRes.status}). Please try again.`,
-        );
-      }
-
-      const orderData = JSON.parse(raw) as OrderResponse;
-
-      if (
-        !orderRes.ok ||
-        !orderData.ok ||
-        !orderData.orderId ||
-        !orderData.keyId
-      ) {
-        throw new Error(orderData.error?.message ?? "Could not start payment.");
-      }
-
-      return orderData;
-    } catch (error) {
-      lastError = error;
-      if (attempt < attempts) {
-        await sleep(250 * attempt);
-      }
-    }
-  }
-
-  throw lastError instanceof Error
-    ? lastError
-    : new Error("Could not start payment.");
-}
-
 export function StoreProductPage({ product }: Props) {
-  const router = useRouter();
   const [activeImage, setActiveImage] = useState(0);
   const [zoomOpen, setZoomOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [selections, setSelections] = useState(product.defaultSelections);
-  const [scriptReady, setScriptReady] = useState(false);
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
   const buyingLock = useRef(false);
@@ -557,7 +520,7 @@ export function StoreProductPage({ product }: Props) {
 
   const lineTotal = unitPrice * quantity;
   const buyDisabled = paying;
-  const buyLabel = paying ? "Opening Razorpay..." : product.buyButtonLabel;
+  const buyLabel = paying ? "Opening checkout..." : product.buyButtonLabel;
 
   const viewContentSent = useRef(false);
 
@@ -574,28 +537,11 @@ export function StoreProductPage({ product }: Props) {
   }, [product.currency, product.price, product.title]);
 
   useEffect(() => {
-    ensureRazorpayScript();
-    let timer: number | undefined;
-    if (window.Razorpay) {
-      setScriptReady(true);
-    } else {
-      timer = window.setInterval(() => {
-        if (window.Razorpay) {
-          setScriptReady(true);
-          if (timer) window.clearInterval(timer);
-        }
-      }, 100);
-    }
-
-    // Warm the order API so the first click is faster.
-    void fetch("/api/store/razorpay/order", {
+    // Warm Dodo checkout API so the first click is faster.
+    void fetch("/api/store/dodo/checkout", {
       method: "GET",
       cache: "no-store",
     }).catch(() => undefined);
-
-    return () => {
-      if (timer) window.clearInterval(timer);
-    };
   }, []);
 
   function selectOption(optionId: string, value: string) {
@@ -617,76 +563,28 @@ export function StoreProductPage({ product }: Props) {
     });
 
     try {
-      const [orderData] = await Promise.all([
-        createOrderWithRetry(quantity, selections),
-        waitForRazorpay(),
-      ]);
+      const res = await fetch("/api/store/dodo/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity }),
+        cache: "no-store",
+      });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        checkoutUrl?: string;
+        error?: { message?: string };
+      };
 
-      const RazorpayCtor = window.Razorpay;
-      if (!RazorpayCtor) {
-        throw new Error(
-          "Payment checkout failed to load. Please refresh and try again.",
-        );
+      if (!res.ok || !data.ok || !data.checkoutUrl) {
+        throw new Error(data.error?.message ?? "Could not start checkout.");
       }
 
-      const razorpay = new RazorpayCtor({
-        key: orderData.keyId,
-        amount: orderData.amount,
-        currency: orderData.currency,
-        name: orderData.productName ?? product.brandName,
-        description: orderData.description ?? product.title,
-        order_id: orderData.orderId,
-        retry: { enabled: true, max_count: 2 },
-        handler: async (response: RazorpaySuccessResponse) => {
-          try {
-            const verifyRes = await fetch("/api/store/razorpay/verify", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(response),
-              cache: "no-store",
-            });
-            const verifyData = (await verifyRes.json()) as {
-              ok: boolean;
-              redirectUrl?: string;
-              error?: { message?: string };
-            };
+      if (!isSafeDodoCheckoutUrl(data.checkoutUrl)) {
+        throw new Error("Invalid checkout link. Please try again.");
+      }
 
-            if (!verifyRes.ok || !verifyData.ok || !verifyData.redirectUrl) {
-              throw new Error(
-                verifyData.error?.message ?? "Payment verify failed.",
-              );
-            }
-
-            router.push(verifyData.redirectUrl);
-          } catch (error) {
-            setPayError(
-              error instanceof Error ? error.message : "Payment verify failed.",
-            );
-            setPaying(false);
-            buyingLock.current = false;
-          }
-        },
-        modal: {
-          ondismiss: () => {
-            setPaying(false);
-            buyingLock.current = false;
-          },
-        },
-        theme: {
-          color: "#101828",
-        },
-        notes: {
-          product: product.title,
-        },
-      });
-
-      razorpay.on("payment.failed", (response) => {
-        setPayError(response.error.description ?? "Payment failed. Try again.");
-        setPaying(false);
-        buyingLock.current = false;
-      });
-
-      razorpay.open();
+      // Direct to Dodo (less friction than intermediate cancel page).
+      window.location.assign(data.checkoutUrl);
     } catch (error) {
       setPayError(
         error instanceof Error ? error.message : "Could not start payment.",
@@ -698,12 +596,6 @@ export function StoreProductPage({ product }: Props) {
 
   return (
     <div className="store-root min-h-full">
-      <Script
-        src="https://checkout.razorpay.com/v1/checkout.js"
-        strategy="afterInteractive"
-        onLoad={() => setScriptReady(true)}
-      />
-
       <header className="store-header">
         <div className="store-shell flex h-14 items-center justify-between sm:h-16">
           <div className="store-header-brand">
@@ -800,12 +692,21 @@ export function StoreProductPage({ product }: Props) {
             <OfferCountdown />
 
             <ul className="store-highlights">
-              {product.highlights.map((item) => (
-                <li key={item}>
-                  <Check className="size-4 shrink-0 text-[var(--store-accent)]" />
-                  <span>{item}</span>
-                </li>
-              ))}
+              {product.highlights.map((item) => {
+                const text = typeof item === "string" ? item : item.text;
+                const badge = typeof item === "string" ? undefined : item.badge;
+                return (
+                  <li key={text}>
+                    <Check className="size-4 shrink-0 text-[var(--store-accent)]" />
+                    <span>
+                      {badge ? (
+                        <span className="store-highlight-badge">{badge}</span>
+                      ) : null}
+                      {text}
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
 
             <div className="mt-8 space-y-6">
@@ -892,11 +793,10 @@ export function StoreProductPage({ product }: Props) {
               ) : null}
               <div
                 className="store-pay-secure"
-                aria-label="Pay securely with Razorpay"
+                aria-label="Pay securely with encrypted checkout"
               >
                 <Lock className="size-3.5 shrink-0 text-[var(--store-accent)]" />
-                <span>Pay securely with</span>
-                <RazorpayLogo />
+                <span>Secure checkout · Instant delivery</span>
               </div>
               <p className="text-center text-xs text-[var(--store-muted)]">
                 Instant Google Drive link after payment
@@ -1069,11 +969,10 @@ export function StoreProductPage({ product }: Props) {
             </div>
             <div
               className="store-pay-secure store-pay-secure-sticky"
-              aria-label="Pay securely with Razorpay"
+              aria-label="Pay securely with encrypted checkout"
             >
               <Lock className="size-2.5 shrink-0 text-[var(--store-accent)]" />
-              <span>Pay securely with</span>
-              <RazorpayLogo className="store-razorpay-logo-sm" />
+              <span>Secure checkout · Instant delivery</span>
             </div>
           </div>
         </div>

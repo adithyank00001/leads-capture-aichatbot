@@ -58,7 +58,11 @@ export const serverEnv = {
   dodoPaymentsEnvironment:
     readOptionalEnv("DODO_PAYMENTS_ENVIRONMENT") ?? "test_mode",
   dodoLtdProductId: readOptionalEnv("DODO_LTD_PRODUCT_ID"),
+  /** One-time digital store product (PAN India leads). Separate from LTD SaaS product. */
+  dodoStoreProductId: readOptionalEnv("DODO_STORE_PRODUCT_ID"),
   dodoPaymentsReturnUrl: readOptionalEnv("DODO_PAYMENTS_RETURN_URL"),
+  /** Optional Google Drive URL shown on /store/success as backup download. */
+  storeDriveDownloadUrl: readOptionalEnv("STORE_DRIVE_DOWNLOAD_URL"),
   razorpayKeyId: readOptionalEnv("RAZORPAY_KEY_ID"),
   razorpayKeySecret: readOptionalEnv("RAZORPAY_KEY_SECRET"),
   razorpayWebhookSecret: readOptionalEnv("RAZORPAY_WEBHOOK_SECRET"),
