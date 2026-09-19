@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { publicConfig } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
 type BrandLogoProps = {
@@ -38,7 +39,7 @@ export function BrandLogo({
   const logo = (
     <Image
       src={BRAND_LOGO_SRC}
-      alt="growscalex AI"
+      alt={publicConfig.appName}
       width={dimensions.width}
       height={dimensions.height}
       priority
@@ -58,7 +59,7 @@ export function BrandLogo({
     <Link
       href={href}
       className="inline-flex transition-opacity hover:opacity-80"
-      aria-label="growscalex AI home"
+      aria-label={`${publicConfig.appName} home`}
     >
       {logo}
     </Link>

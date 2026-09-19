@@ -6,6 +6,7 @@ import { serverEnv } from "@/lib/env.server";
 import { sendPurchaseEventFromPageRequest } from "@/lib/meta/capi";
 import { STORE_DOWNLOAD_FILE } from "@/lib/store/download";
 import { storeProduct } from "@/lib/store/product-content";
+import { sendStorePurchaseEmail } from "@/lib/store/send-purchase-email";
 import { verifyStoreDodoPayment } from "@/lib/store/verify-dodo-payment";
 
 type Props = {
@@ -29,22 +30,33 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
   const origin = serverEnv.appUrl.replace(/\/+$/, "") || "http://localhost:3000";
 
   if (verification.ok) {
-    await sendPurchaseEventFromPageRequest({
-      paymentId: verification.paymentId,
-      email: verification.email,
-      customer: verification.customer,
-      eventSourceUrl: `${origin}/store/success`,
-      requestHeaders,
-      customData: {
+    await Promise.all([
+      sendPurchaseEventFromPageRequest({
+        paymentId: verification.paymentId,
+        email: verification.email,
+        customer: verification.customer,
+        eventSourceUrl: `${origin}/store/success`,
+        requestHeaders,
+        customData: {
+          value: verification.value,
+          currency: verification.currency,
+          order_id: verification.paymentId,
+          content_ids: [verification.productSlug],
+          content_name: verification.productTitle,
+          content_type: "product",
+          num_items: verification.quantity,
+        },
+      }),
+      // Backup if webhook is slow/missed. Same Idempotency-Key → no double email.
+      sendStorePurchaseEmail({
+        toEmail: verification.email,
+        paymentId: verification.paymentId,
+        customerName: verification.customer?.fullName,
+        productTitle: verification.productTitle,
         value: verification.value,
         currency: verification.currency,
-        order_id: verification.paymentId,
-        content_ids: [verification.productSlug],
-        content_name: verification.productTitle,
-        content_type: "product",
-        num_items: verification.quantity,
-      },
-    });
+      }),
+    ]);
   }
 
   const downloadHref = paymentId
@@ -75,16 +87,11 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
                 Your payment is confirmed. Download the PDF package below.
               </p>
 
-              {verification.digitalProductsDelivered ? (
+              {verification.email ? (
                 <p className="mt-3 text-sm text-[var(--store-muted)]">
-                  You may also get a copy by email
-                  {verification.email ? (
-                    <>
-                      {" "}
-                      (<strong>{verification.email}</strong>)
-                    </>
-                  ) : null}
-                  . Check inbox (and spam).
+                  We also emailed the PDF to{" "}
+                  <strong>{verification.email}</strong>. Check inbox (and
+                  spam).
                 </p>
               ) : null}
 

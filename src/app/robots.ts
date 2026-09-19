@@ -25,6 +25,8 @@ export default function robots(): MetadataRoute.Robots {
         "/location-leads",
         "/complete-profile",
         "/embed",
+        "/store/downloads/",
+        "/api/store/download",
       ],
     },
   };

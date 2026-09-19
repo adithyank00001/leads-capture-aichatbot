@@ -32,12 +32,13 @@ function isSuccessfulPaymentStatus(status: string | null | undefined) {
 function paymentIncludesStoreProduct(
   productCart: Array<{ product_id: string; quantity: number }> | null | undefined,
   expectedProductId: string,
+  metadata: Record<string, unknown> | null | undefined,
 ) {
-  if (!productCart?.length) {
-    // Some payloads omit cart; still allow if payment succeeded and we asked for payment_id.
-    return true;
+  if (productCart?.length) {
+    return productCart.some((item) => item.product_id === expectedProductId);
   }
-  return productCart.some((item) => item.product_id === expectedProductId);
+  // Fail closed: empty cart only OK when checkout metadata marks this as store.
+  return metadata?.flow === "store_digital";
 }
 
 function readCustomerEmail(customer: unknown): string | null {
@@ -118,7 +119,13 @@ export async function verifyStoreDodoPayment(input: {
       return { ok: false, reason: "not_succeeded" };
     }
 
-    if (!paymentIncludesStoreProduct(payment.product_cart, storeProductId)) {
+    if (
+      !paymentIncludesStoreProduct(
+        payment.product_cart,
+        storeProductId,
+        (payment.metadata as Record<string, unknown> | null | undefined) ?? null,
+      )
+    ) {
       return { ok: false, reason: "wrong_product" };
     }
 

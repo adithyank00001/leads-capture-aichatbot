@@ -1,9 +1,11 @@
 import { readFile } from "fs/promises";
-import path from "path";
 
 import { NextResponse } from "next/server";
 
-import { STORE_DOWNLOAD_FILE } from "@/lib/store/download";
+import {
+  getStoreDownloadAbsolutePath,
+  STORE_DOWNLOAD_FILE,
+} from "@/lib/store/download";
 import { getPaidPurchaseByDownloadToken } from "@/lib/store/purchases";
 import { verifyStoreDodoPayment } from "@/lib/store/verify-dodo-payment";
 
@@ -38,12 +40,7 @@ export async function GET(request: Request) {
       );
     }
 
-    const filePath = path.join(
-      process.cwd(),
-      "public",
-      STORE_DOWNLOAD_FILE.absolutePublicPath,
-    );
-    const file = await readFile(filePath);
+    const file = await readFile(getStoreDownloadAbsolutePath());
 
     return new NextResponse(file, {
       status: 200,
@@ -51,6 +48,7 @@ export async function GET(request: Request) {
         "Content-Type": STORE_DOWNLOAD_FILE.contentType,
         "Content-Disposition": `attachment; filename="${STORE_DOWNLOAD_FILE.fileName}"`,
         "Cache-Control": "no-store",
+        "X-Content-Type-Options": "nosniff",
       },
     });
   } catch (error) {

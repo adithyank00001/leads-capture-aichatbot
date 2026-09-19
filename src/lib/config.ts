@@ -3,8 +3,8 @@
  * Never put secret keys in this file.
  */
 export const publicConfig = {
-  appName: "growscalex AI",
-  productTagline: "Turn website visitors into qualified leads",
+  appName: "growscaleX",
+  productTagline: "Buy premium lead databases with instant download",
   apiVersion: "v1",
   defaultBotId: process.env.NEXT_PUBLIC_DEFAULT_BOT_ID ?? "test-business-1",
   appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",

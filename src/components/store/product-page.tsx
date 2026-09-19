@@ -789,7 +789,9 @@ export function StoreProductPage({ product }: Props) {
                 </div>
               </div>
               {payError ? (
-                <p className="text-center text-sm text-red-600">{payError}</p>
+                <p className="text-center text-sm text-red-600" role="alert">
+                  {payError}
+                </p>
               ) : null}
               <div
                 className="store-pay-secure"
@@ -967,13 +969,19 @@ export function StoreProductPage({ product }: Props) {
                 </span>
               </button>
             </div>
-            <div
-              className="store-pay-secure store-pay-secure-sticky"
-              aria-label="Pay securely with encrypted checkout"
-            >
-              <Lock className="size-2.5 shrink-0 text-[var(--store-accent)]" />
-              <span>Secure checkout · Instant delivery</span>
-            </div>
+            {payError ? (
+              <p className="text-center text-[11px] leading-snug text-red-600" role="alert">
+                {payError}
+              </p>
+            ) : (
+              <div
+                className="store-pay-secure store-pay-secure-sticky"
+                aria-label="Pay securely with encrypted checkout"
+              >
+                <Lock className="size-2.5 shrink-0 text-[var(--store-accent)]" />
+                <span>Secure checkout · Instant delivery</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

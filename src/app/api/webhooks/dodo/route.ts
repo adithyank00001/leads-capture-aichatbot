@@ -8,6 +8,7 @@ import {
   trackStorePurchaseFromPayment,
 } from "@/lib/meta/capi";
 import { storeProduct } from "@/lib/store/product-content";
+import { sendStorePurchaseEmail } from "@/lib/store/send-purchase-email";
 
 type WebhookHandler = (request: NextRequest) => Promise<NextResponse>;
 
@@ -69,27 +70,37 @@ function getWebhookHandler() {
             ? totalAmount / 100
             : storeProduct.price * quantity;
 
-        after(() =>
-          trackStorePurchaseFromPayment({
-            paymentId: payment.payment_id,
-            email: payment.customer.email,
-            name: payment.customer.name,
-            cardHolderName:
-              typeof payment.card_holder_name === "string"
-                ? payment.card_holder_name
-                : null,
-            dodoCustomerId: payment.customer.customer_id,
-            billing: payment.billing,
-            metadata: payment.metadata,
-            productCart: payment.product_cart,
-            expectedProductId: storeProductId,
-            value,
-            currency: payment.currency || "INR",
-            contentName: storeProduct.title,
-            contentIds: ["pan-india-leads-2026"],
-            numItems: quantity,
-          }),
-        );
+        after(async () => {
+          await Promise.all([
+            trackStorePurchaseFromPayment({
+              paymentId: payment.payment_id,
+              email: payment.customer.email,
+              name: payment.customer.name,
+              cardHolderName:
+                typeof payment.card_holder_name === "string"
+                  ? payment.card_holder_name
+                  : null,
+              dodoCustomerId: payment.customer.customer_id,
+              billing: payment.billing,
+              metadata: payment.metadata,
+              productCart: payment.product_cart,
+              expectedProductId: storeProductId,
+              value,
+              currency: payment.currency || "INR",
+              contentName: storeProduct.title,
+              contentIds: ["pan-india-leads-2026"],
+              numItems: quantity,
+            }),
+            sendStorePurchaseEmail({
+              toEmail: payment.customer.email,
+              paymentId: payment.payment_id,
+              customerName: payment.customer.name,
+              productTitle: storeProduct.title,
+              value,
+              currency: payment.currency || "INR",
+            }),
+          ]);
+        });
         return;
       }
 

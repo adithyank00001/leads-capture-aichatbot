@@ -46,9 +46,10 @@ export function getDodoStoreProductId() {
   return productId;
 }
 
-/** Same orange AI-agent checkout look, store CTA copy. */
+/** Same orange AI-agent checkout look, store CTA copy. Order summary starts collapsed. */
 export const DODO_STORE_CHECKOUT_CUSTOMIZATION = {
   ...DODO_CHECKOUT_CUSTOMIZATION,
+  show_order_details: false,
   theme_config: {
     ...DODO_CHECKOUT_CUSTOMIZATION.theme_config,
     pay_button_text: "Download My Leads Now",
@@ -96,7 +97,7 @@ export async function createStoreDodoCheckoutSession(input: {
     ? metaAttributionToMetadata(input.attribution)
     : {};
 
-  return client.checkoutSessions.create({
+  const session = await client.checkoutSessions.create({
     product_cart: [{ product_id: productId, quantity }],
     metadata: {
       flow: "store_digital",
@@ -108,4 +109,21 @@ export async function createStoreDodoCheckoutSession(input: {
     customization: DODO_STORE_CHECKOUT_CUSTOMIZATION,
     ...STORE_LOW_FRICTION,
   });
+
+  return {
+    ...session,
+    checkout_url: withOrderDetailsHidden(session.checkout_url),
+  };
+}
+
+/** Dodo mobile ignores customization.show_order_details; URL param works. */
+function withOrderDetailsHidden(checkoutUrl: string | null | undefined) {
+  if (!checkoutUrl) return checkoutUrl ?? null;
+  try {
+    const url = new URL(checkoutUrl);
+    url.searchParams.set("showOrderDetails", "false");
+    return url.toString();
+  } catch {
+    return checkoutUrl;
+  }
 }

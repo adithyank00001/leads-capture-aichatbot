@@ -8,6 +8,12 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: projectRoot,
   },
+  // Ensure the paid PDF is bundled with the download API on Vercel.
+  outputFileTracingIncludes: {
+    "/api/store/download": [
+      "./private/store/downloads/ALL-INDIA-COMPLETE-DATABASE-PACKAGE-BUNDLE-2026.pdf",
+    ],
+  },
   images: {
     remotePatterns: [
       {
