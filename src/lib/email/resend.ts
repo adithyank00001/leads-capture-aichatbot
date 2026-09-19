@@ -34,14 +34,19 @@ function normalizeRecipients(to: string | string[]): string[] {
 
 /**
  * Send one email via Resend. Never throws.
+ * Reads API key at call time so new .env values work without stale module cache.
  */
 export async function sendResendEmail(
   input: SendResendEmailInput,
 ): Promise<SendResendEmailResult> {
-  const apiKey = serverEnv.resendApiKey;
+  const apiKey =
+    process.env.RESEND_API_KEY?.trim() || serverEnv.resendApiKey;
   if (!apiKey) {
     return { ok: true, id: null, skipped: true, reason: "not_configured" };
   }
+
+  const from =
+    process.env.RESEND_FROM_EMAIL?.trim() || serverEnv.resendFromEmail;
 
   const recipients = normalizeRecipients(input.to);
   if (recipients.length === 0) {
@@ -59,7 +64,7 @@ export async function sendResendEmail(
     }
 
     const body: Record<string, unknown> = {
-      from: serverEnv.resendFromEmail,
+      from,
       to: recipients,
       subject: input.subject,
       text: input.text,

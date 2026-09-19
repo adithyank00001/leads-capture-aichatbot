@@ -110,8 +110,9 @@ function formatCountdown(totalSeconds: number) {
   return `${pad2(hours)}:${pad2(minutes)}:${pad2(seconds)}`;
 }
 
-const OFFER_TIMER_KEY = "store-offer-timer-v3";
-const OFFER_DURATION_MS = (37 * 60 + 24) * 1000; // 37 minutes 24 seconds
+const OFFER_TIMER_KEY = "store-offer-timer-v4";
+// Fresh visits start at 18h 34m 27s
+const OFFER_DURATION_MS = (18 * 3600 + 34 * 60 + 27) * 1000;
 
 type OfferTimerState = {
   /** When the active countdown ends (ms since epoch). */

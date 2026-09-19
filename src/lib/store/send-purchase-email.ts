@@ -79,7 +79,27 @@ export async function sendStorePurchaseEmail(
 ): Promise<void> {
   const paymentId = input.paymentId.trim();
   const toEmail = input.toEmail?.trim() ?? "";
-  if (!paymentId || !toEmail.includes("@")) {
+  if (!paymentId) {
+    console.error(
+      JSON.stringify({
+        level: "warn",
+        route: "store/purchase-email",
+        message: "Purchase email skipped — missing paymentId",
+        timestamp: new Date().toISOString(),
+      }),
+    );
+    return;
+  }
+  if (!toEmail.includes("@")) {
+    console.error(
+      JSON.stringify({
+        level: "warn",
+        route: "store/purchase-email",
+        message: "Purchase email skipped — buyer email missing from Dodo",
+        paymentId,
+        timestamp: new Date().toISOString(),
+      }),
+    );
     return;
   }
 
@@ -134,6 +154,7 @@ export async function sendStorePurchaseEmail(
 </html>`.trim();
 
   const attachment = await loadPdfAttachment();
+  const toDomain = toEmail.includes("@") ? toEmail.split("@")[1] : "unknown";
 
   const result = await sendResendEmail({
     to: toEmail,
@@ -146,17 +167,17 @@ export async function sendStorePurchaseEmail(
   });
 
   if (result.ok && result.skipped) {
-    if (result.reason === "not_configured") {
-      console.error(
-        JSON.stringify({
-          level: "warn",
-          route: "store/purchase-email",
-          message: "RESEND_API_KEY missing — purchase email skipped",
-          paymentId,
-          timestamp: new Date().toISOString(),
-        }),
-      );
-    }
+    console.error(
+      JSON.stringify({
+        level: "warn",
+        route: "store/purchase-email",
+        message: `Purchase email skipped — ${result.reason}`,
+        paymentId,
+        toDomain,
+        hasAttachment: Boolean(attachment),
+        timestamp: new Date().toISOString(),
+      }),
+    );
     return;
   }
 
@@ -168,8 +189,24 @@ export async function sendStorePurchaseEmail(
         message: `Purchase email failed: ${result.error}`,
         status: result.status ?? null,
         paymentId,
+        toDomain,
+        hasAttachment: Boolean(attachment),
         timestamp: new Date().toISOString(),
       }),
     );
+    return;
   }
+
+  console.info(
+    JSON.stringify({
+      level: "info",
+      route: "store/purchase-email",
+      message: "Purchase email sent",
+      paymentId,
+      toDomain,
+      resendId: result.id,
+      hasAttachment: Boolean(attachment),
+      timestamp: new Date().toISOString(),
+    }),
+  );
 }

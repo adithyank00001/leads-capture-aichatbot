@@ -122,7 +122,7 @@ export const storeProduct: StoreProductContent = {
     "Includes Name, Email, Phone, WhatsApp & Location details",
     "Lifetime access to all downloaded files",
     {
-      text: "150 Millions + free USA Leads database with 300+ categories",
+      text: "More than 150 Millions free USA Leads databases with 300+ categories",
       badge: "Bonus",
     },
   ],
@@ -137,8 +137,8 @@ export const storeProduct: StoreProductContent = {
       alt: "Sample category — New Business Owners Category",
     },
     {
-      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1789739160/77996ae4-239b-4a81-a631-6bf4efa7b324.png",
-      alt: "Database folders — All India Database 2026, Bonus Database, USA Leads",
+      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1789830608/553b1fc9-d60d-42ab-b272-5bc1c483b71e.png",
+      alt: "Google Drive folders — Pan India Database 2026, Bonus Database, USA Leads, and more",
     },
   ],
   options: [],
