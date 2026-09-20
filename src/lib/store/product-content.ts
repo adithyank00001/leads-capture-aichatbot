@@ -137,8 +137,8 @@ export const storeProduct: StoreProductContent = {
       alt: "Sample category — New Business Owners Category",
     },
     {
-      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1789830608/553b1fc9-d60d-42ab-b272-5bc1c483b71e.png",
-      alt: "Google Drive folders — Pan India Database 2026, Bonus Database, USA Leads, and more",
+      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1789829921/Corporate_database_poster_typogr__20260918155251_1.webp",
+      alt: "Corporate database includes B2B, B2C, doctors, exporters, real estate, and many more categories",
     },
   ],
   options: [],
