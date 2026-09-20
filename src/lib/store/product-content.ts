@@ -304,6 +304,16 @@ export const storeProduct: StoreProductContent = {
       answer:
         "Yes, the database is structured to generate high-quality leads that are actively interested in a wide variety of products and services.",
     },
+    {
+      question: "What format is the database delivered in?",
+      answer:
+        "The entire database is provided in a standard Microsoft Excel (.xlsx) format. This makes it instantly accessible and easy to filter, sort, or upload directly into your preferred CRM, email sender, or bulk messaging tool.",
+    },
+    {
+      question: "Does this database cover all states in India?",
+      answer:
+        "Yes, absolutely. This is a comprehensive All-India dataset that includes structured data from every single state and union territory across the country.",
+    },
   ],
   buyButtonLabel: "Download My Leads Now",
   secondaryButtonLabel: "Add to cart",

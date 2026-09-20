@@ -125,12 +125,11 @@ const OFFER_TIMER_KEY = "store-offer-timer-v6";
 // Fresh visits start at 9h 47m 23s
 const OFFER_DURATION_MS = (9 * 3600 + 47 * 60 + 23) * 1000;
 
+const LICENSE_STOCK_KEY = "store-license-stock-v3";
 const LICENSE_MAX = 14;
-/** Shared start so every anonymous visitor sees the same count at the same real time. */
-const LICENSE_EPOCH_MS = Date.UTC(2026, 8, 20, 6, 0, 0); // 20 Sep 2026 06:00 UTC
 /** Drop speed while count is 5–14. */
 const LICENSE_FAST_TICK_MS = 3 * 60 * 1000; // 3 minutes
-/** Drop speed once count is 4 or lower (slower than the fast phase). */
+/** Drop speed once count is 4 or lower. */
 const LICENSE_SLOW_TICK_MS = 3 * 60 * 60 * 1000; // 3 hours
 
 type OfferTimerState = {
@@ -138,6 +137,12 @@ type OfferTimerState = {
   deadlineMs: number;
   /** Local calendar day (YYYY-MM-DD) when this browser hit 00:00:00. */
   expiredOnDay: string | null;
+};
+
+type LicenseStockState = {
+  count: number;
+  /** When the next decrement should happen. */
+  nextTickMs: number;
 };
 
 /** Anonymous day key in the visitor's local timezone. */
@@ -174,33 +179,64 @@ function writeOfferTimerState(state: OfferTimerState) {
   }
 }
 
+function readLicenseStockState(): LicenseStockState | null {
+  try {
+    const raw = window.localStorage.getItem(LICENSE_STOCK_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<LicenseStockState>;
+    if (
+      typeof parsed.count !== "number" ||
+      !Number.isFinite(parsed.count) ||
+      typeof parsed.nextTickMs !== "number" ||
+      !Number.isFinite(parsed.nextTickMs)
+    ) {
+      return null;
+    }
+    const count = Math.min(
+      LICENSE_MAX,
+      Math.max(1, Math.round(parsed.count)),
+    );
+    return { count, nextTickMs: parsed.nextTickMs };
+  } catch {
+    return null;
+  }
+}
+
+function writeLicenseStockState(state: LicenseStockState) {
+  try {
+    window.localStorage.setItem(LICENSE_STOCK_KEY, JSON.stringify(state));
+  } catch {
+    // ignore quota / private mode
+  }
+}
+
 /** How long the counter stays on this number before dropping. */
 function licenseHoldMs(count: number): number {
   return count <= 4 ? LICENSE_SLOW_TICK_MS : LICENSE_FAST_TICK_MS;
 }
 
 /**
- * Shared scarcity stock for all anonymous visitors (same wall-clock time → same count).
- * 14 → 13 → … → 5 drops every few minutes; at 4 and below, drops every 3 hours; then 1 → 14.
+ * Per-browser scarcity stock (localStorage).
+ * Each new visitor starts at 14. Then 14→5 every few minutes; at 4 and below every 3 hours; 1→14.
  */
 function resolveLicenseStock(now = Date.now()): number {
-  if (now <= LICENSE_EPOCH_MS) {
+  const existing = readLicenseStockState();
+  if (!existing) {
+    writeLicenseStockState({
+      count: LICENSE_MAX,
+      nextTickMs: now + licenseHoldMs(LICENSE_MAX),
+    });
     return LICENSE_MAX;
   }
 
-  let count = LICENSE_MAX;
-  let cursor = LICENSE_EPOCH_MS;
+  let { count, nextTickMs } = existing;
   let guard = 0;
-
-  while (guard++ < 200_000) {
-    const hold = licenseHoldMs(count);
-    if (cursor + hold > now) {
-      break;
-    }
-    cursor += hold;
+  while (now >= nextTickMs && guard++ < 100_000) {
     count = count <= 1 ? LICENSE_MAX : count - 1;
+    nextTickMs += licenseHoldMs(count);
   }
 
+  writeLicenseStockState({ count, nextTickMs });
   return count;
 }
 
@@ -621,6 +657,25 @@ export function StoreProductPage({ product }: Props) {
     }).catch(() => undefined);
   }, []);
 
+  // After Dodo checkout, browser Back restores this page from cache with
+  // paying=true still set — reset so the CTA is clickable again.
+  useEffect(() => {
+    function resetBuyUi() {
+      setPaying(false);
+      buyingLock.current = false;
+    }
+
+    function onPageShow() {
+      // Fires on first load and when returning via Back (including bfcache).
+      resetBuyUi();
+    }
+
+    window.addEventListener("pageshow", onPageShow);
+    return () => {
+      window.removeEventListener("pageshow", onPageShow);
+    };
+  }, []);
+
   function selectOption(optionId: string, value: string) {
     setSelections((prev) => ({ ...prev, [optionId]: value }));
   }
@@ -662,6 +717,7 @@ export function StoreProductPage({ product }: Props) {
 
       // Direct to Dodo (less friction than intermediate cancel page).
       window.location.assign(data.checkoutUrl);
+      // If Back restores this page from cache, pageshow/focus reset the CTA.
     } catch (error) {
       setPayError(
         error instanceof Error ? error.message : "Could not start payment.",
