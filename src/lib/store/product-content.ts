@@ -84,9 +84,9 @@ export type StoreProductContent = {
   /** Short note under the included headline */
   includedNote: string;
   /** Checklist in “What’s included” */
-  included: string[];
+  included: Array<{ label: string; value?: number }>;
   /** Extra bonus databases shown under the main list */
-  bonusIncluded: string[];
+  bonusIncluded: Array<{ label: string; value?: number }>;
   /** Customer reviews */
   reviews: ProductReview[];
   /** Steps in “How it works” */
@@ -129,8 +129,8 @@ export const storeProduct: StoreProductContent = {
   socialProofTag: "🔥 150+ sold yesterday!",
   images: [
     {
-      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1789738887/Social_media_educational_poster___20260918185159.webp",
-      alt: "110Cr+ All India Latest Leads PAN India Database 2026",
+      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1789883258/200_Categories_1.webp",
+      alt: "110 Crore+ Indian Leads database with 200+ categories and USA leads bonus",
     },
     {
       src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1789736328/Sample_category_New_Business_Owners_Category_1.webp",
@@ -188,39 +188,42 @@ export const storeProduct: StoreProductContent = {
   includedNote:
     "Every contact includes Category, Name, Email, Phone, WhatsApp, Location, and other essential details. The database is comprehensively segmented into the following high-value categories:",
   included: [
-    "B2B | B2C | Companies",
-    "HNI / High-Income Employees",
-    "Advocates / Lawyers",
-    "Website Owners",
-    "Car Owners",
-    "NRIs",
-    "Real Estate Leads & Property Buyers",
-    "Manufacturing Companies & Garments Exporters",
-    "Architects | Interior Designers",
-    "BPO / Call Centres",
-    "CEO / CFO / CMO / MD / IT Heads",
-    "C.A | Investors & Demat Account Holders",
-    "Chairmen",
-    "Doctors, Chemists & Chemical/Pharma Companies",
-    "Professors, Teachers & Students",
-    "School / College / Educational Institutes",
-    "Event Management Organisers",
-    "Exporters Database",
-    "Beauty Parlours / SPA (Female Demographics)",
-    "Job Seekers",
-    "Credit Card Holders & Bank Database",
-    "State Wise Data",
-    "Photography Studios",
-    "HR | IT Companies",
-    "Hotels / Restaurants / Bars",
-    "Real Estate Agents",
-    "Online User & Shopper Database",
-    "And many more...",
+    { label: "B2B | B2C | Companies", value: 467 },
+    { label: "HNI / High-Income Employees", value: 527 },
+    { label: "Advocates / Lawyers", value: 347 },
+    { label: "Website Owners", value: 287 },
+    { label: "Car Owners", value: 217 },
+    { label: "NRIs", value: 387 },
+    { label: "Real Estate Leads & Property Buyers", value: 797 },
+    { label: "Manufacturing Companies & Garments Exporters", value: 437 },
+    { label: "Architects | Interior Designers", value: 327 },
+    { label: "BPO / Call Centres", value: 267 },
+    { label: "CEO / CFO / CMO / MD / IT Heads", value: 577 },
+    { label: "C.A | Investors & Demat Account Holders", value: 417 },
+    { label: "Chairmen", value: 357 },
+    { label: "Doctors, Chemists & Chemical/Pharma Companies", value: 487 },
+    { label: "Professors, Teachers & Students", value: 187 },
+    { label: "School / College / Educational Institutes", value: 247 },
+    { label: "Event Management Organisers", value: 307 },
+    { label: "Exporters Database", value: 457 },
+    { label: "Beauty Parlours / SPA (Female Demographics)", value: 167 },
+    { label: "Job Seekers", value: 197 },
+    { label: "Credit Card Holders & Bank Database", value: 377 },
+    { label: "State Wise Data", value: 337 },
+    { label: "Photography Studios", value: 157 },
+    { label: "HR | IT Companies", value: 397 },
+    { label: "Hotels / Restaurants / Bars", value: 277 },
+    { label: "Real Estate Agents", value: 797 },
+    { label: "Online User & Shopper Database", value: 227 },
+    { label: "And many more..." },
   ],
   bonusIncluded: [
-    "USA Leads Database (150 Millions+ leads with 300+ categories)",
-    "CRM Tracking Blueprint System",
-    "And many more...",
+    {
+      label: "USA Leads Database (150 Millions+ leads with 300+ categories)",
+      value: 897,
+    },
+    { label: "CRM Tracking Blueprint System", value: 497 },
+    { label: "And many more..." },
   ],
   reviews: [
     {

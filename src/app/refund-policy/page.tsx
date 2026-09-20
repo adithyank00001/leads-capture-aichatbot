@@ -75,12 +75,12 @@ export default function RefundPolicyPage() {
           to Purchaser-provided incorrect contact details, spam filtering,
           payment disputes initiated by the Purchaser, or processor delays), the
           Purchaser may notify{" "}
-          <a
-            href="mailto:support@growscalex.com"
-            className="font-medium text-[var(--landing-orange)] hover:underline"
-          >
-            support@growscalex.com
-          </a>{" "}
+              <a
+                href="mailto:support@growscalex.com"
+                className="font-medium text-[var(--landing-orange)] hover:underline"
+              >
+                support@growscalex.com
+              </a>{" "}
           for investigation. Remedies in such narrow contingency are limited, at
           the Operator&apos;s election, to completing delivery or refunding the
           sum actually received for the undelivered order. This clause does not
@@ -114,11 +114,11 @@ export default function RefundPolicyPage() {
         <LegalH2>6. Contact for clarifications (not a refund channel of right)</LegalH2>
         <LegalP>
           Questions concerning this Policy may be directed to{" "}
-          <a
-            href="mailto:support@growscalex.com"
-            className="font-medium text-[var(--landing-orange)] hover:underline"
-          >
-            support@growscalex.com
+              <a
+                href="mailto:support@growscalex.com"
+                className="font-medium text-[var(--landing-orange)] hover:underline"
+              >
+                support@growscalex.com
           </a>{" "}
           or via{" "}
           <a href="/contact" className="font-medium text-[var(--landing-orange)] hover:underline">

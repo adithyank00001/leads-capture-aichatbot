@@ -43,7 +43,7 @@ export const shopCatalog: CatalogProduct[] = [
     id: "usa-leads-premium",
     title: "USA Leads Premium Pack (150M+ Contacts)",
     subtitle: "300+ categories · State & timezone tagged · Clean B2B emails",
-    price: 597,
+    price: 897,
     compareAtPrice: 2997,
     currencySymbol: "₹",
     image:
@@ -52,7 +52,7 @@ export const shopCatalog: CatalogProduct[] = [
     href: null,
     badge: "Out of stock",
     rating: 4.8,
-    reviewCount: 210,
+    reviewCount: 86,
     available: false,
   },
   {
@@ -67,8 +67,8 @@ export const shopCatalog: CatalogProduct[] = [
     imageAlt: "Indian Real Estate Leads Bundle",
     href: null,
     badge: "Out of stock",
-    rating: 4.7,
-    reviewCount: 128,
+    rating: 4.8,
+    reviewCount: 64,
     available: false,
   },
   {
@@ -99,8 +99,8 @@ export const shopCatalog: CatalogProduct[] = [
     imageAlt: "CRM Tracking Blueprint System",
     href: null,
     badge: "Out of stock",
-    rating: 4.8,
-    reviewCount: 164,
+    rating: 4.6,
+    reviewCount: 24,
     available: false,
   },
 ];

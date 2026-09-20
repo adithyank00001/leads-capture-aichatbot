@@ -153,12 +153,12 @@ export default function PrivacyPolicyPage() {
           Subject to jurisdictional limitations, you may request access,
           rectification, or deletion of account-adjacent records we control by
           writing to{" "}
-          <a
-            href="mailto:support@growscalex.com"
-            className="font-medium text-[var(--landing-orange)] hover:underline"
-          >
-            support@growscalex.com
-          </a>
+              <a
+                href="mailto:support@growscalex.com"
+                className="font-medium text-[var(--landing-orange)] hover:underline"
+              >
+                support@growscalex.com
+              </a>
           , or by submitting the form at{" "}
           <a href="/contact" className="font-medium text-[var(--landing-orange)] hover:underline">
             /contact

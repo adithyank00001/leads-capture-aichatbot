@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 
 import type { StoreProductContent } from "@/lib/store/product-content";
+import { shopCatalog, type CatalogProduct } from "@/lib/store/catalog";
 import { BrandLogo } from "@/components/marketing/brand-logo";
 import { isSafeDodoCheckoutUrl } from "@/lib/billing/start-landing-checkout";
 import {
@@ -34,6 +35,16 @@ import {
   trackStoreViewContent,
 } from "@/lib/meta/store-track";
 import { cn } from "@/lib/utils";
+
+const EXPLORE_PRODUCT_IDS = [
+  "usa-leads-premium",
+  "real-estate-leads",
+  "crm-blueprint",
+] as const;
+
+const exploreProducts = shopCatalog.filter((item) =>
+  (EXPLORE_PRODUCT_IDS as readonly string[]).includes(item.id),
+);
 
 type Props = {
   product: StoreProductContent;
@@ -110,9 +121,17 @@ function formatCountdown(totalSeconds: number) {
   return `${pad2(hours)}:${pad2(minutes)}:${pad2(seconds)}`;
 }
 
-const OFFER_TIMER_KEY = "store-offer-timer-v4";
-// Fresh visits start at 18h 34m 27s
-const OFFER_DURATION_MS = (18 * 3600 + 34 * 60 + 27) * 1000;
+const OFFER_TIMER_KEY = "store-offer-timer-v6";
+// Fresh visits start at 9h 47m 23s
+const OFFER_DURATION_MS = (9 * 3600 + 47 * 60 + 23) * 1000;
+
+const LICENSE_MAX = 14;
+/** Shared start so every anonymous visitor sees the same count at the same real time. */
+const LICENSE_EPOCH_MS = Date.UTC(2026, 8, 20, 6, 0, 0); // 20 Sep 2026 06:00 UTC
+/** Drop speed while count is 5–14. */
+const LICENSE_FAST_TICK_MS = 3 * 60 * 1000; // 3 minutes
+/** Drop speed once count is 4 or lower (slower than the fast phase). */
+const LICENSE_SLOW_TICK_MS = 3 * 60 * 60 * 1000; // 3 hours
 
 type OfferTimerState = {
   /** When the active countdown ends (ms since epoch). */
@@ -153,6 +172,36 @@ function writeOfferTimerState(state: OfferTimerState) {
   } catch {
     // ignore quota / private mode
   }
+}
+
+/** How long the counter stays on this number before dropping. */
+function licenseHoldMs(count: number): number {
+  return count <= 4 ? LICENSE_SLOW_TICK_MS : LICENSE_FAST_TICK_MS;
+}
+
+/**
+ * Shared scarcity stock for all anonymous visitors (same wall-clock time → same count).
+ * 14 → 13 → … → 5 drops every few minutes; at 4 and below, drops every 3 hours; then 1 → 14.
+ */
+function resolveLicenseStock(now = Date.now()): number {
+  if (now <= LICENSE_EPOCH_MS) {
+    return LICENSE_MAX;
+  }
+
+  let count = LICENSE_MAX;
+  let cursor = LICENSE_EPOCH_MS;
+  let guard = 0;
+
+  while (guard++ < 200_000) {
+    const hold = licenseHoldMs(count);
+    if (cursor + hold > now) {
+      break;
+    }
+    cursor += hold;
+    count = count <= 1 ? LICENSE_MAX : count - 1;
+  }
+
+  return count;
 }
 
 /**
@@ -292,13 +341,14 @@ function ReviewForm() {
 
 function OfferCountdown() {
   const [remaining, setRemaining] = useState<number | null>(null);
+  const [licensesLeft, setLicensesLeft] = useState<number | null>(null);
 
   useEffect(() => {
     const resolved = resolveOfferTimer();
     let deadlineMs = resolved.deadlineMs;
     let stuck = resolved.stuckExpired;
 
-    function tick() {
+    function tickTimer() {
       if (stuck) {
         setRemaining(0);
         return;
@@ -317,15 +367,38 @@ function OfferCountdown() {
       setRemaining(Math.floor(leftMs / 1000));
     }
 
-    tick();
-    const id = window.setInterval(tick, 1000);
-    return () => window.clearInterval(id);
+    function tickLicenses() {
+      setLicensesLeft(resolveLicenseStock());
+    }
+
+    tickTimer();
+    tickLicenses();
+    const timerId = window.setInterval(tickTimer, 1000);
+    const licenseId = window.setInterval(tickLicenses, 15_000);
+    return () => {
+      window.clearInterval(timerId);
+      window.clearInterval(licenseId);
+    };
   }, []);
 
   return (
     <div className="store-offer-timer" aria-live="polite">
       <p className="store-offer-timer-title">Offer ending soon</p>
-      <p className="store-offer-timer-label">Price jumps to ₹597 in:</p>
+      <p className="store-offer-timer-licenses" suppressHydrationWarning>
+        {licensesLeft == null ? (
+          <>
+            <span className="store-offer-timer-licenses-count">14</span>{" "}
+            licenses remaining
+          </>
+        ) : (
+          <>
+            <span className="store-offer-timer-licenses-count">
+              {licensesLeft}
+            </span>{" "}
+            licenses remaining
+          </>
+        )}
+      </p>
       <p className="store-offer-timer-digits" suppressHydrationWarning>
         {remaining == null ? "--:--:--" : formatCountdown(remaining)}
       </p>
@@ -507,6 +580,9 @@ export function StoreProductPage({ product }: Props) {
   const [selections, setSelections] = useState(product.defaultSelections);
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
+  const [exploreProduct, setExploreProduct] = useState<CatalogProduct | null>(
+    null,
+  );
   const buyingLock = useRef(false);
 
   const unitPrice = useMemo(() => {
@@ -832,14 +908,14 @@ export function StoreProductPage({ product }: Props) {
             <p className="store-included-note">{product.includedNote}</p>
             <ul className="store-category-grid">
               {product.included.map((item) => {
-                const isMore = item.toLowerCase().includes("and many more");
+                const isMore = item.label.toLowerCase().includes("and many more");
                 return (
                   <li
-                    key={item}
+                    key={item.label}
                     className={isMore ? "store-category-more" : undefined}
                   >
                     <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[var(--store-accent)]" />
-                    <span>{item}</span>
+                    <span>{item.label}</span>
                   </li>
                 );
               })}
@@ -849,14 +925,26 @@ export function StoreProductPage({ product }: Props) {
                 <p className="store-bonus-label">Bonus database</p>
                 <ul className="store-bonus-list">
                   {product.bonusIncluded.map((item) => {
-                    const isMore = item.toLowerCase().includes("and many more");
+                    const isMore = item.label
+                      .toLowerCase()
+                      .includes("and many more");
                     return (
                       <li
-                        key={item}
+                        key={item.label}
                         className={isMore ? "store-bonus-more" : undefined}
                       >
                         <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[var(--store-accent)]" />
-                        <span>{item}</span>
+                        <span>
+                          {item.label}
+                          {typeof item.value === "number" ? (
+                            <>
+                              {" "}
+                              <span className="store-category-value">
+                                Value : Rs {item.value}
+                              </span>
+                            </>
+                          ) : null}
+                        </span>
                       </li>
                     );
                   })}
@@ -941,6 +1029,60 @@ export function StoreProductPage({ product }: Props) {
               </div>
             </div>
           </div>
+
+          {exploreProducts.length > 0 ? (
+            <section
+              className="store-explore"
+              aria-label="Explore Individual Databases"
+            >
+              <h2>Explore Individual Databases</h2>
+              <p className="store-explore-note">
+                Prefer a single niche database? Browse these standalone options
+                below.
+              </p>
+              <div className="store-explore-grid">
+                {exploreProducts.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className="store-explore-card"
+                    onClick={() => setExploreProduct(item)}
+                  >
+                    <div className="store-explore-card-media">
+                      <ProductImage
+                        src={item.image}
+                        alt={item.imageAlt}
+                        sizes="(max-width: 640px) 90vw, 280px"
+                        fit="cover"
+                      />
+                    </div>
+                    <div className="store-explore-card-body">
+                      <p className="store-explore-card-title">{item.title}</p>
+                      <p className="store-explore-card-sub">{item.subtitle}</p>
+                      <div className="store-explore-card-rating">
+                        <Stars rating={item.rating} />
+                        <span>
+                          {item.rating.toFixed(1)} ·{" "}
+                          {Math.floor(item.reviewCount / 10) * 10}+ customers
+                        </span>
+                      </div>
+                      <p className="store-explore-card-price">
+                        {formatMoney(item.price, item.currencySymbol)}
+                        {item.compareAtPrice != null ? (
+                          <span className="store-explore-card-was">
+                            {formatMoney(
+                              item.compareAtPrice,
+                              item.currencySymbol,
+                            )}
+                          </span>
+                        ) : null}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </section>
+          ) : null}
         </section>
       </main>
 
@@ -993,6 +1135,62 @@ export function StoreProductPage({ product }: Props) {
           alt={product.images[activeImage]?.alt ?? product.images[0].alt}
           onClose={() => setZoomOpen(false)}
         />
+      ) : null}
+
+      {exploreProduct ? (
+        <div
+          className="shop-oos-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Restocking soon"
+          onClick={() => setExploreProduct(null)}
+        >
+          <div
+            className="shop-oos-modal store-explore-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="shop-oos-close"
+              aria-label="Close"
+              onClick={() => setExploreProduct(null)}
+            >
+              <X className="size-4" />
+            </button>
+            <p className="store-explore-modal-title">
+              🟡 Restocking Licenses Soon (₹{exploreProduct.price})
+            </p>
+            <p>
+              This standalone database licenses will be restocked soon.
+            </p>
+            <p className="store-explore-modal-warning">
+              ⚠️ WARNING: The All-India Database currently includes this for
+              just ₹{product.price}. This is a flash sale and ending soon.
+            </p>
+            <div className="store-explore-modal-actions">
+              <button
+                type="button"
+                className="store-btn-primary shop-oos-btn"
+                onClick={() => {
+                  setExploreProduct(null);
+                  document
+                    .getElementById("buy")
+                    ?.scrollIntoView({ behavior: "smooth", block: "center" });
+                }}
+              >
+                Get it in the ₹{product.price} Bundle
+                <ChevronRight className="size-4" />
+              </button>
+              <button
+                type="button"
+                className="store-explore-close-btn"
+                onClick={() => setExploreProduct(null)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       ) : null}
     </div>
   );
