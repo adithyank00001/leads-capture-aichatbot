@@ -21,6 +21,7 @@ type Props = {
 export function ProductImageZoomLightbox({ src, alt, onClose }: Props) {
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
   const dragging = useRef(false);
   const lastPoint = useRef({ x: 0, y: 0 });
 
@@ -65,6 +66,7 @@ export function ProductImageZoomLightbox({ src, alt, onClose }: Props) {
   function onPointerDown(event: PointerEvent<HTMLDivElement>) {
     if (zoom <= 1) return;
     dragging.current = true;
+    setIsDragging(true);
     lastPoint.current = { x: event.clientX, y: event.clientY };
     event.currentTarget.setPointerCapture(event.pointerId);
   }
@@ -79,6 +81,7 @@ export function ProductImageZoomLightbox({ src, alt, onClose }: Props) {
 
   function onPointerUp(event: PointerEvent<HTMLDivElement>) {
     dragging.current = false;
+    setIsDragging(false);
     try {
       event.currentTarget.releasePointerCapture(event.pointerId);
     } catch {
@@ -123,8 +126,7 @@ export function ProductImageZoomLightbox({ src, alt, onClose }: Props) {
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
         style={{
-          cursor:
-            zoom > 1 ? (dragging.current ? "grabbing" : "grab") : "zoom-in",
+          cursor: zoom > 1 ? (isDragging ? "grabbing" : "grab") : "zoom-in",
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
