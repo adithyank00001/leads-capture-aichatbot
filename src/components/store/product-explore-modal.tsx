@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { ChevronRight, X } from "lucide-react";
 
 import type { CatalogProduct } from "@/lib/store/catalog";
@@ -11,14 +13,27 @@ type Props = {
   onGetBundle: () => void;
 };
 
-/** Explore-card “restocking soon” modal — loaded only when a card is opened. */
+/** Explore-card “restocking soon” modal — portaled to body so fixed overlay is not trapped by parent transforms. */
 export function ProductExploreModal({
   exploreProduct,
   bundlePrice,
   onClose,
   onGetBundle,
 }: Props) {
-  return (
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [onClose]);
+
+  const modal = (
     <div
       className="shop-oos-overlay"
       role="dialog"
@@ -66,4 +81,10 @@ export function ProductExploreModal({
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  return createPortal(modal, document.body);
 }
