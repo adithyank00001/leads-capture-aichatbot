@@ -61,22 +61,79 @@ function parseCookieValue(cookieHeader: string | null, name: string): string | u
   return undefined;
 }
 
-function getClientIpFromHeaders(headers: Headers): string | undefined {
-  const forwarded = headers.get("x-forwarded-for");
-  if (forwarded) {
-    const first = forwarded.split(",")[0]?.trim();
-    if (first) {
-      return first;
+/** Strip brackets and unwrap IPv4-mapped IPv6 (::ffff:a.b.c.d → a.b.c.d). */
+function normalizeClientIp(raw: string): string {
+  let ip = raw.trim();
+  if (ip.startsWith("[") && ip.endsWith("]")) {
+    ip = ip.slice(1, -1);
+  }
+  const mapped = /^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/i.exec(ip);
+  if (mapped?.[1]) {
+    return mapped[1];
+  }
+  return ip;
+}
+
+function isIpv6Address(ip: string): boolean {
+  // Real IPv6 has colons; IPv4-mapped forms are normalized to IPv4 first.
+  return ip.includes(":");
+}
+
+function isIpv4Address(ip: string): boolean {
+  return /^\d{1,3}(?:\.\d{1,3}){3}$/.test(ip);
+}
+
+/**
+ * Collect client IP candidates from proxy headers (leftmost = original client).
+ * Meta prefers IPv6 when the Pixel saw IPv6 for the same visitor.
+ */
+function collectClientIpCandidates(headers: Headers): string[] {
+  const candidates: string[] = [];
+  const seen = new Set<string>();
+
+  function push(raw: string | null | undefined) {
+    if (!raw?.trim()) return;
+    for (const part of raw.split(",")) {
+      const ip = normalizeClientIp(part);
+      if (!ip || seen.has(ip)) continue;
+      // Skip obvious placeholders
+      if (ip === "unknown" || ip === "null") continue;
+      seen.add(ip);
+      candidates.push(ip);
     }
   }
 
-  const realIp = headers.get("x-real-ip")?.trim();
-  return realIp || undefined;
+  push(headers.get("x-forwarded-for"));
+  push(headers.get("x-vercel-forwarded-for"));
+  push(headers.get("cf-connecting-ip"));
+  push(headers.get("x-real-ip"));
+
+  return candidates;
+}
+
+/**
+ * Prefer IPv6 for Meta CAPI when present (matches Pixel for IPv6-enabled users).
+ * Falls back to IPv4 so existing traffic keeps working.
+ */
+function getClientIpFromHeaders(headers: Headers): string | undefined {
+  const candidates = collectClientIpCandidates(headers);
+  if (candidates.length === 0) {
+    return undefined;
+  }
+
+  const ipv6 = candidates.find(isIpv6Address);
+  if (ipv6) {
+    return ipv6;
+  }
+
+  const ipv4 = candidates.find(isIpv4Address);
+  return ipv4 ?? candidates[0];
 }
 
 /**
  * Read Meta click/browser cookies + request IP/UA for CAPI matching.
  * Builds fbc from fbclid in eventSourceUrl / request URL / Referer when _fbc is missing.
+ * Client IP prefers IPv6 when the proxy headers include one (Meta Events quality tip).
  * Safe to store in Dodo checkout metadata (values truncated to 500 chars).
  */
 export function getMetaAttributionFromRequest(
