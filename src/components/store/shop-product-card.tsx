@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { ChevronRight, Star, X } from "lucide-react";
 
 import type { CatalogProduct } from "@/lib/store/catalog";
+import { cloudinaryDeliveryUrl } from "@/lib/store/cloudinary";
 import { trackStoreHomeProductClick } from "@/lib/meta/store-track";
 import { cn } from "@/lib/utils";
 
@@ -13,12 +14,17 @@ function formatMoney(amount: number, symbol: string) {
   const whole = Number.isInteger(amount) ? String(amount) : amount.toFixed(2);
   const [intPart, decPart] = whole.split(".");
   const withCommas = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return decPart ? `${symbol}${withCommas}.${decPart}` : `${symbol}${withCommas}`;
+  return decPart
+    ? `${symbol}${withCommas}.${decPart}`
+    : `${symbol}${withCommas}`;
 }
 
 function Stars({ rating }: { rating: number }) {
   return (
-    <div className="flex items-center gap-0.5" aria-label={`${rating} out of 5 stars`}>
+    <div
+      className="flex items-center gap-0.5"
+      aria-label={`${rating} out of 5 stars`}
+    >
       {Array.from({ length: 5 }).map((_, i) => {
         const filled = i + 1 <= Math.round(rating);
         return (
@@ -26,7 +32,9 @@ function Stars({ rating }: { rating: number }) {
             key={i}
             className={cn(
               "size-3",
-              filled ? "fill-[var(--store-ink)] text-[var(--store-ink)]" : "text-[var(--store-line)]",
+              filled
+                ? "fill-[var(--store-ink)] text-[var(--store-ink)]"
+                : "text-[var(--store-line)]",
             )}
           />
         );
@@ -51,12 +59,15 @@ export function ShopProductCard({ product }: { product: CatalogProduct }) {
     <>
       <div className="shop-card-media">
         <Image
-          src={product.image}
+          src={cloudinaryDeliveryUrl(product.image, { width: 480 })}
           alt={product.imageAlt}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className={cn("object-contain p-3", !product.available && "opacity-70")}
-          unoptimized
+          quality={75}
+          className={cn(
+            "object-contain p-3",
+            !product.available && "opacity-70",
+          )}
         />
         {product.badge ? (
           <span
@@ -123,7 +134,10 @@ export function ShopProductCard({ product }: { product: CatalogProduct }) {
     <>
       <button
         type="button"
-        className={cn("shop-card shop-card-oos", product.topSelling && "shop-card-featured")}
+        className={cn(
+          "shop-card shop-card-oos",
+          product.topSelling && "shop-card-featured",
+        )}
         onClick={() => setShowOutOfStock(true)}
       >
         {inner}
@@ -137,7 +151,10 @@ export function ShopProductCard({ product }: { product: CatalogProduct }) {
           aria-label="Out of stock"
           onClick={() => setShowOutOfStock(false)}
         >
-          <div className="shop-oos-modal" onClick={(event) => event.stopPropagation()}>
+          <div
+            className="shop-oos-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
             <button
               type="button"
               className="shop-oos-close"
@@ -149,8 +166,8 @@ export function ShopProductCard({ product }: { product: CatalogProduct }) {
             <p className="shop-oos-eyebrow">Out of stock</p>
             <h3>{product.title}</h3>
             <p>
-              This product is currently out of stock. Check the top selling database
-              instead — it&apos;s available now.
+              This product is currently out of stock. Check the top selling
+              database instead — it&apos;s available now.
             </p>
             <Link
               href="/store/product"

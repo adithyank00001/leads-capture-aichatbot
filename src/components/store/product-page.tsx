@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import {
   useEffect,
   useMemo,
@@ -28,6 +27,7 @@ import {
 
 import type { StoreProductContent } from "@/lib/store/product-content";
 import { shopCatalog, type CatalogProduct } from "@/lib/store/catalog";
+import { cloudinaryDeliveryUrl } from "@/lib/store/cloudinary";
 import { BrandLogo } from "@/components/marketing/brand-logo";
 import { isSafeDodoCheckoutUrl } from "@/lib/billing/start-landing-checkout";
 import {
@@ -66,46 +66,36 @@ function formatReviewCount(count: number) {
   return `${count}+`;
 }
 
-function isSvg(src: string) {
-  return src.toLowerCase().endsWith(".svg");
-}
-
 function ProductImage({
   src,
   alt,
   priority = false,
   sizes,
   fit = "contain",
+  /** Max delivery width from Cloudinary (keeps downloads small). */
+  width = 720,
 }: {
   src: string;
   alt: string;
   priority?: boolean;
   sizes: string;
   fit?: "contain" | "cover";
+  width?: number;
 }) {
   const fitClass = fit === "cover" ? "object-cover" : "object-contain";
-
-  if (isSvg(src)) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={src}
-        alt={alt}
-        className={cn("absolute inset-0 size-full p-2", fitClass)}
-      />
-    );
-  }
+  // Serve already-compressed bytes from Cloudinary (no second re-encode pass).
+  const deliverySrc = cloudinaryDeliveryUrl(src, { width });
 
   return (
-    <Image
-      src={src}
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={deliverySrc}
       alt={alt}
-      fill
-      priority={priority}
+      className={cn("absolute inset-0 size-full p-2", fitClass)}
+      loading={priority ? "eager" : "lazy"}
+      decoding="async"
+      fetchPriority={priority ? "high" : "low"}
       sizes={sizes}
-      quality={100}
-      unoptimized
-      className={cn("p-2", fitClass)}
     />
   );
 }
@@ -585,7 +575,7 @@ function ImageZoomLightbox({
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={src}
+          src={cloudinaryDeliveryUrl(src, { width: 1100, quality: "good" })}
           alt={alt}
           className="store-zoom-image"
           style={{
@@ -782,7 +772,12 @@ export function StoreProductPage({ product }: Props) {
                     aria-label={`Show image ${index + 1}`}
                     aria-pressed={selected}
                   >
-                    <ProductImage src={image.src} alt="" sizes="120px" />
+                    <ProductImage
+                      src={image.src}
+                      alt=""
+                      sizes="120px"
+                      width={150}
+                    />
                   </button>
                 );
               })}
@@ -1040,7 +1035,17 @@ export function StoreProductPage({ product }: Props) {
                     <div className="store-review-head">
                       <div className="store-review-avatar">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={review.avatar} alt="" />
+                        <img
+                          src={cloudinaryDeliveryUrl(review.avatar, {
+                            width: 72,
+                            height: 72,
+                          })}
+                          alt=""
+                          width={44}
+                          height={44}
+                          loading="lazy"
+                          decoding="async"
+                        />
                       </div>
                       <div>
                         <p className="store-review-name">{review.name}</p>
@@ -1110,6 +1115,7 @@ export function StoreProductPage({ product }: Props) {
                         alt={item.imageAlt}
                         sizes="(max-width: 640px) 90vw, 280px"
                         fit="cover"
+                        width={360}
                       />
                     </div>
                     <div className="store-explore-card-body">
