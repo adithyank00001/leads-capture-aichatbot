@@ -17,9 +17,13 @@ import { getMetaPixelBootstrapScript } from "@/lib/meta/pixel-bootstrap-script";
 
 const appOrigin = publicConfig.appUrl.replace(/\/+$/, "");
 
+// App/dashboard body font. preload disabled so store pages (Fraunces + Manrope)
+// are not competing with a third font for first-load bandwidth.
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  preload: false,
+  display: "swap",
 });
 
 export const metadata: Metadata = {

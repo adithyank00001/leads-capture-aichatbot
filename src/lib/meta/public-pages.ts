@@ -61,7 +61,7 @@ export function getMetaPageContentName(pathname: string): string | null {
   return META_PAGE_CONTENT_NAMES[pathname] ?? null;
 }
 
-/** Same key format for head bootstrap + SPA tracker (avoids double PageView). */
+/** Same key format for head bootstrap + SPA tracker (avoids double Pixel PageView). */
 export function getMetaPageViewKey(
   pathname: string,
   search: string | { toString(): string },

@@ -5,8 +5,10 @@ import {
 } from "@/lib/meta/public-pages";
 
 /**
- * Inline script for Next.js `beforeInteractive` (injected into <head>).
- * Runs as early as possible: _fbc → Pixel init → PageView → CAPI (same event_id).
+ * Tiny `beforeInteractive` script (page head).
+ * Keeps ad attribution early without loading Facebook’s heavy script yet:
+ * _fbc cookie → fbq stub → init + PageView queued (same event_id for later CAPI).
+ * `fbevents.js` loads with `afterInteractive` in the root layout.
  */
 export function getMetaPixelBootstrapScript(): string {
   const pixelId = FB_PIXEL_ID.replace(/[^0-9]/g, "");
@@ -33,7 +35,7 @@ var key=query?path+"?"+query:path;
 var eventId=(typeof crypto!=="undefined"&&crypto.randomUUID)?crypto.randomUUID():("evt_"+Date.now()+"_"+Math.random().toString(36).slice(2,11));
 var contentName=names[path]||null;
 var customData=contentName?{content_name:contentName}:{};
-window.__LEADCX_META__={initialPageViewKey:key,initialPageViewEventId:eventId,pixelBootstrapped:true};
+window.__LEADCX_META__={initialPageViewKey:key,initialPageViewEventId:eventId,pixelBootstrapped:true,pixelPageViewQueued:true,capiPageViewSent:false};
 try{
 var m=/(?:^|[?&#])fbclid=([^&#]+)/i.exec(location.href);
 var fbclid=m&&m[1]?decodeURIComponent(String(m[1]).replace(/\\+/g," ")).trim():"";
@@ -51,28 +53,11 @@ document.cookie="_fbc="+encodeURIComponent(fbc)+"; Path=/; Max-Age=7776000; Same
 }
 }
 }catch(e){}
-!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+!function(f,n){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
 if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window,document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
+n.queue=[];}(window);
 fbq('init','${pixelId}');
 fbq('track','PageView',customData,{eventID:eventId});
-try{
-fetch('/api/meta/events',{
-method:'POST',
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({
-eventName:'PageView',
-eventId:eventId,
-eventSourceUrl:location.href,
-customData:customData
-}),
-keepalive:true,
-credentials:'same-origin'
-});
-}catch(e){}
 }catch(e){}})();`;
 }

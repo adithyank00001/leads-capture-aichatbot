@@ -11,6 +11,11 @@ type BrandLogoProps = {
   size?: "xs" | "sm" | "md";
   /** Use on blue/dark sidebars so the logo stays visible. */
   tone?: "default" | "onDark";
+  /**
+   * Default false so the logo does not steal bandwidth from the main product image (LCP).
+   * Pass true only when the logo itself is the primary above-the-fold image.
+   */
+  priority?: boolean;
 };
 
 const sizeClasses = {
@@ -33,6 +38,7 @@ export function BrandLogo({
   href = "/",
   size = "sm",
   tone = "default",
+  priority = false,
 }: BrandLogoProps) {
   const dimensions = sizeDimensions[size];
 
@@ -42,7 +48,7 @@ export function BrandLogo({
       alt={publicConfig.appName}
       width={dimensions.width}
       height={dimensions.height}
-      priority
+      priority={priority}
       className={cn(
         sizeClasses[size],
         tone === "onDark" && "brightness-0 invert",

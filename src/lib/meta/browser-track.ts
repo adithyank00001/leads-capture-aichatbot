@@ -49,18 +49,23 @@ function resolvePathnameForPageView(eventSourceUrl?: string): string {
 }
 
 /**
- * Fire Pixel + CAPI with the same event_id for Meta deduplication.
+ * Forward an event to CAPI only (same-origin /api/meta/events).
+ * Used when the browser Pixel event was already queued early with this event_id.
  * Never throws; never blocks the UI.
  */
-export function trackPixelAndCapi(
+export function forwardCapiEvent(
   eventName: BrowserTrackableEvent,
+  eventId: string,
   params: Record<string, unknown> = {},
   eventSourceUrl?: string,
-): string {
-  const eventId = createEventId();
+): void {
+  const trimmedId = eventId.trim();
+  if (!trimmedId) {
+    return;
+  }
+
   const sourceUrl = eventSourceUrl?.trim() || currentPageUrl();
 
-  // Persist fbclid → _fbc before Pixel + CAPI so checkout/Purchase still match later.
   try {
     ensureBrowserFbcCookie();
   } catch {
@@ -68,15 +73,9 @@ export function trackPixelAndCapi(
   }
 
   try {
-    track(eventName, params, { eventID: eventId });
-  } catch {
-    // Pixel must never break the page.
-  }
-
-  try {
     const body = JSON.stringify({
       eventName,
-      eventId,
+      eventId: trimmedId,
       eventSourceUrl: sourceUrl,
       ...(Object.keys(params).length > 0 ? { customData: params } : {}),
     });
@@ -93,6 +92,33 @@ export function trackPixelAndCapi(
   } catch {
     // ignore
   }
+}
+
+/**
+ * Fire Pixel + CAPI with the same event_id for Meta deduplication.
+ * Never throws; never blocks the UI.
+ */
+export function trackPixelAndCapi(
+  eventName: BrowserTrackableEvent,
+  params: Record<string, unknown> = {},
+  eventSourceUrl?: string,
+): string {
+  const eventId = createEventId();
+
+  // Persist fbclid → _fbc before Pixel + CAPI so checkout/Purchase still match later.
+  try {
+    ensureBrowserFbcCookie();
+  } catch {
+    // Cookie write must never break tracking.
+  }
+
+  try {
+    track(eventName, params, { eventID: eventId });
+  } catch {
+    // Pixel must never break the page.
+  }
+
+  forwardCapiEvent(eventName, eventId, params, eventSourceUrl);
 
   return eventId;
 }

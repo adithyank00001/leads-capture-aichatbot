@@ -1,13 +1,11 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import {
   useEffect,
   useMemo,
   useRef,
   useState,
-  type FormEvent,
-  type PointerEvent,
-  type WheelEvent,
 } from "react";
 import {
   BadgeCheck,
@@ -19,10 +17,8 @@ import {
   Plus,
   ShieldCheck,
   Star,
-  X,
   Zap,
   ZoomIn,
-  ZoomOut,
 } from "lucide-react";
 
 import type { StoreProductContent } from "@/lib/store/product-content";
@@ -35,6 +31,39 @@ import {
   trackStoreViewContent,
 } from "@/lib/meta/store-track";
 import { cn } from "@/lib/utils";
+
+/** Heavy UI — not needed for first paint, Meta, or checkout. */
+const ProductImageZoomLightbox = dynamic(
+  () =>
+    import("@/components/store/product-image-zoom-lightbox").then(
+      (m) => m.ProductImageZoomLightbox,
+    ),
+  { ssr: false },
+);
+
+const ProductReviewForm = dynamic(
+  () =>
+    import("@/components/store/product-review-form").then(
+      (m) => m.ProductReviewForm,
+    ),
+  { ssr: false },
+);
+
+const ProductExploreModal = dynamic(
+  () =>
+    import("@/components/store/product-explore-modal").then(
+      (m) => m.ProductExploreModal,
+    ),
+  { ssr: false },
+);
+
+function prefetchZoomLightbox() {
+  void import("@/components/store/product-image-zoom-lightbox");
+}
+
+function prefetchExploreModal() {
+  void import("@/components/store/product-explore-modal");
+}
 
 const EXPLORE_PRODUCT_IDS = [
   "usa-leads-premium",
@@ -296,75 +325,6 @@ function resolveOfferTimer(): {
   };
 }
 
-function ReviewForm() {
-  const [quote, setQuote] = useState("");
-  const [rating, setRating] = useState(5);
-  const [message, setMessage] = useState<string | null>(null);
-
-  function showBuyerOnlyMessage() {
-    setMessage(
-      "Only buyers can leave a review. Purchase this product to share your experience.",
-    );
-  }
-
-  function handleSubmit(event: FormEvent) {
-    event.preventDefault();
-    showBuyerOnlyMessage();
-  }
-
-  return (
-    <form className="store-review-form" onSubmit={handleSubmit}>
-      <h3>Write a review</h3>
-      <p className="store-review-form-note">
-        Share your experience with this product.
-      </p>
-
-      <label className="store-review-field">
-        <span>Rating</span>
-        <select
-          value={rating}
-          onChange={(event) => {
-            setRating(Number(event.target.value));
-            showBuyerOnlyMessage();
-          }}
-          onFocus={showBuyerOnlyMessage}
-          aria-label="Review rating"
-        >
-          <option value={5}>5 stars</option>
-          <option value={4}>4 stars</option>
-          <option value={3}>3 stars</option>
-          <option value={2}>2 stars</option>
-          <option value={1}>1 star</option>
-        </select>
-      </label>
-
-      <label className="store-review-field">
-        <span>Your review</span>
-        <textarea
-          value={quote}
-          onChange={(event) => {
-            setQuote(event.target.value);
-            showBuyerOnlyMessage();
-          }}
-          onFocus={showBuyerOnlyMessage}
-          placeholder="Write your review..."
-          rows={4}
-        />
-      </label>
-
-      <button type="submit" className="store-btn-primary store-review-submit">
-        Submit review
-      </button>
-
-      {message ? (
-        <p className="store-review-buyer-only" role="status">
-          {message}
-        </p>
-      ) : null}
-    </form>
-  );
-}
-
 function OfferCountdown() {
   const [remaining, setRemaining] = useState<number | null>(null);
   const [licensesLeft, setLicensesLeft] = useState<number | null>(null);
@@ -456,149 +416,6 @@ function Stars({ rating }: { rating: number }) {
   );
 }
 
-function ImageZoomLightbox({
-  src,
-  alt,
-  onClose,
-}: {
-  src: string;
-  alt: string;
-  onClose: () => void;
-}) {
-  const [zoom, setZoom] = useState(1);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const dragging = useRef(false);
-  const lastPoint = useRef({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
-      if (event.key === "+" || event.key === "=") {
-        setZoom((value) => Math.min(4, Number((value + 0.25).toFixed(2))));
-      }
-      if (event.key === "-" || event.key === "_") {
-        setZoom((value) => {
-          const next = Math.max(1, Number((value - 0.25).toFixed(2)));
-          if (next === 1) setOffset({ x: 0, y: 0 });
-          return next;
-        });
-      }
-    }
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [onClose]);
-
-  function zoomBy(delta: number) {
-    setZoom((value) => {
-      const next = Math.min(4, Math.max(1, Number((value + delta).toFixed(2))));
-      if (next === 1) setOffset({ x: 0, y: 0 });
-      return next;
-    });
-  }
-
-  function onWheel(event: WheelEvent<HTMLDivElement>) {
-    event.preventDefault();
-    zoomBy(event.deltaY < 0 ? 0.2 : -0.2);
-  }
-
-  function onPointerDown(event: PointerEvent<HTMLDivElement>) {
-    if (zoom <= 1) return;
-    dragging.current = true;
-    lastPoint.current = { x: event.clientX, y: event.clientY };
-    event.currentTarget.setPointerCapture(event.pointerId);
-  }
-
-  function onPointerMove(event: PointerEvent<HTMLDivElement>) {
-    if (!dragging.current || zoom <= 1) return;
-    const dx = event.clientX - lastPoint.current.x;
-    const dy = event.clientY - lastPoint.current.y;
-    lastPoint.current = { x: event.clientX, y: event.clientY };
-    setOffset((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
-  }
-
-  function onPointerUp(event: PointerEvent<HTMLDivElement>) {
-    dragging.current = false;
-    try {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    } catch {
-      // ignore
-    }
-  }
-
-  return (
-    <div
-      className="store-zoom-overlay"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Zoomed product image"
-      onClick={onClose}
-    >
-      <div
-        className="store-zoom-toolbar"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <button
-          type="button"
-          onClick={() => zoomBy(-0.25)}
-          aria-label="Zoom out"
-        >
-          <ZoomOut className="size-4" />
-        </button>
-        <span>{Math.round(zoom * 100)}%</span>
-        <button type="button" onClick={() => zoomBy(0.25)} aria-label="Zoom in">
-          <ZoomIn className="size-4" />
-        </button>
-        <button type="button" onClick={onClose} aria-label="Close zoom">
-          <X className="size-4" />
-        </button>
-      </div>
-
-      <div
-        className="store-zoom-stage"
-        onClick={(event) => event.stopPropagation()}
-        onWheel={onWheel}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
-        style={{
-          cursor:
-            zoom > 1 ? (dragging.current ? "grabbing" : "grab") : "zoom-in",
-        }}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={cloudinaryDeliveryUrl(src, { width: 1100, quality: "good" })}
-          alt={alt}
-          className="store-zoom-image"
-          style={{
-            transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
-          }}
-          draggable={false}
-          onDoubleClick={() => {
-            if (zoom > 1) {
-              setZoom(1);
-              setOffset({ x: 0, y: 0 });
-            } else {
-              setZoom(2);
-            }
-          }}
-        />
-      </div>
-      <p className="store-zoom-hint">
-        Scroll to zoom · Drag to move · Esc to close
-      </p>
-    </div>
-  );
-}
-
 export function StoreProductPage({ product }: Props) {
   const [activeImage, setActiveImage] = useState(0);
   const [zoomOpen, setZoomOpen] = useState(false);
@@ -609,6 +426,8 @@ export function StoreProductPage({ product }: Props) {
   const [exploreProduct, setExploreProduct] = useState<CatalogProduct | null>(
     null,
   );
+  /** Review form is below the fold — mount after idle so buy path stays light. */
+  const [reviewFormReady, setReviewFormReady] = useState(false);
   const buyingLock = useRef(false);
 
   const unitPrice = useMemo(() => {
@@ -628,7 +447,7 @@ export function StoreProductPage({ product }: Props) {
   const viewContentSent = useRef(false);
 
   useEffect(() => {
-    // Meta ViewContent after first paint — PageView already fired early in <head>.
+    // Meta ViewContent after first paint — PageView is queued early in <head>.
     if (viewContentSent.current) return;
     viewContentSent.current = true;
     trackStoreViewContent({
@@ -645,6 +464,27 @@ export function StoreProductPage({ product }: Props) {
       method: "GET",
       cache: "no-store",
     }).catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    const win = window as Window & {
+      requestIdleCallback?: (
+        callback: IdleRequestCallback,
+        options?: IdleRequestOptions,
+      ) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+
+    if (typeof win.requestIdleCallback === "function") {
+      const idleId = win.requestIdleCallback(
+        () => setReviewFormReady(true),
+        { timeout: 2500 },
+      );
+      return () => win.cancelIdleCallback?.(idleId);
+    }
+
+    const timeoutId = window.setTimeout(() => setReviewFormReady(true), 1200);
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   // After Dodo checkout, browser Back restores this page from cache with
@@ -741,6 +581,8 @@ export function StoreProductPage({ product }: Props) {
               type="button"
               className="store-main-image store-main-image-zoom"
               onClick={() => setZoomOpen(true)}
+              onPointerEnter={prefetchZoomLightbox}
+              onFocus={prefetchZoomLightbox}
               aria-label="Open image zoom"
             >
               <ProductImage
@@ -1056,7 +898,7 @@ export function StoreProductPage({ product }: Props) {
                   </li>
                 ))}
               </ul>
-              <ReviewForm />
+              {reviewFormReady ? <ProductReviewForm /> : null}
             </section>
           ) : null}
 
@@ -1108,6 +950,8 @@ export function StoreProductPage({ product }: Props) {
                     type="button"
                     className="store-explore-card"
                     onClick={() => setExploreProduct(item)}
+                    onPointerEnter={prefetchExploreModal}
+                    onFocus={prefetchExploreModal}
                   >
                     <div className="store-explore-card-media">
                       <ProductImage
@@ -1192,7 +1036,7 @@ export function StoreProductPage({ product }: Props) {
       </div>
 
       {zoomOpen ? (
-        <ImageZoomLightbox
+        <ProductImageZoomLightbox
           src={product.images[activeImage]?.src ?? product.images[0].src}
           alt={product.images[activeImage]?.alt ?? product.images[0].alt}
           onClose={() => setZoomOpen(false)}
@@ -1200,59 +1044,17 @@ export function StoreProductPage({ product }: Props) {
       ) : null}
 
       {exploreProduct ? (
-        <div
-          className="shop-oos-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Restocking soon"
-          onClick={() => setExploreProduct(null)}
-        >
-          <div
-            className="shop-oos-modal store-explore-modal"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              className="shop-oos-close"
-              aria-label="Close"
-              onClick={() => setExploreProduct(null)}
-            >
-              <X className="size-4" />
-            </button>
-            <p className="store-explore-modal-title">
-              🟡 Restocking Licenses Soon (₹{exploreProduct.price})
-            </p>
-            <p>
-              This standalone database licenses will be restocked soon.
-            </p>
-            <p className="store-explore-modal-warning">
-              ⚠️ WARNING: The All-India Database currently includes this for
-              just ₹{product.price}. This is a flash sale and ending soon.
-            </p>
-            <div className="store-explore-modal-actions">
-              <button
-                type="button"
-                className="store-btn-primary shop-oos-btn"
-                onClick={() => {
-                  setExploreProduct(null);
-                  document
-                    .getElementById("buy")
-                    ?.scrollIntoView({ behavior: "smooth", block: "center" });
-                }}
-              >
-                Get it in the ₹{product.price} Bundle
-                <ChevronRight className="size-4" />
-              </button>
-              <button
-                type="button"
-                className="store-explore-close-btn"
-                onClick={() => setExploreProduct(null)}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+        <ProductExploreModal
+          exploreProduct={exploreProduct}
+          bundlePrice={product.price}
+          onClose={() => setExploreProduct(null)}
+          onGetBundle={() => {
+            setExploreProduct(null);
+            document
+              .getElementById("buy")
+              ?.scrollIntoView({ behavior: "smooth", block: "center" });
+          }}
+        />
       ) : null}
     </div>
   );

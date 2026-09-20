@@ -1,21 +1,9 @@
 import type { Metadata } from "next";
-import { Fraunces, Manrope } from "next/font/google";
 
 import { ShopHomePage } from "@/components/store/shop-home-page";
+import { storeFontVariables } from "@/lib/store/fonts";
 
 import "./store/store.css";
-
-const display = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-store-display",
-  weight: ["500", "600", "700"],
-});
-
-const sans = Manrope({
-  subsets: ["latin"],
-  variable: "--font-store-sans",
-  weight: ["400", "500", "600", "700"],
-});
 
 export const metadata: Metadata = {
   title: {
@@ -47,7 +35,7 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <div className={`${display.variable} ${sans.variable} min-h-full`}>
+    <div className={`${storeFontVariables} min-h-full`}>
       <ShopHomePage />
     </div>
   );
