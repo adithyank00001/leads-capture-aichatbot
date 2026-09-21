@@ -30,8 +30,9 @@ export const shopCatalog: CatalogProduct[] = [
     compareAtPrice: 4997,
     currencySymbol: "₹",
     image:
-      "https://res.cloudinary.com/ntv0bhpy/image/upload/v1789738887/Social_media_educational_poster___20260918185159.webp",
-    imageAlt: "110Cr+ All India Latest Leads database",
+      "https://res.cloudinary.com/ntv0bhpy/image/upload/v1790006128/ChatGPT_Image_Sep_21_2026_09_19_48_PM.webp",
+    imageAlt:
+      "110 Crore+ Indian Leads database with 200+ categories and 10 Lakhs+ USA leads bonus",
     href: "/store/product",
     badge: "Top selling",
     topSelling: true,
