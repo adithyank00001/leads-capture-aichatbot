@@ -7,6 +7,7 @@ import {
   type PointerEvent,
   type WheelEvent,
 } from "react";
+import { createPortal } from "react-dom";
 import { X, ZoomIn, ZoomOut } from "lucide-react";
 
 import { cloudinaryDeliveryUrl } from "@/lib/store/cloudinary";
@@ -22,8 +23,20 @@ export function ProductImageZoomLightbox({ src, alt, onClose }: Props) {
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  const zoomRef = useRef(1);
   const dragging = useRef(false);
   const lastPoint = useRef({ x: 0, y: 0 });
+  const stageRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    zoomRef.current = zoom;
+  }, [zoom]);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -50,6 +63,32 @@ export function ProductImageZoomLightbox({ src, alt, onClose }: Props) {
     };
   }, [onClose]);
 
+  // Keep drag working even if the pointer leaves the image area
+  useEffect(() => {
+    function onWindowPointerMove(event: globalThis.PointerEvent) {
+      if (!dragging.current || zoomRef.current <= 1) return;
+      const dx = event.clientX - lastPoint.current.x;
+      const dy = event.clientY - lastPoint.current.y;
+      lastPoint.current = { x: event.clientX, y: event.clientY };
+      setOffset((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
+    }
+
+    function onWindowPointerUp() {
+      if (!dragging.current) return;
+      dragging.current = false;
+      setIsDragging(false);
+    }
+
+    window.addEventListener("pointermove", onWindowPointerMove);
+    window.addEventListener("pointerup", onWindowPointerUp);
+    window.addEventListener("pointercancel", onWindowPointerUp);
+    return () => {
+      window.removeEventListener("pointermove", onWindowPointerMove);
+      window.removeEventListener("pointerup", onWindowPointerUp);
+      window.removeEventListener("pointercancel", onWindowPointerUp);
+    };
+  }, []);
+
   function zoomBy(delta: number) {
     setZoom((value) => {
       const next = Math.min(4, Math.max(1, Number((value + delta).toFixed(2))));
@@ -64,19 +103,20 @@ export function ProductImageZoomLightbox({ src, alt, onClose }: Props) {
   }
 
   function onPointerDown(event: PointerEvent<HTMLDivElement>) {
-    if (zoom <= 1) return;
+    if (zoomRef.current <= 1) return;
+    // Only primary button / touch / pen
+    if (event.button !== 0 && event.pointerType === "mouse") return;
+
+    event.preventDefault();
     dragging.current = true;
     setIsDragging(true);
     lastPoint.current = { x: event.clientX, y: event.clientY };
-    event.currentTarget.setPointerCapture(event.pointerId);
-  }
 
-  function onPointerMove(event: PointerEvent<HTMLDivElement>) {
-    if (!dragging.current || zoom <= 1) return;
-    const dx = event.clientX - lastPoint.current.x;
-    const dy = event.clientY - lastPoint.current.y;
-    lastPoint.current = { x: event.clientX, y: event.clientY };
-    setOffset((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // ignore — window listeners still handle the drag
+    }
   }
 
   function onPointerUp(event: PointerEvent<HTMLDivElement>) {
@@ -89,7 +129,9 @@ export function ProductImageZoomLightbox({ src, alt, onClose }: Props) {
     }
   }
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div
       className="store-zoom-overlay"
       role="dialog"
@@ -118,11 +160,11 @@ export function ProductImageZoomLightbox({ src, alt, onClose }: Props) {
       </div>
 
       <div
+        ref={stageRef}
         className="store-zoom-stage"
         onClick={(event) => event.stopPropagation()}
         onWheel={onWheel}
         onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
         style={{
@@ -135,9 +177,11 @@ export function ProductImageZoomLightbox({ src, alt, onClose }: Props) {
           alt={alt}
           className="store-zoom-image"
           style={{
-            transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
+            transform: `translate3d(${offset.x}px, ${offset.y}px, 0) scale(${zoom})`,
+            transition: isDragging ? "none" : undefined,
           }}
           draggable={false}
+          onDragStart={(event) => event.preventDefault()}
           onDoubleClick={() => {
             if (zoom > 1) {
               setZoom(1);
@@ -149,8 +193,9 @@ export function ProductImageZoomLightbox({ src, alt, onClose }: Props) {
         />
       </div>
       <p className="store-zoom-hint">
-        Scroll to zoom · Drag to move · Esc to close
+        Scroll or use + / − to zoom · Drag to move · Esc to close
       </p>
-    </div>
+    </div>,
+    document.body,
   );
 }

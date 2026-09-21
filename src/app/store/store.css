@@ -197,6 +197,7 @@
   min-height: 0;
   touch-action: none;
   user-select: none;
+  -webkit-user-select: none;
 }
 
 .store-zoom-image {
@@ -209,6 +210,11 @@
   transition: transform 60ms linear;
   border-radius: 0.25rem;
   background: white;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: auto;
 }
 
 .store-zoom-hint {

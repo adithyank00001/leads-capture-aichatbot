@@ -122,15 +122,15 @@ export const storeProduct: StoreProductContent = {
     "Includes Name, Email, Phone, WhatsApp & Location details",
     "Lifetime access to all downloaded files",
     {
-      text: "More than 150 Millions free USA Leads databases with 300+ categories",
+      text: "More than 10 Lakhs+ free USA Leads databases with 300+ categories",
       badge: "Bonus",
     },
   ],
   socialProofTag: "🔥 150+ sold yesterday!",
   images: [
     {
-      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1789883258/200_Categories_1.webp",
-      alt: "110 Crore+ Indian Leads database with 200+ categories and USA leads bonus",
+      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1790006128/ChatGPT_Image_Sep_21_2026_09_19_48_PM.webp",
+      alt: "110 Crore+ Indian Leads database with 200+ categories and 10 Lakhs+ USA leads bonus",
     },
     {
       src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1789736328/Sample_category_New_Business_Owners_Category_1.webp",
@@ -219,7 +219,7 @@ export const storeProduct: StoreProductContent = {
   ],
   bonusIncluded: [
     {
-      label: "USA Leads Database (150 Millions+ leads with 300+ categories)",
+      label: "USA Leads Database (10 Lakhs+ leads with 300+ categories)",
       value: 897,
     },
     { label: "CRM Tracking Blueprint System", value: 497 },
