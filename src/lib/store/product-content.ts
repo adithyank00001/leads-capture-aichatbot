@@ -307,7 +307,7 @@ export const storeProduct: StoreProductContent = {
     {
       question: "What format is the database delivered in?",
       answer:
-        "The entire database is provided in a standard Microsoft Excel (.xlsx) format. This makes it instantly accessible and easy to filter, sort, or upload directly into your preferred CRM, email sender, or bulk messaging tool.",
+        "The database is delivered in universal spreadsheet formats (.xlsx and .csv). This means you can easily open, filter, and sort the data using Microsoft Excel, Google Sheets, or Apple Numbers. It is also perfectly formatted to be uploaded instantly into any CRM, email sender, or bulk messaging tool.",
     },
     {
       question: "Does this database cover all states in India?",

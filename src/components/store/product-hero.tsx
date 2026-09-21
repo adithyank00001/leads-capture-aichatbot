@@ -47,7 +47,7 @@ function formatCountdown(totalSeconds: number) {
   return `${pad2(hours)}:${pad2(minutes)}:${pad2(seconds)}`;
 }
 
-const OFFER_TIMER_KEY = "store-offer-timer-v6";
+const OFFER_TIMER_KEY = "store-offer-timer-v7";
 const OFFER_DURATION_MS = (9 * 3600 + 47 * 60 + 23) * 1000;
 
 const LICENSE_STOCK_KEY = "store-license-stock-v3";
@@ -162,6 +162,7 @@ function resolveOfferTimer(): {
   const today = localDayKey();
   const existing = readOfferTimerState();
 
+  // Already hit 00:00 today → stay at zero until they open again tomorrow
   if (existing?.expiredOnDay === today) {
     return {
       deadlineMs: existing.deadlineMs,
@@ -170,6 +171,8 @@ function resolveOfferTimer(): {
     };
   }
 
+  // Expired on a previous day → start fresh only when they open the page
+  // (nothing auto-starts at midnight while the tab is closed)
   if (existing?.expiredOnDay && existing.expiredOnDay !== today) {
     const deadlineMs = Date.now() + OFFER_DURATION_MS;
     writeOfferTimerState({ deadlineMs, expiredOnDay: null });
@@ -180,6 +183,7 @@ function resolveOfferTimer(): {
     };
   }
 
+  // Countdown still running
   if (existing && existing.deadlineMs > Date.now()) {
     return {
       deadlineMs: existing.deadlineMs,
@@ -188,7 +192,22 @@ function resolveOfferTimer(): {
     };
   }
 
+  // Deadline already passed (e.g. tab was closed when it hit zero)
   if (existing && existing.deadlineMs <= Date.now()) {
+    const deadlineDay = localDayKey(new Date(existing.deadlineMs));
+
+    // Old deadline was yesterday (or earlier) → this open starts a new offer
+    if (deadlineDay !== today) {
+      const deadlineMs = Date.now() + OFFER_DURATION_MS;
+      writeOfferTimerState({ deadlineMs, expiredOnDay: null });
+      return {
+        deadlineMs,
+        remainingSeconds: Math.floor(OFFER_DURATION_MS / 1000),
+        stuckExpired: false,
+      };
+    }
+
+    // Hit zero earlier today → stay stuck for the rest of today
     writeOfferTimerState({
       deadlineMs: existing.deadlineMs,
       expiredOnDay: today,
@@ -200,6 +219,7 @@ function resolveOfferTimer(): {
     };
   }
 
+  // First visit in this browser
   const deadlineMs = Date.now() + OFFER_DURATION_MS;
   writeOfferTimerState({ deadlineMs, expiredOnDay: null });
   return {
