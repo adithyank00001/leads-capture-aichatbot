@@ -20,6 +20,7 @@ import {
   trackStoreInitiateCheckout,
   trackStoreViewContent,
 } from "@/lib/meta/store-track";
+import { readBrowserMetaClickIds } from "@/lib/meta/fbc";
 import { isValidStoreEmail, normalizeStoreEmail } from "@/lib/store/email";
 import {
   openRazorpayCheckout,
@@ -456,6 +457,7 @@ export function ProductHero({ product }: Props) {
     response: RazorpaySuccessResponse,
     buyerEmail: string,
   ) {
+    const clickIds = readBrowserMetaClickIds();
     const res = await fetch("/api/store/razorpay/verify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -464,6 +466,8 @@ export function ProductHero({ product }: Props) {
         razorpay_payment_id: response.razorpay_payment_id,
         razorpay_signature: response.razorpay_signature,
         customer_email: buyerEmail,
+        ...(clickIds.fbp ? { fbp: clickIds.fbp } : {}),
+        ...(clickIds.fbc ? { fbc: clickIds.fbc } : {}),
       }),
       cache: "no-store",
     });
@@ -507,6 +511,7 @@ export function ProductHero({ product }: Props) {
     });
 
     try {
+      const clickIds = readBrowserMetaClickIds();
       const res = await fetch("/api/store/razorpay/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -516,6 +521,8 @@ export function ProductHero({ product }: Props) {
           email: buyerEmail,
           eventSourceUrl:
             typeof window !== "undefined" ? window.location.href : undefined,
+          ...(clickIds.fbp ? { fbp: clickIds.fbp } : {}),
+          ...(clickIds.fbc ? { fbc: clickIds.fbc } : {}),
         }),
         cache: "no-store",
       });

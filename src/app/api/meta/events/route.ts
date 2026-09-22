@@ -7,6 +7,7 @@ import {
   type ClientForwardableCapiEvent,
 } from "@/lib/meta/capi";
 import { getMetaAttributionFromRequest } from "@/lib/meta/attribution";
+import { isValidFbc, isValidFbp } from "@/lib/meta/fbc";
 import { assertMetaEventsRateLimits } from "@/lib/rate-limit";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -17,6 +18,9 @@ type MetaEventsBody = {
   customData?: unknown;
   /** Guest checkout email (store). Optional — improves CAPI match quality. */
   email?: unknown;
+  /** Browser _fbp / _fbc — preferred when Cookie header is incomplete. */
+  fbp?: unknown;
+  fbc?: unknown;
 };
 
 function parseGuestEmail(raw: unknown): string | null {
@@ -25,6 +29,18 @@ function parseGuestEmail(raw: unknown): string | null {
   if (!email || email.length > 254) return null;
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return null;
   return email;
+}
+
+function parseClientFbp(raw: unknown): string | undefined {
+  if (typeof raw !== "string") return undefined;
+  const trimmed = raw.trim();
+  return isValidFbp(trimmed) ? trimmed : undefined;
+}
+
+function parseClientFbc(raw: unknown): string | undefined {
+  if (typeof raw !== "string") return undefined;
+  const trimmed = raw.trim();
+  return isValidFbc(trimmed) ? trimmed : undefined;
 }
 
 function isClientForwardableEvent(
@@ -125,9 +141,19 @@ export async function POST(request: Request) {
     // Prefer guest checkout email (store) when present — better Purchase match later.
     const email = guestEmail ?? authEmail;
 
-    const attribution = getMetaAttributionFromRequest(request, {
+    const fromCookies = getMetaAttributionFromRequest(request, {
       eventSourceUrl,
     });
+    const clientFbp = parseClientFbp(body.fbp);
+    const clientFbc = parseClientFbc(body.fbc);
+
+    // Prefer explicit browser click ids (more reliable than Cookie header alone).
+    const attribution = {
+      fbp: clientFbp ?? fromCookies.fbp,
+      fbc: clientFbc ?? fromCookies.fbc,
+      clientIp: fromCookies.clientIp,
+      userAgent: fromCookies.userAgent,
+    };
 
     await sendCapiEvent({
       eventName,

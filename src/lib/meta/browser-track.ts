@@ -1,6 +1,6 @@
 import { publicConfig } from "@/lib/config";
 import { track } from "@/lib/fbpixel";
-import { ensureBrowserFbcCookie } from "@/lib/meta/fbc";
+import { ensureBrowserFbcCookie, readBrowserMetaClickIds } from "@/lib/meta/fbc";
 import { getMetaPageContentName } from "@/lib/meta/public-pages";
 
 export type BrowserTrackableEvent =
@@ -72,8 +72,10 @@ export function forwardCapiEvent(
   const sourceUrl = eventSourceUrl?.trim() || currentPageUrl();
   const email = userData?.email?.trim().toLowerCase() || null;
 
+  let clickIds: { fbp?: string; fbc?: string } = {};
   try {
     ensureBrowserFbcCookie();
+    clickIds = readBrowserMetaClickIds();
   } catch {
     // Cookie write must never break tracking.
   }
@@ -85,6 +87,8 @@ export function forwardCapiEvent(
       eventSourceUrl: sourceUrl,
       ...(Object.keys(params).length > 0 ? { customData: params } : {}),
       ...(email ? { email } : {}),
+      ...(clickIds.fbp ? { fbp: clickIds.fbp } : {}),
+      ...(clickIds.fbc ? { fbc: clickIds.fbc } : {}),
     });
 
     void fetch("/api/meta/events", {

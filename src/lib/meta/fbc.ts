@@ -127,6 +127,15 @@ function readBrowserCookie(name: string): string | undefined {
   return undefined;
 }
 
+const FBP_COOKIE = "_fbp";
+const FBP_PATTERN = /^fb\.\d+\.\d+\.\d+$/;
+
+export function isValidFbp(value: string | null | undefined): value is string {
+  if (!value) return false;
+  const trimmed = value.trim();
+  return trimmed.length > 0 && trimmed.length <= 512 && FBP_PATTERN.test(trimmed);
+}
+
 /**
  * Capture fbclid from the current page into a first-party _fbc cookie (90 days).
  * Safe to call often; only writes when needed. Returns the fbc value if known.
@@ -156,4 +165,33 @@ export function ensureBrowserFbcCookie(): string | undefined {
   document.cookie = `${FBC_COOKIE}=${encodeURIComponent(resolved)}; Path=/; Max-Age=${FBC_MAX_AGE_SECONDS}; SameSite=Lax${secure}`;
 
   return resolved;
+}
+
+/**
+ * Read browser Meta cookies after ensuring _fbc from fbclid.
+ * Used so CAPI gets fbp/fbc even if Cookie header is incomplete.
+ */
+export function readBrowserMetaClickIds(): {
+  fbp?: string;
+  fbc?: string;
+} {
+  if (typeof window === "undefined") {
+    return {};
+  }
+
+  let fbc: string | undefined;
+  try {
+    fbc = ensureBrowserFbcCookie();
+  } catch {
+    fbc = undefined;
+  }
+
+  const fbpRaw = readBrowserCookie(FBP_COOKIE)?.trim();
+  const fbp = isValidFbp(fbpRaw) ? fbpRaw : undefined;
+  const resolvedFbc = isValidFbc(fbc) ? fbc : undefined;
+
+  return {
+    ...(fbp ? { fbp } : {}),
+    ...(resolvedFbc ? { fbc: resolvedFbc } : {}),
+  };
 }

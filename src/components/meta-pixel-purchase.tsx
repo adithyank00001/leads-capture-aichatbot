@@ -4,6 +4,7 @@ import { useEffect } from "react";
 
 import { publicConfig } from "@/lib/config";
 import { setPixelUserData, track } from "@/lib/fbpixel";
+import { ensureBrowserFbcCookie } from "@/lib/meta/fbc";
 
 const PURCHASE_TRACK_KEY = "leady_meta_pixel_purchase";
 
@@ -55,6 +56,12 @@ export function MetaPixelPurchase({
         ...(email ? { em: email } : {}),
         ...(phone ? { ph: phone } : {}),
       });
+    }
+
+    try {
+      ensureBrowserFbcCookie();
+    } catch {
+      // Cookie write must never break Purchase tracking.
     }
 
     track(

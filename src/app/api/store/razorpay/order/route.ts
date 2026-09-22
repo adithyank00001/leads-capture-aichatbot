@@ -4,6 +4,7 @@ import {
   getMetaAttributionFromRequest,
   metaAttributionToMetadata,
 } from "@/lib/meta/attribution";
+import { isValidFbc, isValidFbp } from "@/lib/meta/fbc";
 import { isValidStoreEmail, normalizeStoreEmail } from "@/lib/store/email";
 import { STORE_PRODUCT_SLUG } from "@/lib/store/download";
 import { createStorePurchase } from "@/lib/store/purchases";
@@ -15,6 +16,8 @@ type OrderBody = {
   selections?: Record<string, string>;
   email?: string;
   eventSourceUrl?: string;
+  fbp?: string;
+  fbc?: string;
 };
 
 function computeUnitPrice(selections: Record<string, string>) {
@@ -82,9 +85,23 @@ export async function POST(request: Request) {
         ? body.eventSourceUrl.trim()
         : undefined;
 
-    const attribution = getMetaAttributionFromRequest(request, {
+    const attributionFromRequest = getMetaAttributionFromRequest(request, {
       eventSourceUrl,
     });
+    const clientFbp =
+      typeof body.fbp === "string" && isValidFbp(body.fbp.trim())
+        ? body.fbp.trim()
+        : undefined;
+    const clientFbc =
+      typeof body.fbc === "string" && isValidFbc(body.fbc.trim())
+        ? body.fbc.trim()
+        : undefined;
+    const attribution = {
+      fbp: clientFbp ?? attributionFromRequest.fbp,
+      fbc: clientFbc ?? attributionFromRequest.fbc,
+      clientIp: attributionFromRequest.clientIp,
+      userAgent: attributionFromRequest.userAgent,
+    };
     const metaNotes = metaAttributionToMetadata(attribution);
 
     const receipt = `store_${Date.now()}`.slice(0, 40);

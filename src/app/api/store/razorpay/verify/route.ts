@@ -6,6 +6,7 @@ import {
   metaAttributionFromMetadata,
 } from "@/lib/meta/attribution";
 import { sendPurchaseEvent } from "@/lib/meta/capi";
+import { isValidFbc, isValidFbp } from "@/lib/meta/fbc";
 import { isValidStoreEmail, normalizeStoreEmail } from "@/lib/store/email";
 import {
   getMetaAttributionFromPurchase,
@@ -20,6 +21,8 @@ type VerifyBody = {
   razorpay_payment_id?: string;
   razorpay_signature?: string;
   customer_email?: string | null;
+  fbp?: string;
+  fbc?: string;
 };
 
 async function fetchRazorpayPaymentEmail(paymentId: string): Promise<{
@@ -104,9 +107,17 @@ export async function POST(request: Request) {
     const storedAttribution = metaAttributionFromMetadata(
       getMetaAttributionFromPurchase(purchase),
     );
+    const clientFbp =
+      typeof body.fbp === "string" && isValidFbp(body.fbp.trim())
+        ? body.fbp.trim()
+        : undefined;
+    const clientFbc =
+      typeof body.fbc === "string" && isValidFbc(body.fbc.trim())
+        ? body.fbc.trim()
+        : undefined;
     const attribution = {
-      fbp: liveAttribution.fbp ?? storedAttribution.fbp,
-      fbc: liveAttribution.fbc ?? storedAttribution.fbc,
+      fbp: clientFbp ?? liveAttribution.fbp ?? storedAttribution.fbp,
+      fbc: clientFbc ?? liveAttribution.fbc ?? storedAttribution.fbc,
       clientIp: liveAttribution.clientIp ?? storedAttribution.clientIp,
       userAgent: liveAttribution.userAgent ?? storedAttribution.userAgent,
     };
