@@ -40,6 +40,28 @@ function prefetchZoomLightbox() {
   void import("@/components/store/product-image-zoom-lightbox");
 }
 
+function RazorpayLogo({ className }: { className?: string }) {
+  return (
+    <span className={cn("store-razorpay-logo-sm inline-flex items-center gap-1.5", className)}>
+      <svg
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden
+        focusable="false"
+        className="size-4 shrink-0"
+      >
+        <path
+          fill="#072654"
+          d="M22.436 0l-11.91 7.773-1.174 4.276 6.625-4.297L11.65 24h4.391l6.395-24zM14.26 10.098L3.389 17.166 1.564 24h9.008l3.688-13.902Z"
+        />
+      </svg>
+      <span className="font-semibold tracking-tight text-[#072654]">
+        Razorpay
+      </span>
+    </span>
+  );
+}
+
 function pad2(value: number) {
   return String(value).padStart(2, "0");
 }
@@ -723,10 +745,11 @@ export function ProductHero({ product }: Props) {
             ) : null}
             <div
               className="store-pay-secure"
-              aria-label="Pay securely with Razorpay"
+              aria-label="Secured by Razorpay"
             >
               <Lock className="size-3.5 shrink-0 text-[var(--store-accent)]" />
-              <span>Secure checkout · Instant delivery</span>
+              <span>Secured by</span>
+              <RazorpayLogo />
             </div>
             <p className="text-center text-xs text-[var(--store-muted)]">
               Instant Google Drive link after payment
@@ -786,10 +809,11 @@ export function ProductHero({ product }: Props) {
             ) : (
               <div
                 className="store-pay-secure store-pay-secure-sticky"
-                aria-label="Pay securely with encrypted checkout"
+                aria-label="Secured by Razorpay"
               >
-                <Lock className="size-2.5 shrink-0 text-[var(--store-accent)]" />
-                <span>Secure checkout · Instant delivery</span>
+                <Lock className="size-3 shrink-0 text-[var(--store-accent)]" />
+                <span>Secured by</span>
+                <RazorpayLogo className="store-razorpay-logo-sm" />
               </div>
             )}
           </div>

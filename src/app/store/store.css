@@ -694,30 +694,30 @@
 }
 
 .store-pay-secure-sticky {
-  gap: 0.2rem;
-  font-size: 0.58rem;
+  gap: 0.28rem;
+  font-size: 0.72rem;
   font-weight: 500;
   color: var(--store-muted);
-  line-height: 1;
+  line-height: 1.15;
 }
 
 .store-pay-secure-sticky .store-razorpay-logo-sm {
-  gap: 0.15rem;
+  gap: 0.2rem;
 }
 
 .store-pay-secure-sticky .store-razorpay-logo-sm svg {
-  width: 0.55rem;
-  height: 0.55rem;
+  width: 0.72rem;
+  height: 0.72rem;
 }
 
 .store-pay-secure-sticky .store-razorpay-logo-sm span {
-  font-size: 0.58rem;
+  font-size: 0.72rem;
   font-weight: 600;
 }
 
 .store-pay-secure-sticky > svg {
-  width: 0.55rem;
-  height: 0.55rem;
+  width: 0.72rem;
+  height: 0.72rem;
 }
 
 .store-trust {
