@@ -4,6 +4,10 @@ import { headers } from "next/headers";
 import { MetaPixelPurchase } from "@/components/meta-pixel-purchase";
 import { serverEnv } from "@/lib/env.server";
 import { sendPurchaseEventFromPageRequest } from "@/lib/meta/capi";
+import {
+  buildStorePurchaseCustomData,
+  buildStorePurchaseCustomer,
+} from "@/lib/meta/store-purchase-meta";
 import { STORE_DOWNLOAD_FILE } from "@/lib/store/download";
 import { storeProduct } from "@/lib/store/product-content";
 import {
@@ -111,40 +115,36 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
   const origin = serverEnv.appUrl.replace(/\/+$/, "") || "http://localhost:3000";
 
   if (verification.ok) {
-    const itemPrice =
-      verification.quantity > 0
-        ? verification.value / verification.quantity
-        : verification.value;
-
     await Promise.all([
       sendPurchaseEventFromPageRequest({
         paymentId: verification.paymentId,
         email: verification.email,
-        customer: {
+        customer: buildStorePurchaseCustomer({
+          paymentId: verification.paymentId,
+          orderId: verification.orderId,
           email: verification.email,
           phone: verification.phone,
           fullName: verification.customerName,
-          country: "in",
-        },
-        eventSourceUrl: `${origin}/store/success`,
-        requestHeaders,
-        customData: {
+          productSlug: verification.productSlug,
+          productTitle: verification.productTitle,
           value: verification.value,
           currency: verification.currency,
-          order_id: verification.orderId ?? verification.paymentId,
-          content_ids: [verification.productSlug],
-          content_name: verification.productTitle,
-          content_type: "product",
-          content_category: "digital_leads_database",
-          num_items: verification.quantity,
-          contents: [
-            {
-              id: verification.productSlug,
-              quantity: verification.quantity,
-              item_price: itemPrice,
-            },
-          ],
-        },
+          quantity: verification.quantity,
+        }),
+        eventSourceUrl: `${origin}/store/success`,
+        requestHeaders,
+        customData: buildStorePurchaseCustomData({
+          paymentId: verification.paymentId,
+          orderId: verification.orderId,
+          email: verification.email,
+          phone: verification.phone,
+          fullName: verification.customerName,
+          productSlug: verification.productSlug,
+          productTitle: verification.productTitle,
+          value: verification.value,
+          currency: verification.currency,
+          quantity: verification.quantity,
+        }),
       }),
       // Backup if webhook/verify is slow. Same Idempotency-Key → no double email.
       sendStorePurchaseEmail({
@@ -167,8 +167,10 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
           contentName={verification.productTitle}
           contentIds={[verification.productSlug]}
           numItems={verification.quantity}
+          orderId={verification.orderId}
           email={verification.email}
           phone={verification.phone}
+          fullName={verification.customerName}
         />
       ) : null}
 

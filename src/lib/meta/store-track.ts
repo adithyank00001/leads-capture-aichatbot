@@ -58,8 +58,9 @@ export function trackStoreViewContent(input?: {
 }
 
 /**
- * Real InitiateCheckout — fire on email modal Continue (with email).
- * Pixel Advanced Matching + CAPI hashed email in one shared event_id.
+ * InitiateCheckout — fire when buyer clicks Download / buy CTA.
+ * Sends product + money + cookies/IP via Pixel + CAPI.
+ * Email/phone come later from Razorpay on Purchase (stronger match).
  */
 export function trackStoreInitiateCheckout(input: {
   value: number;
@@ -67,7 +68,7 @@ export function trackStoreInitiateCheckout(input: {
   quantity?: number;
   contentName?: string;
   contentIds?: string[];
-  /** Buyer email from the modal — required for strong Meta matching. */
+  /** Optional — only if already known before Razorpay. */
   email?: string | null;
 }): void {
   const email = input.email ? normalizeStoreEmail(input.email) : "";
@@ -94,7 +95,7 @@ export function trackStoreInitiateCheckout(input: {
 }
 
 /**
- * After email is entered — Advanced Matching only (no new event).
+ * Advanced Matching only (no new event) when email becomes known later.
  */
 export function attachStoreCheckoutEmail(emailRaw: string): void {
   const email = normalizeStoreEmail(emailRaw);

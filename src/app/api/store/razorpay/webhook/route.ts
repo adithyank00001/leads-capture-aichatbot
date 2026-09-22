@@ -1,14 +1,17 @@
 import { after, NextResponse } from "next/server";
 
 import { serverEnv } from "@/lib/env.server";
-import {
-  metaAttributionFromMetadata,
-} from "@/lib/meta/attribution";
+import { metaAttributionFromMetadata } from "@/lib/meta/attribution";
 import { sendPurchaseEvent } from "@/lib/meta/capi";
+import {
+  buildStorePurchaseCustomData,
+  buildStorePurchaseCustomer,
+} from "@/lib/meta/store-purchase-meta";
 import {
   getMetaAttributionFromPurchase,
   markStorePurchasePaid,
 } from "@/lib/store/purchases";
+import { fetchRazorpayPaymentCustomer } from "@/lib/store/razorpay-customer";
 import { sendStorePurchaseEmail } from "@/lib/store/send-purchase-email";
 import { verifyRazorpayWebhookSignature } from "@/lib/store/verify";
 
@@ -57,14 +60,28 @@ export async function POST(request: Request) {
       const paymentId = payment.id;
       const orderId = payment.order_id;
 
+      // Fetch full payment for name + any fields webhook payload omitted.
+      const razorpayCustomer = await fetchRazorpayPaymentCustomer(paymentId);
+
       const purchase = await markStorePurchasePaid({
         razorpayOrderId: orderId,
         razorpayPaymentId: paymentId,
-        customerEmail: payment.email ?? null,
-        customerPhone: payment.contact ?? null,
+        customerEmail: razorpayCustomer.email ?? payment.email ?? null,
+        customerPhone: razorpayCustomer.phone ?? payment.contact ?? null,
+        customerName: razorpayCustomer.name,
       });
 
-      const email = purchase.customer_email ?? payment.email ?? null;
+      const email =
+        purchase.customer_email ??
+        razorpayCustomer.email ??
+        payment.email ??
+        null;
+      const phone =
+        purchase.customer_phone ??
+        razorpayCustomer.phone ??
+        payment.contact ??
+        null;
+      const fullName = purchase.customer_name ?? razorpayCustomer.name;
       const origin =
         serverEnv.appUrl.replace(/\/+$/, "") || "http://localhost:3000";
       const eventSourceUrl = `${origin}/store/success`;
@@ -81,48 +98,36 @@ export async function POST(request: Request) {
         userAgent: fromStored.userAgent ?? notesMeta.userAgent,
       };
 
+      const metaInput = {
+        paymentId,
+        orderId: purchase.razorpay_order_id,
+        email,
+        phone,
+        fullName,
+        productSlug: purchase.product_slug,
+        productTitle: purchase.product_title,
+        value: purchase.amount_paise / 100,
+        currency: purchase.currency,
+        quantity: purchase.quantity,
+      };
+
       // Ack Razorpay fast; finish Meta + email in background (same as Dodo).
       after(async () => {
-        const value = purchase.amount_paise / 100;
-        const quantity = purchase.quantity;
-        const itemPrice = quantity > 0 ? value / quantity : value;
-
         await Promise.all([
           sendPurchaseEvent({
             paymentId,
             email,
-            customer: {
-              email,
-              fullName: purchase.customer_name,
-              phone: purchase.customer_phone,
-              country: "in",
-            },
+            customer: buildStorePurchaseCustomer(metaInput),
             attribution,
             eventSourceUrl,
-            customData: {
-              value,
-              currency: (purchase.currency || "INR").toUpperCase(),
-              order_id: purchase.razorpay_order_id,
-              content_ids: [purchase.product_slug],
-              content_name: purchase.product_title,
-              content_type: "product",
-              content_category: "digital_leads_database",
-              num_items: quantity,
-              contents: [
-                {
-                  id: purchase.product_slug,
-                  quantity,
-                  item_price: itemPrice,
-                },
-              ],
-            },
+            customData: buildStorePurchaseCustomData(metaInput),
           }),
           sendStorePurchaseEmail({
             toEmail: email,
             paymentId,
-            customerName: purchase.customer_name,
+            customerName: fullName,
             productTitle: purchase.product_title,
-            value,
+            value: metaInput.value,
             currency: purchase.currency,
           }),
         ]);

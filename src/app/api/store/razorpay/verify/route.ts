@@ -6,13 +6,17 @@ import {
   metaAttributionFromMetadata,
 } from "@/lib/meta/attribution";
 import { sendPurchaseEvent } from "@/lib/meta/capi";
+import {
+  buildStorePurchaseCustomData,
+  buildStorePurchaseCustomer,
+} from "@/lib/meta/store-purchase-meta";
 import { isValidFbc, isValidFbp } from "@/lib/meta/fbc";
 import { isValidStoreEmail, normalizeStoreEmail } from "@/lib/store/email";
 import {
   getMetaAttributionFromPurchase,
   markStorePurchasePaid,
 } from "@/lib/store/purchases";
-import { getRazorpayClient } from "@/lib/store/razorpay";
+import { fetchRazorpayPaymentCustomer } from "@/lib/store/razorpay-customer";
 import { sendStorePurchaseEmail } from "@/lib/store/send-purchase-email";
 import { verifyRazorpayPaymentSignature } from "@/lib/store/verify";
 
@@ -20,39 +24,11 @@ type VerifyBody = {
   razorpay_order_id?: string;
   razorpay_payment_id?: string;
   razorpay_signature?: string;
+  /** Legacy — prefer email collected by Razorpay checkout. */
   customer_email?: string | null;
   fbp?: string;
   fbc?: string;
 };
-
-async function fetchRazorpayPaymentEmail(paymentId: string): Promise<{
-  email: string | null;
-  phone: string | null;
-  name: string | null;
-}> {
-  try {
-    const payment = await getRazorpayClient().payments.fetch(paymentId);
-    const emailRaw =
-      typeof payment.email === "string" ? payment.email : null;
-    const phoneRaw =
-      typeof payment.contact === "string" ? payment.contact : null;
-    const nameRaw =
-      typeof (payment as { name?: unknown }).name === "string"
-        ? ((payment as { name?: string }).name ?? null)
-        : null;
-
-    return {
-      email: isValidStoreEmail(emailRaw)
-        ? normalizeStoreEmail(emailRaw)
-        : null,
-      phone: phoneRaw?.trim() || null,
-      name: nameRaw?.trim() || null,
-    };
-  } catch (error) {
-    console.error("[store/razorpay/verify] payment fetch", error);
-    return { email: null, phone: null, name: null };
-  }
-}
 
 export async function POST(request: Request) {
   try {
@@ -60,7 +36,7 @@ export async function POST(request: Request) {
     const orderId = body.razorpay_order_id?.trim();
     const paymentId = body.razorpay_payment_id?.trim();
     const signature = body.razorpay_signature?.trim();
-    const modalEmail = isValidStoreEmail(body.customer_email)
+    const clientEmail = isValidStoreEmail(body.customer_email)
       ? normalizeStoreEmail(body.customer_email)
       : null;
 
@@ -84,9 +60,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // Prefer email from our modal; Razorpay payment email is backup.
-    const razorpayCustomer = await fetchRazorpayPaymentEmail(paymentId);
-    const customerEmail = modalEmail ?? razorpayCustomer.email;
+    // Razorpay checkout is the source of truth for email + phone + name.
+    const razorpayCustomer = await fetchRazorpayPaymentCustomer(paymentId);
+    const customerEmail = razorpayCustomer.email ?? clientEmail;
 
     const purchase = await markStorePurchasePaid({
       razorpayOrderId: orderId,
@@ -98,6 +74,8 @@ export async function POST(request: Request) {
     });
 
     const email = purchase.customer_email ?? customerEmail;
+    const phone = purchase.customer_phone ?? razorpayCustomer.phone;
+    const fullName = purchase.customer_name ?? razorpayCustomer.name;
     const origin =
       serverEnv.appUrl.replace(/\/+$/, "") || "http://localhost:3000";
     const eventSourceUrl = `${origin}/store/success`;
@@ -122,48 +100,36 @@ export async function POST(request: Request) {
       userAgent: liveAttribution.userAgent ?? storedAttribution.userAgent,
     };
 
+    const metaInput = {
+      paymentId,
+      orderId: purchase.razorpay_order_id,
+      email,
+      phone,
+      fullName,
+      productSlug: purchase.product_slug,
+      productTitle: purchase.product_title,
+      value: purchase.amount_paise / 100,
+      currency: purchase.currency,
+      quantity: purchase.quantity,
+    };
+
     // Reply fast to the buyer; finish Meta + email in background (same as Dodo).
     after(async () => {
-      const value = purchase.amount_paise / 100;
-      const quantity = purchase.quantity;
-      const itemPrice = quantity > 0 ? value / quantity : value;
-
       await Promise.all([
         sendPurchaseEvent({
           paymentId,
           email,
-          customer: {
-            email,
-            fullName: purchase.customer_name,
-            phone: purchase.customer_phone,
-            country: "in",
-          },
+          customer: buildStorePurchaseCustomer(metaInput),
           attribution,
           eventSourceUrl,
-          customData: {
-            value,
-            currency: (purchase.currency || "INR").toUpperCase(),
-            order_id: purchase.razorpay_order_id,
-            content_ids: [purchase.product_slug],
-            content_name: purchase.product_title,
-            content_type: "product",
-            content_category: "digital_leads_database",
-            num_items: quantity,
-            contents: [
-              {
-                id: purchase.product_slug,
-                quantity,
-                item_price: itemPrice,
-              },
-            ],
-          },
+          customData: buildStorePurchaseCustomData(metaInput),
         }),
         sendStorePurchaseEmail({
           toEmail: email,
           paymentId,
-          customerName: purchase.customer_name,
+          customerName: fullName,
           productTitle: purchase.product_title,
-          value,
+          value: metaInput.value,
           currency: purchase.currency,
         }),
       ]);

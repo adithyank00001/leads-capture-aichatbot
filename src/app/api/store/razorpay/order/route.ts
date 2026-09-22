@@ -53,14 +53,10 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as OrderBody;
-    const email = normalizeStoreEmail(body.email);
-
-    if (!isValidStoreEmail(email)) {
-      return NextResponse.json(
-        { ok: false, error: { message: "Please enter a valid email." } },
-        { status: 400 },
-      );
-    }
+    // Email is optional here — Razorpay checkout collects email + phone.
+    const emailRaw =
+      typeof body.email === "string" ? normalizeStoreEmail(body.email) : "";
+    const email = isValidStoreEmail(emailRaw) ? emailRaw : null;
 
     const quantity = Math.min(20, Math.max(1, Number(body.quantity) || 1));
     const selections = {
@@ -113,7 +109,7 @@ export async function POST(request: Request) {
         product_slug: STORE_PRODUCT_SLUG,
         product_title: storeProduct.title,
         quantity: String(quantity),
-        customer_email: email,
+        ...(email ? { customer_email: email } : {}),
         ...metaNotes,
       },
     });
@@ -138,7 +134,7 @@ export async function POST(request: Request) {
       keyId: getRazorpayKeyId(),
       productName: storeProduct.brandName,
       description: "Complete payment to receive your leads database",
-      email,
+      ...(email ? { email } : {}),
     });
   } catch (error) {
     console.error("[store/razorpay/order]", error);

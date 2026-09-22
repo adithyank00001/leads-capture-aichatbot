@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Check,
   ChevronRight,
@@ -9,7 +9,6 @@ import {
   Lock,
   Minus,
   Plus,
-  X,
   Zap,
   ZoomIn,
 } from "lucide-react";
@@ -21,7 +20,6 @@ import {
   trackStoreViewContent,
 } from "@/lib/meta/store-track";
 import { readBrowserMetaClickIds } from "@/lib/meta/fbc";
-import { isValidStoreEmail, normalizeStoreEmail } from "@/lib/store/email";
 import {
   openRazorpayCheckout,
   type RazorpaySuccessResponse,
@@ -348,21 +346,16 @@ type Props = {
 
 /**
  * Gallery + buy box + sticky CTA.
- * CTA → email modal.
- * Continue → InitiateCheckout (with email) + Razorpay checkout.
+ * CTA → InitiateCheckout (Pixel + CAPI) + Razorpay (email/phone collected there).
  */
 export function ProductHero({ product }: Props) {
   const [activeImage, setActiveImage] = useState(0);
   const [zoomOpen, setZoomOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [selections, setSelections] = useState(product.defaultSelections);
-  const [emailModalOpen, setEmailModalOpen] = useState(false);
-  const [email, setEmail] = useState("");
-  const [emailError, setEmailError] = useState<string | null>(null);
   const [startingCheckout, setStartingCheckout] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
   const checkoutLock = useRef(false);
-  const emailInputRef = useRef<HTMLInputElement>(null);
 
   const unitPrice = useMemo(() => {
     let total = product.price;
@@ -376,6 +369,7 @@ export function ProductHero({ product }: Props) {
 
   const lineTotal = unitPrice * quantity;
   const buyLabel = product.buyButtonLabel;
+  const buyButtonText = startingCheckout ? "Opening checkout…" : buyLabel;
 
   const viewContentSent = useRef(false);
 
@@ -409,26 +403,6 @@ export function ProductHero({ product }: Props) {
     };
   }, []);
 
-  useEffect(() => {
-    if (!emailModalOpen) return;
-    const t = window.setTimeout(() => emailInputRef.current?.focus(), 40);
-    return () => window.clearTimeout(t);
-  }, [emailModalOpen]);
-
-  useEffect(() => {
-    if (!emailModalOpen) return;
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape" && !checkoutLock.current) {
-        setEmailModalOpen(false);
-        setEmailError(null);
-      }
-    }
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [emailModalOpen]);
-
   function selectOption(optionId: string, value: string) {
     setSelections((prev) => ({ ...prev, [optionId]: value }));
   }
@@ -438,25 +412,7 @@ export function ProductHero({ product }: Props) {
     setStartingCheckout(false);
   }
 
-  function closeEmailModal() {
-    if (checkoutLock.current) return;
-    setEmailModalOpen(false);
-    setEmailError(null);
-  }
-
-  /** CTA click: open email modal only (no InitiateCheckout yet). */
-  function handleBuy() {
-    if (emailModalOpen || startingCheckout) return;
-
-    setPayError(null);
-    setEmailError(null);
-    setEmailModalOpen(true);
-  }
-
-  async function verifyAndRedirect(
-    response: RazorpaySuccessResponse,
-    buyerEmail: string,
-  ) {
+  async function verifyAndRedirect(response: RazorpaySuccessResponse) {
     const clickIds = readBrowserMetaClickIds();
     const res = await fetch("/api/store/razorpay/verify", {
       method: "POST",
@@ -465,7 +421,6 @@ export function ProductHero({ product }: Props) {
         razorpay_order_id: response.razorpay_order_id,
         razorpay_payment_id: response.razorpay_payment_id,
         razorpay_signature: response.razorpay_signature,
-        customer_email: buyerEmail,
         ...(clickIds.fbp ? { fbp: clickIds.fbp } : {}),
         ...(clickIds.fbc ? { fbc: clickIds.fbc } : {}),
       }),
@@ -484,30 +439,23 @@ export function ProductHero({ product }: Props) {
     window.location.assign(data.redirectUrl);
   }
 
-  /** Continue: real InitiateCheckout (with email) + open Razorpay. */
-  async function handleEmailContinue(event: FormEvent) {
-    event.preventDefault();
+  /**
+   * Buy CTA: InitiateCheckout with available details, then open Razorpay.
+   * Razorpay asks for email + phone on its checkout screen.
+   */
+  async function handleBuy() {
     if (checkoutLock.current || startingCheckout) return;
 
-    const buyerEmail = normalizeStoreEmail(email);
-    if (!isValidStoreEmail(buyerEmail)) {
-      setEmailError("Please enter a valid email.");
-      return;
-    }
-
     checkoutLock.current = true;
-    setEmailError(null);
     setPayError(null);
     setStartingCheckout(true);
 
-    // Strong Meta signal: InitiateCheckout + Advanced Matching with email now.
     trackStoreInitiateCheckout({
       value: lineTotal,
       currency: product.currency,
       quantity,
       contentName: product.title,
       contentIds: ["pan-india-leads-2026"],
-      email: buyerEmail,
     });
 
     try {
@@ -518,7 +466,6 @@ export function ProductHero({ product }: Props) {
         body: JSON.stringify({
           quantity,
           selections,
-          email: buyerEmail,
           eventSourceUrl:
             typeof window !== "undefined" ? window.location.href : undefined,
           ...(clickIds.fbp ? { fbp: clickIds.fbp } : {}),
@@ -534,7 +481,6 @@ export function ProductHero({ product }: Props) {
         keyId?: string;
         productName?: string;
         description?: string;
-        email?: string;
         error?: { message?: string };
       };
 
@@ -548,8 +494,6 @@ export function ProductHero({ product }: Props) {
         throw new Error(data.error?.message ?? "Could not start checkout.");
       }
 
-      setEmailModalOpen(false);
-
       await openRazorpayCheckout({
         key: data.keyId,
         amount: data.amount,
@@ -559,9 +503,9 @@ export function ProductHero({ product }: Props) {
           data.description ??
           "Complete payment to receive your leads database",
         order_id: data.orderId,
-        prefill: { email: data.email ?? buyerEmail },
+        // No email/phone prefill — Razorpay collects both on checkout.
         handler: (response) => {
-          void verifyAndRedirect(response, buyerEmail).catch((error) => {
+          void verifyAndRedirect(response).catch((error) => {
             setPayError(
               error instanceof Error
                 ? error.message
@@ -577,7 +521,7 @@ export function ProductHero({ product }: Props) {
         },
       });
     } catch (error) {
-      setEmailError(
+      setPayError(
         error instanceof Error ? error.message : "Could not start payment.",
       );
       resetCheckoutUi();
@@ -758,12 +702,16 @@ export function ProductHero({ product }: Props) {
               <div className="hover:scale-[1.04] transition-all duration-200 will-change-transform rounded-[14px] p-[1px] bg-gradient-to-b from-[#FFB06A] to-[#FF8A3D] hover:from-[#E8883A] hover:to-[#D46A1C] w-full">
                 <button
                   type="button"
-                  onClick={handleBuy}
-                  className="rounded-[13px] font-medium transition-all will-change-transform flex items-center justify-center gap-2 bg-gradient-to-b from-[#E36F02] to-[#FC7B02] text-white shadow-[0px_2px_10.1px_0px_#FC7B0233] hover:shadow-[0px_2px_10.1px_0px_#FC7B0244] relative overflow-hidden z-10 before:absolute before:inset-0 before:bg-gradient-to-b before:from-[#D45E00] before:to-[#F07310] before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-200 before:z-0 before:content-[''] text-[16px] py-[11.7px] px-[22px] w-full"
+                  onClick={() => void handleBuy()}
+                  disabled={startingCheckout}
+                  aria-busy={startingCheckout}
+                  className="rounded-[13px] font-medium transition-all will-change-transform flex items-center justify-center gap-2 bg-gradient-to-b from-[#E36F02] to-[#FC7B02] text-white shadow-[0px_2px_10.1px_0px_#FC7B0233] hover:shadow-[0px_2px_10.1px_0px_#FC7B0244] relative overflow-hidden z-10 before:absolute before:inset-0 before:bg-gradient-to-b before:from-[#D45E00] before:to-[#F07310] before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-200 before:z-0 before:content-[''] text-[16px] py-[11.7px] px-[22px] w-full disabled:opacity-80 disabled:cursor-wait"
                 >
                   <span className="relative z-10 flex items-center gap-2">
-                    {buyLabel}
-                    <ChevronRight className="size-4" />
+                    {buyButtonText}
+                    {!startingCheckout ? (
+                      <ChevronRight className="size-4" />
+                    ) : null}
                   </span>
                 </button>
               </div>
@@ -818,12 +766,16 @@ export function ProductHero({ product }: Props) {
             <div className="hover:scale-[1.04] transition-all duration-200 will-change-transform rounded-[14px] p-[1px] bg-gradient-to-b from-[#FFB06A] to-[#FF8A3D] hover:from-[#E8883A] hover:to-[#D46A1C] w-full">
               <button
                 type="button"
-                onClick={handleBuy}
-                className="rounded-[13px] font-medium transition-all will-change-transform flex items-center justify-center gap-2 bg-gradient-to-b from-[#E36F02] to-[#FC7B02] text-white shadow-[0px_2px_10.1px_0px_#FC7B0233] hover:shadow-[0px_2px_10.1px_0px_#FC7B0244] relative overflow-hidden z-10 before:absolute before:inset-0 before:bg-gradient-to-b before:from-[#D45E00] before:to-[#F07310] before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-200 before:z-0 before:content-[''] text-[16px] py-[11.7px] px-[22px] w-full min-h-[2.85rem]"
+                onClick={() => void handleBuy()}
+                disabled={startingCheckout}
+                aria-busy={startingCheckout}
+                className="rounded-[13px] font-medium transition-all will-change-transform flex items-center justify-center gap-2 bg-gradient-to-b from-[#E36F02] to-[#FC7B02] text-white shadow-[0px_2px_10.1px_0px_#FC7B0233] hover:shadow-[0px_2px_10.1px_0px_#FC7B0244] relative overflow-hidden z-10 before:absolute before:inset-0 before:bg-gradient-to-b before:from-[#D45E00] before:to-[#F07310] before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-200 before:z-0 before:content-[''] text-[16px] py-[11.7px] px-[22px] w-full min-h-[2.85rem] disabled:opacity-80 disabled:cursor-wait"
               >
                 <span className="relative z-10 flex items-center gap-2">
-                  {buyLabel}
-                  <ChevronRight className="size-4" />
+                  {buyButtonText}
+                  {!startingCheckout ? (
+                    <ChevronRight className="size-4" />
+                  ) : null}
                 </span>
               </button>
             </div>
@@ -850,85 +802,6 @@ export function ProductHero({ product }: Props) {
           alt={product.images[activeImage]?.alt ?? product.images[0].alt}
           onClose={() => setZoomOpen(false)}
         />
-      ) : null}
-
-      {emailModalOpen ? (
-        <div
-          className="store-email-modal-overlay"
-          role="presentation"
-          onClick={closeEmailModal}
-        >
-          <div
-            className={cn(
-              "store-email-modal",
-              startingCheckout && "is-proceeding",
-            )}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="store-email-modal-title"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {!startingCheckout ? (
-              <button
-                type="button"
-                className="store-email-modal-close"
-                onClick={closeEmailModal}
-                aria-label="Close"
-              >
-                <X className="size-4" />
-              </button>
-            ) : null}
-            {!startingCheckout ? (
-              <h2
-                id="store-email-modal-title"
-                className="store-email-modal-title"
-              >
-                Where should we send your leads database?
-              </h2>
-            ) : (
-              <span id="store-email-modal-title" className="sr-only">
-                Proceed to Payment
-              </span>
-            )}
-            <form onSubmit={handleEmailContinue} className="store-email-modal-form">
-              {!startingCheckout ? (
-                <>
-                  <label htmlFor="store-modal-email" className="store-option-label">
-                    Email
-                  </label>
-                  <input
-                    ref={emailInputRef}
-                    id="store-modal-email"
-                    type="email"
-                    name="email"
-                    autoComplete="email"
-                    inputMode="email"
-                    required
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      if (emailError) setEmailError(null);
-                    }}
-                    placeholder="you@email.com"
-                    className="store-email-input"
-                  />
-                  {emailError ? (
-                    <p className="store-email-modal-error" role="alert">
-                      {emailError}
-                    </p>
-                  ) : null}
-                </>
-              ) : null}
-              <button
-                type="submit"
-                disabled={startingCheckout}
-                className="store-email-modal-continue"
-              >
-                {startingCheckout ? "Proceed to Payment" : "Continue to Secure Checkout ➔"}
-              </button>
-            </form>
-          </div>
-        </div>
       ) : null}
     </>
   );
