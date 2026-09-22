@@ -54,9 +54,9 @@ function formatCountdown(totalSeconds: number) {
   return `${pad2(hours)}:${pad2(minutes)}:${pad2(seconds)}`;
 }
 
-const OFFER_TIMER_KEY = "store-offer-timer-v11";
-/** Fresh browser open starts at 19:49:28 */
-const OFFER_START_MS = ((19 * 60 + 49) * 60 + 28) * 1000;
+const OFFER_TIMER_KEY = "store-offer-timer-v12";
+/** Fresh browser open starts at 09:49:28 */
+const OFFER_START_MS = ((9 * 60 + 49) * 60 + 28) * 1000;
 /** When timer hits 00:15:00, bump back to 00:45:24 */
 const OFFER_SOFT_FLOOR_MS = 15 * 60 * 1000;
 const OFFER_SOFT_RESET_MS = (45 * 60 + 24) * 1000;
@@ -223,9 +223,9 @@ function resolveLicenseStock(now = Date.now()): number {
 
 /**
  * Per-browser offer timer:
- * - First open: 19:49:28
+ * - First open: 09:49:28
  * - Hits ≤ 00:15:00 → jump to 00:45:24
- * - Local midnight: restart to 19:49:28 only if under 2 hours left
+ * - Local midnight: restart to 09:49:28 only if under 2 hours left
  */
 function resolveOfferTimer(now = Date.now()): {
   deadlineMs: number;
