@@ -6,6 +6,10 @@ import { serverEnv } from "@/lib/env.server";
 import { sendPurchaseEventFromPageRequest } from "@/lib/meta/capi";
 import { STORE_DOWNLOAD_FILE } from "@/lib/store/download";
 import { storeProduct } from "@/lib/store/product-content";
+import {
+  getPaidPurchaseByDownloadToken,
+  getPaidPurchaseByPaymentId,
+} from "@/lib/store/purchases";
 import { sendStorePurchaseEmail } from "@/lib/store/send-purchase-email";
 import { verifyStoreDodoPayment } from "@/lib/store/verify-dodo-payment";
 
@@ -17,14 +21,79 @@ type Props = {
   }>;
 };
 
+type StoreSuccessView = {
+  ok: true;
+  paymentId: string;
+  email: string | null;
+  productTitle: string;
+  productSlug: string;
+  value: number;
+  currency: string;
+  quantity: number;
+  downloadHref: string;
+};
+
 export default async function StoreSuccessPage({ searchParams }: Props) {
   const params = await searchParams;
-  const paymentId = params.payment_id?.trim() ?? "";
+  const paymentIdParam = params.payment_id?.trim() ?? "";
+  const token = params.token?.trim() ?? "";
   const status = params.status?.trim() ?? "";
 
-  const verification = paymentId
-    ? await verifyStoreDodoPayment({ paymentId, status: status || "succeeded" })
-    : { ok: false as const };
+  let verification: StoreSuccessView | { ok: false } = { ok: false };
+
+  if (token) {
+    const purchase = await getPaidPurchaseByDownloadToken(token);
+    if (purchase) {
+      const paymentId = purchase.razorpay_payment_id ?? paymentIdParam;
+      verification = {
+        ok: true,
+        paymentId,
+        email: purchase.customer_email,
+        productTitle: purchase.product_title,
+        productSlug: purchase.product_slug,
+        value: purchase.amount_paise / 100,
+        currency: (purchase.currency || "INR").toUpperCase(),
+        quantity: purchase.quantity,
+        downloadHref: `/api/store/download?token=${encodeURIComponent(token)}`,
+      };
+    }
+  }
+
+  if (!verification.ok && paymentIdParam) {
+    const purchase = await getPaidPurchaseByPaymentId(paymentIdParam);
+    if (purchase?.download_token) {
+      verification = {
+        ok: true,
+        paymentId: purchase.razorpay_payment_id ?? paymentIdParam,
+        email: purchase.customer_email,
+        productTitle: purchase.product_title,
+        productSlug: purchase.product_slug,
+        value: purchase.amount_paise / 100,
+        currency: (purchase.currency || "INR").toUpperCase(),
+        quantity: purchase.quantity,
+        downloadHref: `/api/store/download?token=${encodeURIComponent(purchase.download_token)}`,
+      };
+    } else {
+      // Legacy Dodo success links still work.
+      const dodo = await verifyStoreDodoPayment({
+        paymentId: paymentIdParam,
+        status: status || "succeeded",
+      });
+      if (dodo.ok) {
+        verification = {
+          ok: true,
+          paymentId: dodo.paymentId,
+          email: dodo.email,
+          productTitle: dodo.productTitle,
+          productSlug: dodo.productSlug,
+          value: dodo.value,
+          currency: dodo.currency,
+          quantity: dodo.quantity,
+          downloadHref: `/api/store/download?payment_id=${encodeURIComponent(dodo.paymentId)}`,
+        };
+      }
+    }
+  }
 
   const requestHeaders = await headers();
   const origin = serverEnv.appUrl.replace(/\/+$/, "") || "http://localhost:3000";
@@ -34,7 +103,9 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
       sendPurchaseEventFromPageRequest({
         paymentId: verification.paymentId,
         email: verification.email,
-        customer: verification.customer,
+        customer: {
+          email: verification.email,
+        },
         eventSourceUrl: `${origin}/store/success`,
         requestHeaders,
         customData: {
@@ -47,21 +118,16 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
           num_items: verification.quantity,
         },
       }),
-      // Backup if webhook is slow/missed. Same Idempotency-Key → no double email.
+      // Backup if webhook/verify is slow. Same Idempotency-Key → no double email.
       sendStorePurchaseEmail({
         toEmail: verification.email,
         paymentId: verification.paymentId,
-        customerName: verification.customer?.fullName,
         productTitle: verification.productTitle,
         value: verification.value,
         currency: verification.currency,
       }),
     ]);
   }
-
-  const downloadHref = paymentId
-    ? `/api/store/download?payment_id=${encodeURIComponent(paymentId)}`
-    : null;
 
   return (
     <div className="store-root min-h-full">
@@ -96,11 +162,13 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
               ) : null}
 
               <div className="mt-8 space-y-3">
-                {downloadHref ? (
-                  <a className="store-btn-primary" href={downloadHref} download>
-                    Download PDF package
-                  </a>
-                ) : null}
+                <a
+                  className="store-btn-primary"
+                  href={verification.downloadHref}
+                  download
+                >
+                  Download PDF package
+                </a>
               </div>
 
               <p className="mt-6 text-xs text-[var(--store-muted)]">
@@ -114,7 +182,7 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
               <p className="store-eyebrow">Download locked</p>
               <h1 className="store-title text-[2rem]">Payment not found</h1>
               <p className="mt-3 text-[var(--store-muted)]">
-                We could not confirm a paid Dodo order for this link. Complete
+                We could not confirm a paid order for this link. Complete
                 checkout on the product page, or open the success link from your
                 payment email.
               </p>

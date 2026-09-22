@@ -1,4 +1,6 @@
 import { trackPixelAndCapi } from "@/lib/meta/browser-track";
+import { setPixelUserData } from "@/lib/fbpixel";
+import { normalizeStoreEmail } from "@/lib/store/email";
 
 const STORE_PRODUCT_ID = "pan-india-leads-2026";
 const STORE_PRODUCT_NAME =
@@ -27,7 +29,8 @@ export function trackStoreViewContent(input?: {
 }
 
 /**
- * Buyer clicked Get now — Pixel + CAPI InitiateCheckout before Razorpay opens.
+ * CTA click — Pixel + CAPI InitiateCheckout (before email modal / Razorpay).
+ * Do not pass email here; email is collected in the modal after this event.
  */
 export function trackStoreInitiateCheckout(input: {
   value: number;
@@ -44,6 +47,16 @@ export function trackStoreInitiateCheckout(input: {
     content_ids: input.contentIds ?? [STORE_PRODUCT_ID],
     content_type: "product",
   });
+}
+
+/**
+ * After email is entered (Continue) — Advanced Matching only.
+ * Does NOT fire InitiateCheckout again.
+ */
+export function attachStoreCheckoutEmail(emailRaw: string): void {
+  const email = normalizeStoreEmail(emailRaw);
+  if (!email) return;
+  setPixelUserData({ em: email });
 }
 
 /** Shop homepage “view product” intent (soft signal before product PageView). */

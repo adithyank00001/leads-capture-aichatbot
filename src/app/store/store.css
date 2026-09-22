@@ -392,6 +392,142 @@
   color: var(--store-ink);
 }
 
+.store-email-prompt {
+  margin: 0 0 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--store-ink);
+}
+
+.store-email-input {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--store-line);
+  background: var(--store-surface);
+  color: var(--store-ink);
+  border-radius: 12px;
+  padding: 0.75rem 0.95rem;
+  font-size: 1rem;
+  line-height: 1.4;
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.store-email-input::placeholder {
+  color: var(--store-muted);
+}
+
+.store-email-input:focus {
+  border-color: #fc7b02;
+  box-shadow: 0 0 0 3px rgba(252, 123, 2, 0.18);
+}
+
+.store-email-input:disabled {
+  opacity: 0.65;
+}
+
+.store-email-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(10, 16, 28, 0.55);
+}
+
+.store-email-modal {
+  position: relative;
+  width: min(100%, 26rem);
+  border-radius: 1.15rem;
+  border: 1px solid var(--store-line);
+  background: #fff;
+  padding: 1.35rem 1.25rem 1.2rem;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.22);
+}
+
+.store-email-modal-close {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.7rem;
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--store-muted);
+  cursor: pointer;
+}
+
+.store-email-modal-close:hover:not(:disabled) {
+  background: #f1f5f9;
+  color: var(--store-ink);
+}
+
+.store-email-modal-close:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.store-email-modal-title {
+  margin: 0;
+  padding-right: 1.75rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--store-ink);
+}
+
+.store-email-modal-copy {
+  margin: 0.55rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--store-muted);
+}
+
+.store-email-modal-form {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.store-email-modal.is-proceeding .store-email-modal-form {
+  margin-top: 0;
+}
+
+.store-email-modal.is-proceeding .store-email-modal-continue {
+  min-height: 3rem;
+  font-size: 1rem;
+}
+
+.store-email-modal-error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #dc2626;
+}
+
+.store-email-modal-continue {
+  width: 100%;
+  min-height: 2.75rem;
+  border: 0;
+  border-radius: 0.85rem;
+  background: linear-gradient(180deg, #e36f02 0%, #fc7b02 100%);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.store-email-modal-continue:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
 .store-chip {
   border: 1px solid var(--store-line);
   background: var(--store-surface);

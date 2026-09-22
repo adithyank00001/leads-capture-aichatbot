@@ -15,7 +15,17 @@ type MetaEventsBody = {
   eventId?: unknown;
   eventSourceUrl?: unknown;
   customData?: unknown;
+  /** Guest checkout email (store). Optional — improves CAPI match quality. */
+  email?: unknown;
 };
+
+function parseGuestEmail(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const email = raw.trim().toLowerCase();
+  if (!email || email.length > 254) return null;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return null;
+  return email;
+}
 
 function isClientForwardableEvent(
   value: string,
@@ -99,16 +109,21 @@ export async function POST(request: Request) {
       customData = body.customData as Record<string, unknown>;
     }
 
-    let email: string | null = null;
+    const guestEmail = parseGuestEmail(body.email);
+
+    let authEmail: string | null = null;
     try {
       const supabase = await createServerSupabaseClient();
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      email = user?.email ?? null;
+      authEmail = user?.email ?? null;
     } catch {
-      email = null;
+      authEmail = null;
     }
+
+    // Prefer guest checkout email (store) when present — better Purchase match later.
+    const email = guestEmail ?? authEmail;
 
     const attribution = getMetaAttributionFromRequest(request, {
       eventSourceUrl,

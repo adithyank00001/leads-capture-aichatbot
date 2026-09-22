@@ -6,7 +6,10 @@ import {
   getStoreDownloadAbsolutePath,
   STORE_DOWNLOAD_FILE,
 } from "@/lib/store/download";
-import { getPaidPurchaseByDownloadToken } from "@/lib/store/purchases";
+import {
+  getPaidPurchaseByDownloadToken,
+  getPaidPurchaseByPaymentId,
+} from "@/lib/store/purchases";
 import { verifyStoreDodoPayment } from "@/lib/store/verify-dodo-payment";
 
 export async function GET(request: Request) {
@@ -21,11 +24,17 @@ export async function GET(request: Request) {
       const purchase = await getPaidPurchaseByDownloadToken(token);
       allowed = Boolean(purchase);
     } else if (paymentId) {
-      const verification = await verifyStoreDodoPayment({
-        paymentId,
-        status: "succeeded",
-      });
-      allowed = verification.ok;
+      const razorpayPurchase = await getPaidPurchaseByPaymentId(paymentId);
+      if (razorpayPurchase) {
+        allowed = true;
+      } else {
+        // Legacy Dodo downloads.
+        const verification = await verifyStoreDodoPayment({
+          paymentId,
+          status: "succeeded",
+        });
+        allowed = verification.ok;
+      }
     } else {
       return NextResponse.json(
         { ok: false, error: { message: "Missing download token." } },

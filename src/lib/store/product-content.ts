@@ -110,7 +110,9 @@ export const storeProduct: StoreProductContent = {
   title: "110Cr+ All India Latest Leads (PAN INDIA DATABASE) 2026",
   subtitle:
     "Unlock 110 Crore+ Verified Indian Contacts with 200+ categories to Scale Your Sales & Marketing Instantly.",
-  price: 397,
+  price: Number.parseFloat(
+    process.env.NEXT_PUBLIC_STORE_PRICE_INR?.trim() || "397",
+  ) || 397,
   compareAtPrice: 4997,
   currency: "INR",
   currencySymbol: "₹",

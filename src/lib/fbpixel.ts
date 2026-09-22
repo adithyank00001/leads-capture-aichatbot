@@ -32,3 +32,19 @@ export const track = (
 
   window.fbq?.("track", name, options);
 };
+
+/**
+ * Advanced Matching — pass buyer email to the Pixel (Meta hashes it).
+ * Call when the store checkout form has a valid email.
+ */
+export function setPixelUserData(data: { em?: string }) {
+  const email = data.em?.trim().toLowerCase();
+  if (!email || !email.includes("@")) {
+    return;
+  }
+  try {
+    window.fbq?.("set", "userData", { em: email });
+  } catch {
+    // Pixel must never break checkout.
+  }
+}

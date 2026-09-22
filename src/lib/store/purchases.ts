@@ -75,7 +75,17 @@ export async function createStorePurchase(input: {
   quantity: number;
   selections: Record<string, string>;
   razorpayOrderId: string;
+  customerEmail?: string | null;
+  /** Meta click/browser ids stored for webhook Purchase matching. */
+  metaAttribution?: Record<string, string> | null;
 }) {
+  const selectionsPayload: Record<string, unknown> = {
+    ...input.selections,
+  };
+  if (input.metaAttribution && Object.keys(input.metaAttribution).length > 0) {
+    selectionsPayload.__meta_attribution = input.metaAttribution;
+  }
+
   const { data, error } = await storeDb()
     .from("store_purchases")
     .insert({
@@ -84,7 +94,8 @@ export async function createStorePurchase(input: {
       amount_paise: input.amountPaise,
       currency: input.currency,
       quantity: input.quantity,
-      selections: input.selections,
+      selections: selectionsPayload,
+      customer_email: input.customerEmail?.trim() || null,
       razorpay_order_id: input.razorpayOrderId,
       status: "created",
     })
@@ -167,4 +178,37 @@ export async function getPaidPurchaseByDownloadToken(token: string) {
   }
 
   return data;
+}
+
+export async function getPaidPurchaseByPaymentId(paymentId: string) {
+  const { data, error } = await storeDb()
+    .from("store_purchases")
+    .select("*")
+    .eq("razorpay_payment_id", paymentId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data || data.status !== "paid") {
+    return null;
+  }
+
+  return data;
+}
+
+/** Read Meta attribution saved on the purchase row (for webhook CAPI). */
+export function getMetaAttributionFromPurchase(
+  purchase: StorePurchaseRow,
+): Record<string, unknown> {
+  const selections = purchase.selections;
+  if (!selections || typeof selections !== "object" || Array.isArray(selections)) {
+    return {};
+  }
+  const meta = (selections as Record<string, unknown>).__meta_attribution;
+  if (!meta || typeof meta !== "object" || Array.isArray(meta)) {
+    return {};
+  }
+  return meta as Record<string, unknown>;
 }

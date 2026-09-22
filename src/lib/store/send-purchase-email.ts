@@ -70,7 +70,7 @@ async function loadPdfAttachment(): Promise<{
 }
 
 /**
- * Email the buyer their leads PDF + download link after a paid store order.
+ * Email the buyer their PDF + Google Drive link after a paid store order.
  * Safe to call twice (webhook + success page) — Resend Idempotency-Key dedupes.
  * Never throws.
  */
@@ -95,7 +95,7 @@ export async function sendStorePurchaseEmail(
       JSON.stringify({
         level: "warn",
         route: "store/purchase-email",
-        message: "Purchase email skipped — buyer email missing from Dodo",
+        message: "Purchase email skipped — buyer email missing",
         paymentId,
         timestamp: new Date().toISOString(),
       }),
@@ -103,8 +103,7 @@ export async function sendStorePurchaseEmail(
     return;
   }
 
-  const origin = serverEnv.appUrl.replace(/\/+$/, "") || "http://localhost:3000";
-  const downloadUrl = `${origin}/api/store/download?payment_id=${encodeURIComponent(paymentId)}`;
+  const driveUrl = serverEnv.storeDriveDownloadUrl?.trim() || "";
   const productTitle = input.productTitle?.trim() || storeProduct.title;
   const priceLabel = formatMoney(input.value, input.currency);
   const firstName =
@@ -112,7 +111,7 @@ export async function sendStorePurchaseEmail(
     toEmail.split("@")[0] ||
     "there";
 
-  const text = [
+  const textLines = [
     `Hi ${firstName},`,
     "",
     `Thanks for your purchase of ${productTitle}.`,
@@ -121,15 +120,32 @@ export async function sendStorePurchaseEmail(
     `Payment ID: ${paymentId}`,
     "",
     "Your PDF package is attached to this email.",
-    "You can also download it any time from this link:",
-    downloadUrl,
-    "",
-    "If the attachment is missing, use the link above (it only works after a successful payment).",
+  ];
+
+  if (driveUrl) {
+    textLines.push(
+      "",
+      "You can also open it anytime from Google Drive:",
+      driveUrl,
+    );
+  }
+
+  textLines.push(
     "",
     "Questions? Reply to this email or contact support@growscalex.com",
     "",
     "— growscaleX",
-  ].join("\n");
+  );
+
+  const driveButtonHtml = driveUrl
+    ? `
+  <p>
+    <a href="${escapeHtml(driveUrl)}" style="display:inline-block;padding:12px 20px;background:#e85d04;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;">
+      Open Google Drive download
+    </a>
+  </p>
+  <p style="font-size:13px;color:#666;">If the button does not work, copy this link:<br/>${escapeHtml(driveUrl)}</p>`
+    : "";
 
   const html = `
 <!DOCTYPE html>
@@ -142,12 +158,7 @@ export async function sendStorePurchaseEmail(
     <strong>Payment ID:</strong> ${escapeHtml(paymentId)}
   </p>
   <p>Your PDF package is <strong>attached</strong> to this email.</p>
-  <p>
-    <a href="${escapeHtml(downloadUrl)}" style="display:inline-block;padding:12px 20px;background:#e85d04;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;">
-      Download PDF package
-    </a>
-  </p>
-  <p style="font-size:13px;color:#666;">If the button does not work, copy this link:<br/>${escapeHtml(downloadUrl)}</p>
+  ${driveButtonHtml}
   <p style="font-size:13px;color:#666;">Questions? Reply to this email or write to support@growscalex.com</p>
   <p>— growscaleX</p>
 </body>
@@ -159,7 +170,7 @@ export async function sendStorePurchaseEmail(
   const result = await sendResendEmail({
     to: toEmail,
     subject: `Your leads package is ready — ${productTitle}`,
-    text,
+    text: textLines.join("\n"),
     html,
     replyTo: serverEnv.contactInboxEmail,
     idempotencyKey: `store-purchase-email-${paymentId}`,
@@ -175,6 +186,7 @@ export async function sendStorePurchaseEmail(
         paymentId,
         toDomain,
         hasAttachment: Boolean(attachment),
+        hasDriveLink: Boolean(driveUrl),
         timestamp: new Date().toISOString(),
       }),
     );
@@ -191,6 +203,7 @@ export async function sendStorePurchaseEmail(
         paymentId,
         toDomain,
         hasAttachment: Boolean(attachment),
+        hasDriveLink: Boolean(driveUrl),
         timestamp: new Date().toISOString(),
       }),
     );
@@ -206,6 +219,7 @@ export async function sendStorePurchaseEmail(
       toDomain,
       resendId: result.id,
       hasAttachment: Boolean(attachment),
+      hasDriveLink: Boolean(driveUrl),
       timestamp: new Date().toISOString(),
     }),
   );

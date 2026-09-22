@@ -53,11 +53,16 @@ function resolvePathnameForPageView(eventSourceUrl?: string): string {
  * Used when the browser Pixel event was already queued early with this event_id.
  * Never throws; never blocks the UI.
  */
+export type BrowserTrackUserData = {
+  email?: string | null;
+};
+
 export function forwardCapiEvent(
   eventName: BrowserTrackableEvent,
   eventId: string,
   params: Record<string, unknown> = {},
   eventSourceUrl?: string,
+  userData?: BrowserTrackUserData,
 ): void {
   const trimmedId = eventId.trim();
   if (!trimmedId) {
@@ -65,6 +70,7 @@ export function forwardCapiEvent(
   }
 
   const sourceUrl = eventSourceUrl?.trim() || currentPageUrl();
+  const email = userData?.email?.trim().toLowerCase() || null;
 
   try {
     ensureBrowserFbcCookie();
@@ -78,6 +84,7 @@ export function forwardCapiEvent(
       eventId: trimmedId,
       eventSourceUrl: sourceUrl,
       ...(Object.keys(params).length > 0 ? { customData: params } : {}),
+      ...(email ? { email } : {}),
     });
 
     void fetch("/api/meta/events", {
@@ -102,6 +109,7 @@ export function trackPixelAndCapi(
   eventName: BrowserTrackableEvent,
   params: Record<string, unknown> = {},
   eventSourceUrl?: string,
+  userData?: BrowserTrackUserData,
 ): string {
   const eventId = createEventId();
 
@@ -118,7 +126,7 @@ export function trackPixelAndCapi(
     // Pixel must never break the page.
   }
 
-  forwardCapiEvent(eventName, eventId, params, eventSourceUrl);
+  forwardCapiEvent(eventName, eventId, params, eventSourceUrl, userData);
 
   return eventId;
 }

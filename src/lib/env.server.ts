@@ -66,6 +66,14 @@ export const serverEnv = {
   razorpayKeyId: readOptionalEnv("RAZORPAY_KEY_ID"),
   razorpayKeySecret: readOptionalEnv("RAZORPAY_KEY_SECRET"),
   razorpayWebhookSecret: readOptionalEnv("RAZORPAY_WEBHOOK_SECRET"),
+  /**
+   * Optional store checkout price override (INR major units).
+   * Prefer NEXT_PUBLIC_STORE_PRICE_INR so UI + order stay in sync.
+   */
+  storePriceInr: readFloatEnv(
+    "NEXT_PUBLIC_STORE_PRICE_INR",
+    readFloatEnv("STORE_PRICE_INR", 397),
+  ),
   metaCapiAccessToken: readOptionalEnv("META_CAPI_ACCESS_TOKEN"),
   metaCapiTestEventCode: readOptionalEnv("META_CAPI_TEST_EVENT_CODE"),
   demoSystemPrompt: readOptionalEnv("DEMO_SYSTEM_PROMPT"),

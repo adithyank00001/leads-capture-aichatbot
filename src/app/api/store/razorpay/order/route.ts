@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 
+import {
+  getMetaAttributionFromRequest,
+  metaAttributionToMetadata,
+} from "@/lib/meta/attribution";
+import { isValidStoreEmail, normalizeStoreEmail } from "@/lib/store/email";
 import { STORE_PRODUCT_SLUG } from "@/lib/store/download";
 import { createStorePurchase } from "@/lib/store/purchases";
 import { getRazorpayClient, getRazorpayKeyId } from "@/lib/store/razorpay";
@@ -8,6 +13,8 @@ import { storeProduct } from "@/lib/store/product-content";
 type OrderBody = {
   quantity?: number;
   selections?: Record<string, string>;
+  email?: string;
+  eventSourceUrl?: string;
 };
 
 function computeUnitPrice(selections: Record<string, string>) {
@@ -24,7 +31,6 @@ function computeUnitPrice(selections: Record<string, string>) {
 
 export async function GET() {
   try {
-    // Warm serverless + confirm Razorpay config without creating an order.
     getRazorpayKeyId();
     return NextResponse.json({ ok: true });
   } catch (error) {
@@ -44,6 +50,15 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as OrderBody;
+    const email = normalizeStoreEmail(body.email);
+
+    if (!isValidStoreEmail(email)) {
+      return NextResponse.json(
+        { ok: false, error: { message: "Please enter a valid email." } },
+        { status: 400 },
+      );
+    }
+
     const quantity = Math.min(20, Math.max(1, Number(body.quantity) || 1));
     const selections = {
       ...storeProduct.defaultSelections,
@@ -62,6 +77,16 @@ export async function POST(request: Request) {
       );
     }
 
+    const eventSourceUrl =
+      typeof body.eventSourceUrl === "string" && body.eventSourceUrl.trim()
+        ? body.eventSourceUrl.trim()
+        : undefined;
+
+    const attribution = getMetaAttributionFromRequest(request, {
+      eventSourceUrl,
+    });
+    const metaNotes = metaAttributionToMetadata(attribution);
+
     const receipt = `store_${Date.now()}`.slice(0, 40);
     const order = await getRazorpayClient().orders.create({
       amount: amountPaise,
@@ -71,7 +96,8 @@ export async function POST(request: Request) {
         product_slug: STORE_PRODUCT_SLUG,
         product_title: storeProduct.title,
         quantity: String(quantity),
-        selections: JSON.stringify(selections),
+        customer_email: email,
+        ...metaNotes,
       },
     });
 
@@ -83,6 +109,8 @@ export async function POST(request: Request) {
       quantity,
       selections,
       razorpayOrderId: order.id,
+      customerEmail: email,
+      metaAttribution: metaNotes,
     });
 
     return NextResponse.json({
@@ -92,7 +120,8 @@ export async function POST(request: Request) {
       currency: order.currency,
       keyId: getRazorpayKeyId(),
       productName: storeProduct.brandName,
-      description: storeProduct.title,
+      description: "Complete payment to receive your leads database",
+      email,
     });
   } catch (error) {
     console.error("[store/razorpay/order]", error);
