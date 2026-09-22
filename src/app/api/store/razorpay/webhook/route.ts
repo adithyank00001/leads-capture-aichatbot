@@ -54,9 +54,12 @@ export async function POST(request: Request) {
       payment?.id &&
       payment.order_id
     ) {
+      const paymentId = payment.id;
+      const orderId = payment.order_id;
+
       const purchase = await markStorePurchasePaid({
-        razorpayOrderId: payment.order_id,
-        razorpayPaymentId: payment.id,
+        razorpayOrderId: orderId,
+        razorpayPaymentId: paymentId,
         customerEmail: payment.email ?? null,
         customerPhone: payment.contact ?? null,
       });
@@ -82,7 +85,7 @@ export async function POST(request: Request) {
       after(async () => {
         await Promise.all([
           sendPurchaseEvent({
-            paymentId: payment.id,
+            paymentId,
             email,
             customer: {
               email,
@@ -102,7 +105,7 @@ export async function POST(request: Request) {
           }),
           sendStorePurchaseEmail({
             toEmail: email,
-            paymentId: payment.id,
+            paymentId,
             customerName: purchase.customer_name,
             productTitle: purchase.product_title,
             value: purchase.amount_paise / 100,
