@@ -34,16 +34,33 @@ export const track = (
 };
 
 /**
- * Advanced Matching — pass buyer email to the Pixel (Meta hashes it).
- * Call when the store checkout form has a valid email.
+ * Advanced Matching — pass buyer email/phone to the Pixel (Meta hashes them).
  */
-export function setPixelUserData(data: { em?: string }) {
+export function setPixelUserData(data: { em?: string; ph?: string }) {
   const email = data.em?.trim().toLowerCase();
-  if (!email || !email.includes("@")) {
+  const phoneDigits = data.ph?.replace(/\D/g, "") ?? "";
+  const payload: Record<string, string> = {};
+
+  if (email && email.includes("@")) {
+    payload.em = email;
+  }
+  if (phoneDigits.length >= 10) {
+    // Pixel accepts phone; Meta hashes client-side. Prefer country code when possible.
+    let ph = phoneDigits.replace(/^00+/, "").replace(/^0+/, "");
+    if (/^[6-9]\d{9}$/.test(ph)) {
+      ph = `91${ph}`;
+    }
+    if (ph.length >= 10 && ph.length <= 15) {
+      payload.ph = ph;
+    }
+  }
+
+  if (Object.keys(payload).length === 0) {
     return;
   }
+
   try {
-    window.fbq?.("set", "userData", { em: email });
+    window.fbq?.("set", "userData", payload);
   } catch {
     // Pixel must never break checkout.
   }

@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 
 import { publicConfig } from "@/lib/config";
-import { track } from "@/lib/fbpixel";
+import { setPixelUserData, track } from "@/lib/fbpixel";
 
 const PURCHASE_TRACK_KEY = "leady_meta_pixel_purchase";
 
@@ -14,6 +14,10 @@ type MetaPixelPurchaseProps = {
   contentName?: string;
   contentIds?: string[];
   numItems?: number;
+  /** Buyer email for Advanced Matching before Purchase. */
+  email?: string | null;
+  /** Buyer phone from Razorpay (when available). */
+  phone?: string | null;
 };
 
 export function MetaPixelPurchase({
@@ -23,6 +27,8 @@ export function MetaPixelPurchase({
   contentName,
   contentIds,
   numItems,
+  email,
+  phone,
 }: MetaPixelPurchaseProps) {
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -39,19 +45,41 @@ export function MetaPixelPurchase({
       return;
     }
 
+    const quantity = numItems ?? 1;
+    const purchaseValue = value ?? publicConfig.lifetimeAccessPriceUsd;
+    const itemPrice = quantity > 0 ? purchaseValue / quantity : purchaseValue;
+    const ids = contentIds?.length ? contentIds : undefined;
+
+    if (email || phone) {
+      setPixelUserData({
+        ...(email ? { em: email } : {}),
+        ...(phone ? { ph: phone } : {}),
+      });
+    }
+
     track(
       "Purchase",
       {
-        value: value ?? publicConfig.lifetimeAccessPriceUsd,
+        value: purchaseValue,
         currency: currency ?? "USD",
         ...(contentName ? { content_name: contentName } : {}),
-        ...(contentIds?.length ? { content_ids: contentIds, content_type: "product" } : {}),
-        ...(numItems != null ? { num_items: numItems } : {}),
+        ...(ids
+          ? {
+              content_ids: ids,
+              content_type: "product",
+              contents: ids.map((id) => ({
+                id,
+                quantity,
+                item_price: itemPrice,
+              })),
+            }
+          : {}),
+        num_items: quantity,
       },
       { eventID: trimmedEventId },
     );
     window.sessionStorage.setItem(storageKey, "1");
-  }, [contentIds, contentName, currency, eventId, numItems, value]);
+  }, [contentIds, contentName, currency, email, eventId, numItems, phone, value]);
 
   return null;
 }

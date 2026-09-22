@@ -6,6 +6,33 @@ const STORE_PRODUCT_ID = "pan-india-leads-2026";
 const STORE_PRODUCT_NAME =
   "110Cr+ All India Latest Leads (PAN INDIA DATABASE) 2026";
 
+function storeContentPayload(input: {
+  value: number;
+  quantity?: number;
+  contentName?: string;
+  contentIds?: string[];
+}) {
+  const quantity = input.quantity ?? 1;
+  const contentIds = input.contentIds ?? [STORE_PRODUCT_ID];
+  const contentName = input.contentName ?? STORE_PRODUCT_NAME;
+  const itemPrice = quantity > 0 ? input.value / quantity : input.value;
+
+  return {
+    value: input.value,
+    currency: "INR" as const,
+    num_items: quantity,
+    content_name: contentName,
+    content_ids: contentIds,
+    content_type: "product",
+    content_category: "digital_leads_database",
+    contents: contentIds.map((id) => ({
+      id,
+      quantity,
+      item_price: itemPrice,
+    })),
+  };
+}
+
 /**
  * Product page viewed — Pixel + CAPI ViewContent (same event_id).
  * Fire once when the PAN India product page loads.
@@ -18,19 +45,21 @@ export function trackStoreViewContent(input?: {
 }): void {
   const value = input?.value ?? 397;
   const currency = input?.currency ?? "INR";
-  trackPixelAndCapi("ViewContent", {
+  const payload = storeContentPayload({
     value,
+    quantity: 1,
+    contentName: input?.contentName,
+    contentIds: input?.contentIds,
+  });
+  trackPixelAndCapi("ViewContent", {
+    ...payload,
     currency,
-    content_name: input?.contentName ?? STORE_PRODUCT_NAME,
-    content_ids: input?.contentIds ?? [STORE_PRODUCT_ID],
-    content_type: "product",
-    content_category: "digital_leads_database",
   });
 }
 
 /**
- * CTA click — Pixel + CAPI InitiateCheckout (before email modal / Razorpay).
- * Do not pass email here; email is collected in the modal after this event.
+ * Real InitiateCheckout — fire on email modal Continue (with email).
+ * Pixel Advanced Matching + CAPI hashed email in one shared event_id.
  */
 export function trackStoreInitiateCheckout(input: {
   value: number;
@@ -38,20 +67,34 @@ export function trackStoreInitiateCheckout(input: {
   quantity?: number;
   contentName?: string;
   contentIds?: string[];
+  /** Buyer email from the modal — required for strong Meta matching. */
+  email?: string | null;
 }): void {
-  trackPixelAndCapi("InitiateCheckout", {
+  const email = input.email ? normalizeStoreEmail(input.email) : "";
+  if (email) {
+    setPixelUserData({ em: email });
+  }
+
+  const payload = storeContentPayload({
     value: input.value,
-    currency: input.currency ?? "INR",
-    num_items: input.quantity ?? 1,
-    content_name: input.contentName ?? STORE_PRODUCT_NAME,
-    content_ids: input.contentIds ?? [STORE_PRODUCT_ID],
-    content_type: "product",
+    quantity: input.quantity,
+    contentName: input.contentName,
+    contentIds: input.contentIds,
   });
+
+  trackPixelAndCapi(
+    "InitiateCheckout",
+    {
+      ...payload,
+      currency: input.currency ?? "INR",
+    },
+    undefined,
+    email ? { email } : undefined,
+  );
 }
 
 /**
- * After email is entered (Continue) — Advanced Matching only.
- * Does NOT fire InitiateCheckout again.
+ * After email is entered — Advanced Matching only (no new event).
  */
 export function attachStoreCheckoutEmail(emailRaw: string): void {
   const email = normalizeStoreEmail(emailRaw);
@@ -62,11 +105,8 @@ export function attachStoreCheckoutEmail(emailRaw: string): void {
 /** Shop homepage “view product” intent (soft signal before product PageView). */
 export function trackStoreHomeProductClick(): void {
   trackPixelAndCapi("ViewContent", {
-    value: 397,
+    ...storeContentPayload({ value: 397, quantity: 1 }),
     currency: "INR",
-    content_name: STORE_PRODUCT_NAME,
-    content_ids: [STORE_PRODUCT_ID],
-    content_type: "product",
     content_category: "shop_home_cta",
   });
 }

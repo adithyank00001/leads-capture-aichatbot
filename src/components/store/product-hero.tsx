@@ -17,7 +17,6 @@ import {
 import { ProductImage } from "@/components/store/product-image";
 import { ProductStars } from "@/components/store/product-stars";
 import {
-  attachStoreCheckoutEmail,
   trackStoreInitiateCheckout,
   trackStoreViewContent,
 } from "@/lib/meta/store-track";
@@ -348,8 +347,8 @@ type Props = {
 
 /**
  * Gallery + buy box + sticky CTA.
- * CTA → Instant email modal + InitiateCheckout.
- * Continue → Razorpay checkout (default payment methods).
+ * CTA → email modal.
+ * Continue → InitiateCheckout (with email) + Razorpay checkout.
  */
 export function ProductHero({ product }: Props) {
   const [activeImage, setActiveImage] = useState(0);
@@ -444,21 +443,13 @@ export function ProductHero({ product }: Props) {
     setEmailError(null);
   }
 
-  /** CTA click: Meta InitiateCheckout + instant email modal. Button label stays the same. */
+  /** CTA click: open email modal only (no InitiateCheckout yet). */
   function handleBuy() {
     if (emailModalOpen || startingCheckout) return;
 
     setPayError(null);
     setEmailError(null);
     setEmailModalOpen(true);
-
-    trackStoreInitiateCheckout({
-      value: lineTotal,
-      currency: product.currency,
-      quantity,
-      contentName: product.title,
-      contentIds: ["pan-india-leads-2026"],
-    });
   }
 
   async function verifyAndRedirect(
@@ -489,7 +480,7 @@ export function ProductHero({ product }: Props) {
     window.location.assign(data.redirectUrl);
   }
 
-  /** Continue in modal: open Razorpay. Does NOT fire InitiateCheckout again. */
+  /** Continue: real InitiateCheckout (with email) + open Razorpay. */
   async function handleEmailContinue(event: FormEvent) {
     event.preventDefault();
     if (checkoutLock.current || startingCheckout) return;
@@ -505,8 +496,15 @@ export function ProductHero({ product }: Props) {
     setPayError(null);
     setStartingCheckout(true);
 
-    // Advanced Matching only — InitiateCheckout already fired on CTA.
-    attachStoreCheckoutEmail(buyerEmail);
+    // Strong Meta signal: InitiateCheckout + Advanced Matching with email now.
+    trackStoreInitiateCheckout({
+      value: lineTotal,
+      currency: product.currency,
+      quantity,
+      contentName: product.title,
+      contentIds: ["pan-india-leads-2026"],
+      email: buyerEmail,
+    });
 
     try {
       const res = await fetch("/api/store/razorpay/order", {

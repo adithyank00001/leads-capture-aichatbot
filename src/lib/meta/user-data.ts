@@ -4,10 +4,11 @@ import { createHash } from "node:crypto";
 
 /**
  * Customer match fields for Meta CAPI (hashed after normalize).
- * Phone is intentionally omitted for now.
  */
 export type MetaCustomerInfo = {
   email?: string | null;
+  /** E.164-ish digits preferred (e.g. 9198xxxxxxxx). Hashed as Meta `ph`. */
+  phone?: string | null;
   fullName?: string | null;
   country?: string | null;
   city?: string | null;
@@ -96,6 +97,33 @@ function normalizeEmail(email: string): string | undefined {
     return undefined;
   }
   return normalized;
+}
+
+/**
+ * Meta `ph`: digits only, with country code, no +/spaces/leading zeros.
+ * Indian 10-digit mobiles → prefix 91.
+ */
+export function normalizePhoneForMeta(phone: string): string | undefined {
+  let digits = phone.replace(/\D/g, "");
+  if (!digits) return undefined;
+
+  // 0091… / 091…
+  digits = digits.replace(/^00+/, "");
+  if (digits.startsWith("0") && digits.length >= 11) {
+    digits = digits.replace(/^0+/, "");
+  }
+
+  // Local Indian mobile: 10 digits starting 6–9
+  if (/^[6-9]\d{9}$/.test(digits)) {
+    digits = `91${digits}`;
+  }
+
+  // Too short / too long after normalize
+  if (digits.length < 10 || digits.length > 15) {
+    return undefined;
+  }
+
+  return digits;
 }
 
 /** Meta recommends hashing external_id; normalize then SHA-256. */
@@ -236,6 +264,12 @@ export function buildHashedCustomerUserData(
   const hashedEmail = hashNormalized(email);
   if (hashedEmail) {
     userData.em = [hashedEmail];
+  }
+
+  const phone = info.phone ? normalizePhoneForMeta(info.phone) : undefined;
+  const hashedPhone = hashNormalized(phone);
+  if (hashedPhone) {
+    userData.ph = [hashedPhone];
   }
 
   const { firstName, lastName } = splitFullName(info.fullName);

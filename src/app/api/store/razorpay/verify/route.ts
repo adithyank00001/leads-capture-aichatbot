@@ -113,6 +113,10 @@ export async function POST(request: Request) {
 
     // Reply fast to the buyer; finish Meta + email in background (same as Dodo).
     after(async () => {
+      const value = purchase.amount_paise / 100;
+      const quantity = purchase.quantity;
+      const itemPrice = quantity > 0 ? value / quantity : value;
+
       await Promise.all([
         sendPurchaseEvent({
           paymentId,
@@ -120,17 +124,27 @@ export async function POST(request: Request) {
           customer: {
             email,
             fullName: purchase.customer_name,
+            phone: purchase.customer_phone,
+            country: "in",
           },
           attribution,
           eventSourceUrl,
           customData: {
-            value: purchase.amount_paise / 100,
+            value,
             currency: (purchase.currency || "INR").toUpperCase(),
             order_id: purchase.razorpay_order_id,
             content_ids: [purchase.product_slug],
             content_name: purchase.product_title,
             content_type: "product",
-            num_items: purchase.quantity,
+            content_category: "digital_leads_database",
+            num_items: quantity,
+            contents: [
+              {
+                id: purchase.product_slug,
+                quantity,
+                item_price: itemPrice,
+              },
+            ],
           },
         }),
         sendStorePurchaseEmail({
@@ -138,7 +152,7 @@ export async function POST(request: Request) {
           paymentId,
           customerName: purchase.customer_name,
           productTitle: purchase.product_title,
-          value: purchase.amount_paise / 100,
+          value,
           currency: purchase.currency,
         }),
       ]);

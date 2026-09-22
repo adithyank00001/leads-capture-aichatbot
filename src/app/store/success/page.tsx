@@ -24,7 +24,10 @@ type Props = {
 type StoreSuccessView = {
   ok: true;
   paymentId: string;
+  orderId: string | null;
   email: string | null;
+  phone: string | null;
+  customerName: string | null;
   productTitle: string;
   productSlug: string;
   value: number;
@@ -48,7 +51,10 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
       verification = {
         ok: true,
         paymentId,
+        orderId: purchase.razorpay_order_id,
         email: purchase.customer_email,
+        phone: purchase.customer_phone,
+        customerName: purchase.customer_name,
         productTitle: purchase.product_title,
         productSlug: purchase.product_slug,
         value: purchase.amount_paise / 100,
@@ -65,7 +71,10 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
       verification = {
         ok: true,
         paymentId: purchase.razorpay_payment_id ?? paymentIdParam,
+        orderId: purchase.razorpay_order_id,
         email: purchase.customer_email,
+        phone: purchase.customer_phone,
+        customerName: purchase.customer_name,
         productTitle: purchase.product_title,
         productSlug: purchase.product_slug,
         value: purchase.amount_paise / 100,
@@ -83,7 +92,10 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
         verification = {
           ok: true,
           paymentId: dodo.paymentId,
+          orderId: null,
           email: dodo.email,
+          phone: null,
+          customerName: dodo.customer?.fullName ?? null,
           productTitle: dodo.productTitle,
           productSlug: dodo.productSlug,
           value: dodo.value,
@@ -99,23 +111,39 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
   const origin = serverEnv.appUrl.replace(/\/+$/, "") || "http://localhost:3000";
 
   if (verification.ok) {
+    const itemPrice =
+      verification.quantity > 0
+        ? verification.value / verification.quantity
+        : verification.value;
+
     await Promise.all([
       sendPurchaseEventFromPageRequest({
         paymentId: verification.paymentId,
         email: verification.email,
         customer: {
           email: verification.email,
+          phone: verification.phone,
+          fullName: verification.customerName,
+          country: "in",
         },
         eventSourceUrl: `${origin}/store/success`,
         requestHeaders,
         customData: {
           value: verification.value,
           currency: verification.currency,
-          order_id: verification.paymentId,
+          order_id: verification.orderId ?? verification.paymentId,
           content_ids: [verification.productSlug],
           content_name: verification.productTitle,
           content_type: "product",
+          content_category: "digital_leads_database",
           num_items: verification.quantity,
+          contents: [
+            {
+              id: verification.productSlug,
+              quantity: verification.quantity,
+              item_price: itemPrice,
+            },
+          ],
         },
       }),
       // Backup if webhook/verify is slow. Same Idempotency-Key → no double email.
@@ -139,6 +167,8 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
           contentName={verification.productTitle}
           contentIds={[verification.productSlug]}
           numItems={verification.quantity}
+          email={verification.email}
+          phone={verification.phone}
         />
       ) : null}
 
