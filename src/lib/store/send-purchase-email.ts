@@ -5,14 +5,20 @@ import { readFile } from "fs/promises";
 import { sendResendEmail } from "@/lib/email/resend";
 import { serverEnv } from "@/lib/env.server";
 import {
-  getStoreDownloadAbsolutePath,
-  STORE_DOWNLOAD_FILE,
+  getStoreDownloadForSlug,
+  type ResolvedStoreDownload,
 } from "@/lib/store/download";
-import { storeProduct } from "@/lib/store/product-content";
+import {
+  getStoreProductForPurchaseSlug,
+  LIVE_ADS_PRODUCT_SLUG,
+  storeProduct,
+} from "@/lib/store/products";
 
 export type SendStorePurchaseEmailInput = {
   toEmail: string | null | undefined;
   paymentId: string;
+  /** Purchase product slug. Missing = live ads product. */
+  productSlug?: string | null;
   customerName?: string | null;
   productTitle?: string;
   value?: number;
@@ -41,17 +47,20 @@ function formatMoney(value: number | undefined, currency: string | undefined) {
   }
 }
 
-async function loadPdfAttachment(): Promise<{
+async function loadPdfAttachment(download: ResolvedStoreDownload | null): Promise<{
   filename: string;
   content: string;
   content_type: string;
 } | null> {
+  if (!download) {
+    return null;
+  }
   try {
-    const bytes = await readFile(getStoreDownloadAbsolutePath());
+    const bytes = await readFile(download.absolutePath);
     return {
-      filename: STORE_DOWNLOAD_FILE.fileName,
+      filename: download.fileName,
       content: bytes.toString("base64"),
-      content_type: STORE_DOWNLOAD_FILE.contentType,
+      content_type: download.contentType,
     };
   } catch (error) {
     console.error(
@@ -103,8 +112,14 @@ export async function sendStorePurchaseEmail(
     return;
   }
 
-  const driveUrl = serverEnv.storeDriveDownloadUrl?.trim() || "";
-  const productTitle = input.productTitle?.trim() || storeProduct.title;
+  const product = getStoreProductForPurchaseSlug(input.productSlug);
+  const envDriveUrl =
+    product?.slug === LIVE_ADS_PRODUCT_SLUG
+      ? serverEnv.storeDriveDownloadUrl?.trim() || ""
+      : "";
+  const driveUrl = product?.driveDownloadUrl?.trim() || envDriveUrl;
+  const productTitle =
+    input.productTitle?.trim() || product?.title || storeProduct.title;
   const priceLabel = formatMoney(input.value, input.currency);
   const firstName =
     input.customerName?.trim().split(/\s+/)[0] ||
@@ -164,7 +179,9 @@ export async function sendStorePurchaseEmail(
 </body>
 </html>`.trim();
 
-  const attachment = await loadPdfAttachment();
+  const attachment = await loadPdfAttachment(
+    getStoreDownloadForSlug(input.productSlug),
+  );
   const toDomain = toEmail.includes("@") ? toEmail.split("@")[1] : "unknown";
 
   const result = await sendResendEmail({

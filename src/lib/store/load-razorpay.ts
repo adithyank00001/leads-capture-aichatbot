@@ -56,9 +56,14 @@ declare global {
 
 let loadingPromise: Promise<RazorpayConstructor> | null = null;
 
+function failLoad(reject: (reason?: unknown) => void) {
+  loadingPromise = null;
+  reject(new Error("Razorpay failed to load."));
+}
+
 /**
- * Load Razorpay Checkout.js only when the buyer pays.
- * Keeps the product page fast (no script on first paint).
+ * Load Razorpay Checkout.js on demand (or reuse an in-flight download).
+ * Safe to call from idle prefetch — first paint stays free of this script.
  */
 export function loadRazorpayCheckout(): Promise<RazorpayConstructor> {
   if (typeof window === "undefined") {
@@ -74,17 +79,28 @@ export function loadRazorpayCheckout(): Promise<RazorpayConstructor> {
   }
 
   loadingPromise = new Promise((resolve, reject) => {
+    const finishOk = () => {
+      if (window.Razorpay) {
+        resolve(window.Razorpay);
+      } else {
+        failLoad(reject);
+      }
+    };
+
     const existing = document.querySelector<HTMLScriptElement>(
       `script[src="${RAZORPAY_SCRIPT_URL}"]`,
     );
     if (existing) {
-      existing.addEventListener("load", () => {
+      // Load may have already fired — re-check immediately so we never hang.
+      if (window.Razorpay) {
+        resolve(window.Razorpay);
+        return;
+      }
+      existing.addEventListener("load", finishOk);
+      existing.addEventListener("error", () => failLoad(reject));
+      // Microtask: script may have finished between query and listeners.
+      queueMicrotask(() => {
         if (window.Razorpay) resolve(window.Razorpay);
-        else reject(new Error("Razorpay failed to load."));
-      });
-      existing.addEventListener("error", () => {
-        loadingPromise = null;
-        reject(new Error("Razorpay failed to load."));
       });
       return;
     }
@@ -92,22 +108,24 @@ export function loadRazorpayCheckout(): Promise<RazorpayConstructor> {
     const script = document.createElement("script");
     script.src = RAZORPAY_SCRIPT_URL;
     script.async = true;
-    script.onload = () => {
-      if (window.Razorpay) {
-        resolve(window.Razorpay);
-      } else {
-        loadingPromise = null;
-        reject(new Error("Razorpay failed to load."));
-      }
-    };
-    script.onerror = () => {
-      loadingPromise = null;
-      reject(new Error("Razorpay failed to load."));
-    };
+    if ("fetchPriority" in script) {
+      (script as HTMLScriptElement & { fetchPriority: string }).fetchPriority =
+        "low";
+    }
+    script.onload = finishOk;
+    script.onerror = () => failLoad(reject);
     document.body.appendChild(script);
   });
 
   return loadingPromise;
+}
+
+/**
+ * Warm Checkout.js in the background after the page is idle.
+ * Failures are silent — Buy click will retry via loadRazorpayCheckout.
+ */
+export function prefetchRazorpayCheckout(): void {
+  void loadRazorpayCheckout().catch(() => undefined);
 }
 
 /**

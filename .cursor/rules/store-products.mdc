@@ -1,0 +1,55 @@
+---
+description: How to add/edit store products safely without breaking live ads, Pixel, CAPI, or Razorpay
+globs: src/lib/store/**,src/app/store/**,src/components/store/**,src/app/api/store/**
+alwaysApply: false
+---
+
+# Store products — AI must follow
+
+Before creating or changing store products, **read** `STORE-PRODUCT-GUIDE.md` at the project root. Follow it step by step.
+
+## Hard stops
+
+- **Never** change, redirect, or rename `/store/product` (live ads URL).
+- **Never** rename slug/contentId `pan-india-leads-2026` unless the user explicitly asks.
+- **Never** invent a second Meta Pixel or per-product Razorpay keys.
+- **Never** trust browser-sent prices; server price comes from the product file.
+- **Never** rewire buy / track / timer / zoom when doing a design change.
+- **Never** edit shared UI (`product-hero.tsx`, shared store CSS, shared FAQ/details) “just for one product.”
+
+## How to add a product
+
+1. Copy `src/lib/store/products/_TEMPLATE.ts` → `src/lib/store/products/<slug>.ts`
+2. Rename the export; fill all fields; keep `published: false`
+3. Put PDF under `private/store/downloads/` and set `download`
+4. Register in `src/lib/store/products/index.ts` (`REGISTERED_PRODUCTS`)
+5. Test at `/store/product/<slug>`
+6. Set `published: true` only when the user asks to put it on the homepage
+
+## Architecture to preserve
+
+- One product = one content file under `src/lib/store/products/`
+- Shared Pixel + CAPI; each product uses its own `contentId`
+- Shared Razorpay keys (site-wide); per-product `price` in the product file
+- Live ads product is served **only** at `/store/product` (slug URL for that product must 404)
+- Env `NEXT_PUBLIC_STORE_PRICE_INR` overrides price for the live ads product only
+- Legacy purchase slug `poster-pack` must keep mapping to the live ads download
+
+## Design changes for one product
+
+- Copy the section into a **new** component name
+- Change look only; keep calling shared buy/track helpers
+- Do not build a pre-made `layout` / `faqStyle` config system unless asked
+- Product files hold content only — never payment or Pixel code
+
+## Mixed hero reminder
+
+`product-hero.tsx` contains design **and** checkout/tracking wiring. Leaving buy/track lines alone is required. Cutting those wires breaks payments/Meta for that page.
+
+## Done checklist
+
+- [ ] Guide steps followed
+- [ ] `/store/product` behavior/URL unchanged
+- [ ] New product unpublished until user says publish
+- [ ] No new Pixel / no per-product Razorpay secrets
+- [ ] No shared-UI edit that affects other products

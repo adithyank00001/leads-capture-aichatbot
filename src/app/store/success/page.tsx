@@ -8,7 +8,7 @@ import {
   buildStorePurchaseCustomData,
   buildStorePurchaseCustomer,
 } from "@/lib/meta/store-purchase-meta";
-import { STORE_DOWNLOAD_FILE } from "@/lib/store/download";
+import { getStoreDownloadForSlug } from "@/lib/store/download";
 import { storeProduct } from "@/lib/store/product-content";
 import {
   getPaidPurchaseByDownloadToken,
@@ -150,6 +150,7 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
       sendStorePurchaseEmail({
         toEmail: verification.email,
         paymentId: verification.paymentId,
+        productSlug: verification.productSlug,
         productTitle: verification.productTitle,
         value: verification.value,
         currency: verification.currency,
@@ -204,7 +205,7 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
               </div>
 
               <p className="mt-6 text-xs text-[var(--store-muted)]">
-                File: {STORE_DOWNLOAD_FILE.fileName}
+                File: {getStoreDownloadForSlug(verification.productSlug)?.fileName}
                 <br />
                 Payment ID: {verification.paymentId}
               </p>

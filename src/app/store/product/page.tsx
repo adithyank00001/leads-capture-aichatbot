@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { StoreProductPage } from "@/components/store/product-page";
+/** Live ads product — always /store/product. Content: products/pan-india-leads-2026.ts */
 import { storeProduct } from "@/lib/store/product-content";
 
 export const metadata: Metadata = {

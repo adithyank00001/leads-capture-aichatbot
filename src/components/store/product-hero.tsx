@@ -21,11 +21,13 @@ import {
 } from "@/lib/meta/store-track";
 import { readBrowserMetaClickIds } from "@/lib/meta/fbc";
 import {
+  loadRazorpayCheckout,
   openRazorpayCheckout,
+  prefetchRazorpayCheckout,
   type RazorpaySuccessResponse,
 } from "@/lib/store/load-razorpay";
 import { formatMoney, formatReviewCount } from "@/lib/store/product-format";
-import type { StoreProductContent } from "@/lib/store/product-content";
+import type { StoreProductConfig } from "@/lib/store/product-content";
 import { cn } from "@/lib/utils";
 
 const ProductImageZoomLightbox = dynamic(
@@ -363,7 +365,7 @@ function OfferCountdown() {
 }
 
 type Props = {
-  product: StoreProductContent;
+  product: StoreProductConfig;
 };
 
 /**
@@ -402,15 +404,60 @@ export function ProductHero({ product }: Props) {
       value: product.price,
       currency: product.currency,
       contentName: product.title,
-      contentIds: ["pan-india-leads-2026"],
+      contentIds: [product.contentId],
     });
-  }, [product.currency, product.price, product.title]);
+  }, [product.contentId, product.currency, product.price, product.title]);
 
+  /** After first paint: warm Checkout.js + order API (never on mount). */
   useEffect(() => {
-    void fetch("/api/store/razorpay/order", {
-      method: "GET",
-      cache: "no-store",
-    }).catch(() => undefined);
+    let cancelled = false;
+    let idleId: number | undefined;
+    let timeoutId: number | undefined;
+
+    const win = window as Window & {
+      requestIdleCallback?: (
+        callback: IdleRequestCallback,
+        options?: IdleRequestOptions,
+      ) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+
+    const runWarmup = () => {
+      if (cancelled) return;
+      prefetchRazorpayCheckout();
+      void fetch("/api/store/razorpay/order", {
+        method: "GET",
+        cache: "no-store",
+      }).catch(() => undefined);
+    };
+
+    const scheduleIdle = () => {
+      if (cancelled) return;
+      if (typeof win.requestIdleCallback === "function") {
+        idleId = win.requestIdleCallback(() => runWarmup(), { timeout: 2500 });
+      } else {
+        timeoutId = window.setTimeout(runWarmup, 2000);
+      }
+    };
+
+    if (document.readyState === "complete") {
+      scheduleIdle();
+    } else {
+      const onLoad = () => scheduleIdle();
+      window.addEventListener("load", onLoad, { once: true });
+      return () => {
+        cancelled = true;
+        window.removeEventListener("load", onLoad);
+        if (idleId != null) win.cancelIdleCallback?.(idleId);
+        if (timeoutId != null) window.clearTimeout(timeoutId);
+      };
+    }
+
+    return () => {
+      cancelled = true;
+      if (idleId != null) win.cancelIdleCallback?.(idleId);
+      if (timeoutId != null) window.clearTimeout(timeoutId);
+    };
   }, []);
 
   useEffect(() => {
@@ -477,15 +524,19 @@ export function ProductHero({ product }: Props) {
       currency: product.currency,
       quantity,
       contentName: product.title,
-      contentIds: ["pan-india-leads-2026"],
+      contentIds: [product.contentId],
     });
 
     try {
+      // Start script download in parallel with order create (often already warm).
+      const scriptReady = loadRazorpayCheckout();
+
       const clickIds = readBrowserMetaClickIds();
       const res = await fetch("/api/store/razorpay/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          slug: product.slug,
           quantity,
           selections,
           eventSourceUrl:
@@ -515,6 +566,8 @@ export function ProductHero({ product }: Props) {
       ) {
         throw new Error(data.error?.message ?? "Could not start checkout.");
       }
+
+      await scriptReady;
 
       await openRazorpayCheckout({
         key: data.keyId,

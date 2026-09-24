@@ -18,6 +18,9 @@ export const PUBLIC_META_PAGE_PATHS = [
 
 const PUBLIC_PAGE_EXACT = new Set<string>(PUBLIC_META_PAGE_PATHS);
 
+/** Extra store products: /store/product/<slug> (live ads product stays /store/product). */
+const STORE_SLUG_PRODUCT_PATH = /^\/store\/product\/([a-z0-9-]+)$/;
+
 /** Friendly labels for Meta PageView custom_data.content_name */
 export const META_PAGE_CONTENT_NAMES: Record<string, string> = {
   "/": "Digital Products Store Home",
@@ -49,7 +52,7 @@ export function isPublicMetaPagePath(pathname: string): boolean {
     return false;
   }
 
-  return PUBLIC_PAGE_EXACT.has(pathname);
+  return PUBLIC_PAGE_EXACT.has(pathname) || STORE_SLUG_PRODUCT_PATH.test(pathname);
 }
 
 /** Friendly content_name for a public page path, or null if unknown. */
@@ -58,7 +61,13 @@ export function getMetaPageContentName(pathname: string): string | null {
     return null;
   }
 
-  return META_PAGE_CONTENT_NAMES[pathname] ?? null;
+  const exact = META_PAGE_CONTENT_NAMES[pathname];
+  if (exact) {
+    return exact;
+  }
+
+  const slug = STORE_SLUG_PRODUCT_PATH.exec(pathname)?.[1];
+  return slug ? `Store Product: ${slug}` : null;
 }
 
 /** Same key format for head bootstrap + SPA tracker (avoids double Pixel PageView). */

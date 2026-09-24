@@ -6,12 +6,14 @@ import {
 } from "@/lib/meta/attribution";
 import { isValidFbc, isValidFbp } from "@/lib/meta/fbc";
 import { isValidStoreEmail, normalizeStoreEmail } from "@/lib/store/email";
-import { STORE_PRODUCT_SLUG } from "@/lib/store/download";
+import type { StoreProductConfig } from "@/lib/store/product-content";
+import { getStoreProductBySlug, storeProduct } from "@/lib/store/products";
 import { createStorePurchase } from "@/lib/store/purchases";
 import { getRazorpayClient, getRazorpayKeyId } from "@/lib/store/razorpay";
-import { storeProduct } from "@/lib/store/product-content";
 
 type OrderBody = {
+  /** Product slug. Missing = live ads product (older page builds). */
+  slug?: string;
   quantity?: number;
   selections?: Record<string, string>;
   email?: string;
@@ -20,10 +22,13 @@ type OrderBody = {
   fbc?: string;
 };
 
-function computeUnitPrice(selections: Record<string, string>) {
-  let total = storeProduct.price;
-  for (const option of storeProduct.options) {
-    const selected = selections[option.id] ?? storeProduct.defaultSelections[option.id];
+function computeUnitPrice(
+  product: StoreProductConfig,
+  selections: Record<string, string>,
+) {
+  let total = product.price;
+  for (const option of product.options) {
+    const selected = selections[option.id] ?? product.defaultSelections[option.id];
     const match = option.values.find((value) => value.value === selected);
     if (match?.priceAdjust) {
       total += match.priceAdjust;
@@ -53,6 +58,15 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as OrderBody;
+    const requestedSlug = typeof body.slug === "string" ? body.slug.trim() : "";
+    const product = requestedSlug ? getStoreProductBySlug(requestedSlug) : storeProduct;
+    if (!product) {
+      return NextResponse.json(
+        { ok: false, error: { message: "Unknown product." } },
+        { status: 400 },
+      );
+    }
+
     // Email is optional here — Razorpay checkout collects email + phone.
     const emailRaw =
       typeof body.email === "string" ? normalizeStoreEmail(body.email) : "";
@@ -60,13 +74,13 @@ export async function POST(request: Request) {
 
     const quantity = Math.min(20, Math.max(1, Number(body.quantity) || 1));
     const selections = {
-      ...storeProduct.defaultSelections,
+      ...product.defaultSelections,
       ...(body.selections ?? {}),
     };
 
-    const unitPrice = computeUnitPrice(selections);
+    const unitPrice = computeUnitPrice(product, selections);
     const amountMajor = unitPrice * quantity;
-    const currency = storeProduct.currency.toUpperCase();
+    const currency = product.currency.toUpperCase();
     const amountPaise = Math.round(amountMajor * 100);
 
     if (!Number.isFinite(amountPaise) || amountPaise < 100) {
@@ -106,8 +120,8 @@ export async function POST(request: Request) {
       currency,
       receipt,
       notes: {
-        product_slug: STORE_PRODUCT_SLUG,
-        product_title: storeProduct.title,
+        product_slug: product.slug,
+        product_title: product.title,
         quantity: String(quantity),
         ...(email ? { customer_email: email } : {}),
         ...metaNotes,
@@ -115,8 +129,8 @@ export async function POST(request: Request) {
     });
 
     await createStorePurchase({
-      productSlug: STORE_PRODUCT_SLUG,
-      productTitle: storeProduct.title,
+      productSlug: product.slug,
+      productTitle: product.title,
       amountPaise,
       currency,
       quantity,
@@ -132,7 +146,7 @@ export async function POST(request: Request) {
       amount: order.amount,
       currency: order.currency,
       keyId: getRazorpayKeyId(),
-      productName: storeProduct.brandName,
+      productName: product.brandName,
       description: "Complete payment to receive your leads database",
       ...(email ? { email } : {}),
     });

@@ -2,10 +2,7 @@ import { readFile } from "fs/promises";
 
 import { NextResponse } from "next/server";
 
-import {
-  getStoreDownloadAbsolutePath,
-  STORE_DOWNLOAD_FILE,
-} from "@/lib/store/download";
+import { getStoreDownloadForSlug } from "@/lib/store/download";
 import {
   getPaidPurchaseByDownloadToken,
   getPaidPurchaseByPaymentId,
@@ -19,14 +16,18 @@ export async function GET(request: Request) {
     const paymentId = searchParams.get("payment_id")?.trim();
 
     let allowed = false;
+    /** Empty = live ads product (legacy Dodo purchases). */
+    let productSlug: string | null = null;
 
     if (token) {
       const purchase = await getPaidPurchaseByDownloadToken(token);
       allowed = Boolean(purchase);
+      productSlug = purchase?.product_slug ?? null;
     } else if (paymentId) {
       const razorpayPurchase = await getPaidPurchaseByPaymentId(paymentId);
       if (razorpayPurchase) {
         allowed = true;
+        productSlug = razorpayPurchase.product_slug;
       } else {
         // Legacy Dodo downloads.
         const verification = await verifyStoreDodoPayment({
@@ -49,13 +50,21 @@ export async function GET(request: Request) {
       );
     }
 
-    const file = await readFile(getStoreDownloadAbsolutePath());
+    const download = getStoreDownloadForSlug(productSlug);
+    if (!download) {
+      return NextResponse.json(
+        { ok: false, error: { message: "Download not available." } },
+        { status: 404 },
+      );
+    }
+
+    const file = await readFile(download.absolutePath);
 
     return new NextResponse(file, {
       status: 200,
       headers: {
-        "Content-Type": STORE_DOWNLOAD_FILE.contentType,
-        "Content-Disposition": `attachment; filename="${STORE_DOWNLOAD_FILE.fileName}"`,
+        "Content-Type": download.contentType,
+        "Content-Disposition": `attachment; filename="${download.fileName}"`,
         "Cache-Control": "no-store",
         "X-Content-Type-Options": "nosniff",
       },

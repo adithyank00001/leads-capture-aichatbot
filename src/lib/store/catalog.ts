@@ -1,7 +1,13 @@
 /**
  * Shop catalog for the homepage storefront.
- * Top-selling product links to the real checkout page: /store/product
+ * Buyable cards come from product files with `published: true`
+ * (src/lib/store/products). Teaser cards below are display-only.
  */
+
+import {
+  getPublishedStoreProducts,
+  getStoreProductPath,
+} from "@/lib/store/products";
 
 export type CatalogProduct = {
   id: string;
@@ -20,26 +26,27 @@ export type CatalogProduct = {
   available: boolean;
 };
 
-export const shopCatalog: CatalogProduct[] = [
-  {
-    id: "pan-india-leads-2026",
-    title: "110Cr+ All India Latest Leads (PAN INDIA DATABASE) 2026",
-    subtitle:
-      "200+ categories · Instant Google Drive download · USA leads bonus included",
-    price: 397,
-    compareAtPrice: 4997,
-    currencySymbol: "₹",
-    image:
-      "https://res.cloudinary.com/ntv0bhpy/image/upload/v1790006128/ChatGPT_Image_Sep_21_2026_09_19_48_PM.webp",
-    imageAlt:
-      "110 Crore+ Indian Leads database with 200+ categories and 10 Lakhs+ USA leads bonus",
-    href: "/store/product",
-    badge: "Top selling",
-    topSelling: true,
-    rating: 4.9,
-    reviewCount: 500,
+const publishedCards: CatalogProduct[] = getPublishedStoreProducts().map(
+  (product) => ({
+    id: product.slug,
+    title: product.title,
+    subtitle: product.catalogSubtitle || product.subtitle,
+    price: product.price,
+    compareAtPrice: product.compareAtPrice,
+    currencySymbol: product.currencySymbol,
+    image: product.images[0]?.src ?? "",
+    imageAlt: product.images[0]?.alt ?? product.title,
+    href: getStoreProductPath(product),
+    badge: product.badge,
+    topSelling: product.topSelling,
+    rating: product.rating,
+    reviewCount: product.reviewCount,
     available: true,
-  },
+  }),
+);
+
+/** Display-only "Out of stock" cards. Not buyable. */
+const teaserCards: CatalogProduct[] = [
   {
     id: "usa-leads-premium",
     title: "USA Leads Premium Pack (10 Lakhs+ Contacts)",
@@ -104,4 +111,11 @@ export const shopCatalog: CatalogProduct[] = [
     reviewCount: 24,
     available: false,
   },
+];
+
+const publishedIds = new Set(publishedCards.map((card) => card.id));
+
+export const shopCatalog: CatalogProduct[] = [
+  ...publishedCards,
+  ...teaserCards.filter((card) => !publishedIds.has(card.id)),
 ];

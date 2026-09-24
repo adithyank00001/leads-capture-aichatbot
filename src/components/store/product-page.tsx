@@ -1,9 +1,9 @@
 import { ProductDetails } from "@/components/store/product-details";
 import { ProductHeader } from "@/components/store/product-header";
 import { ProductHero } from "@/components/store/product-hero";
-import type { StoreProductContent } from "@/lib/store/product-content";
+import type { StoreProductConfig } from "@/lib/store/product-content";
 
-export function StoreProductPage({ product }: { product: StoreProductContent }) {
+export function StoreProductPage({ product }: { product: StoreProductConfig }) {
   return (
     <div className="store-root min-h-full">
       <ProductHeader brandName={product.brandName} />

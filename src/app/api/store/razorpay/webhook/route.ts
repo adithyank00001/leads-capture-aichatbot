@@ -125,6 +125,7 @@ export async function POST(request: Request) {
           sendStorePurchaseEmail({
             toEmail: email,
             paymentId,
+            productSlug: purchase.product_slug,
             customerName: fullName,
             productTitle: purchase.product_title,
             value: metaInput.value,

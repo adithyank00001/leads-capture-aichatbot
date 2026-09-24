@@ -1,8 +1,17 @@
 import { FB_PIXEL_ID } from "@/lib/fbpixel";
 import {
+  getMetaPageContentName,
   META_PAGE_CONTENT_NAMES,
   PUBLIC_META_PAGE_PATHS,
 } from "@/lib/meta/public-pages";
+import { getStoreProductPath, storeProducts } from "@/lib/store/products";
+
+/** Registered /store/product/<slug> pages (live ads product is already in the list). */
+function getStoreSlugPagePaths(): string[] {
+  return storeProducts
+    .map((product) => getStoreProductPath(product))
+    .filter((pagePath) => !(PUBLIC_META_PAGE_PATHS as readonly string[]).includes(pagePath));
+}
 
 /**
  * Tiny `beforeInteractive` script (page head).
@@ -16,8 +25,17 @@ export function getMetaPixelBootstrapScript(): string {
     return "";
   }
 
-  const pathsJson = JSON.stringify(PUBLIC_META_PAGE_PATHS);
-  const namesJson = JSON.stringify(META_PAGE_CONTENT_NAMES);
+  const slugPaths = getStoreSlugPagePaths();
+  const names: Record<string, string> = { ...META_PAGE_CONTENT_NAMES };
+  for (const pagePath of slugPaths) {
+    const name = getMetaPageContentName(pagePath);
+    if (name) {
+      names[pagePath] = name;
+    }
+  }
+
+  const pathsJson = JSON.stringify([...PUBLIC_META_PAGE_PATHS, ...slugPaths]);
+  const namesJson = JSON.stringify(names);
 
   // Keep this self-contained — no imports at runtime.
   // PageView key must match getMetaPageViewKey() in meta-pixel.tsx (path, or path?query).
