@@ -33,8 +33,8 @@ export const usaLeads: StoreProductConfig = {
   subtitleLead: "Ready to start closing clients who pay in dollars?",
   subtitle:
     "Get instant access to 10 Lakh+ verified US business owners. Stop guessing and start closing high-ticket client today.",
-  rating: 4.8,
-  reviewCount: 200,
+  rating: 4.9,
+  reviewCount: 500,
   socialProofTag: "🔥 50+ sold yesterday!",
   highlights: [
     "10,00,000+ Verified US Prospects ready to be pitched.",

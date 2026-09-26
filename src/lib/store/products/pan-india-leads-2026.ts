@@ -29,7 +29,7 @@ export const panIndiaLeads2026: StoreProductConfig = {
   currency: "INR",
   currencySymbol: "₹",
   rating: 4.9,
-  reviewCount: 500,
+  reviewCount: 700,
   highlights: [
     "Instant digital download via Google Drive",
     "110 Crore+ High Quality Verified B2B & B2C Contacts",
@@ -40,7 +40,7 @@ export const panIndiaLeads2026: StoreProductConfig = {
       badge: "🎁 Bonus",
     },
   ],
-  socialProofTag: "🔥 150+ sold yesterday!",
+  socialProofTag: "🔥 100+ sold yesterday!",
   images: [
     {
       src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1790006128/ChatGPT_Image_Sep_21_2026_09_19_48_PM.webp",
