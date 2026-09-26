@@ -17,6 +17,9 @@ import {
 import { sendStorePurchaseEmail } from "@/lib/store/send-purchase-email";
 import { verifyStoreDodoPayment } from "@/lib/store/verify-dodo-payment";
 
+/** Success-page email is only a short backup; late revisits must not re-send (Resend idempotency ~24h). */
+const SUCCESS_EMAIL_BACKUP_MAX_AGE_MS = 6 * 60 * 60 * 1000;
+
 type Props = {
   searchParams: Promise<{
     payment_id?: string;
@@ -38,7 +41,16 @@ type StoreSuccessView = {
   currency: string;
   quantity: number;
   downloadHref: string;
+  /** From store_purchases.paid_at. Null for legacy Dodo success (keep backup send). */
+  paidAt: string | null;
 };
+
+function isPaidRecently(paidAt: string | null): boolean {
+  if (!paidAt) return true;
+  const paidAtMs = Date.parse(paidAt);
+  if (!Number.isFinite(paidAtMs)) return true;
+  return Date.now() - paidAtMs <= SUCCESS_EMAIL_BACKUP_MAX_AGE_MS;
+}
 
 export default async function StoreSuccessPage({ searchParams }: Props) {
   const params = await searchParams;
@@ -65,6 +77,7 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
         currency: (purchase.currency || "INR").toUpperCase(),
         quantity: purchase.quantity,
         downloadHref: `/api/store/download?token=${encodeURIComponent(token)}`,
+        paidAt: purchase.paid_at ?? null,
       };
     }
   }
@@ -85,6 +98,7 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
         currency: (purchase.currency || "INR").toUpperCase(),
         quantity: purchase.quantity,
         downloadHref: `/api/store/download?token=${encodeURIComponent(purchase.download_token)}`,
+        paidAt: purchase.paid_at ?? null,
       };
     } else {
       // Legacy Dodo success links still work.
@@ -106,6 +120,7 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
           currency: dodo.currency,
           quantity: dodo.quantity,
           downloadHref: `/api/store/download?payment_id=${encodeURIComponent(dodo.paymentId)}`,
+          paidAt: null,
         };
       }
     }
@@ -113,6 +128,9 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
 
   const requestHeaders = await headers();
   const origin = serverEnv.appUrl.replace(/\/+$/, "") || "http://localhost:3000";
+  const paidRecently = verification.ok
+    ? isPaidRecently(verification.paidAt)
+    : false;
 
   if (verification.ok) {
     await Promise.all([
@@ -146,15 +164,18 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
           quantity: verification.quantity,
         }),
       }),
-      // Backup if webhook/verify is slow. Same Idempotency-Key → no double email.
-      sendStorePurchaseEmail({
-        toEmail: verification.email,
-        paymentId: verification.paymentId,
-        productSlug: verification.productSlug,
-        productTitle: verification.productTitle,
-        value: verification.value,
-        currency: verification.currency,
-      }),
+      // Backup only while purchase is fresh. Late revisits skip email
+      // (Resend idempotency expires ~24h and was causing duplicate sends).
+      paidRecently
+        ? sendStorePurchaseEmail({
+            toEmail: verification.email,
+            paymentId: verification.paymentId,
+            productSlug: verification.productSlug,
+            productTitle: verification.productTitle,
+            value: verification.value,
+            currency: verification.currency,
+          })
+        : Promise.resolve(),
     ]);
   }
 
@@ -186,7 +207,7 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
                 Your payment is confirmed. Download the PDF package below.
               </p>
 
-              {verification.email ? (
+              {verification.email && paidRecently ? (
                 <p className="mt-3 text-sm text-[var(--store-muted)]">
                   We also emailed the PDF to{" "}
                   <strong>{verification.email}</strong>. Check inbox (and
