@@ -51,7 +51,7 @@ const teaserCards: CatalogProduct[] = [
     id: "real-estate-leads",
     title: "Real Estate Leads Bundle — India",
     subtitle: "Buyers, agents & property leads · City-wise Excel sheets",
-    price: 797,
+    price: 499,
     compareAtPrice: 1497,
     currencySymbol: "₹",
     image:

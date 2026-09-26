@@ -1306,6 +1306,11 @@
     align-items: center;
     padding-block: 1.5rem 0.5rem;
   }
+
+  .shop-hero-inner-simple {
+    grid-template-columns: minmax(0, 1fr);
+    padding-block: 1rem 0.25rem;
+  }
 }
 
 .shop-hero-title {

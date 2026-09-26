@@ -12,8 +12,8 @@ export const usaLeads: StoreProductConfig = {
 
   catalogSubtitle:
     "300+ industries · Instant Excel & CSV download · 3 premium bonuses included",
-  badge: "🔥 Raising",
-  topSelling: false,
+  badge: "Top selling",
+  topSelling: true,
 
   download: {
     relativePrivatePath: "store/downloads/USA-LEADS-PREMIUM-PACK-2026.pdf",
