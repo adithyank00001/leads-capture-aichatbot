@@ -1048,6 +1048,19 @@
   text-align: center;
 }
 
+.store-bonus-surprise-emoji {
+  display: block;
+  margin-top: 0.2rem;
+}
+
+@media (min-width: 640px) {
+  .store-bonus-surprise-emoji {
+    display: inline;
+    margin-top: 0;
+    margin-left: 0.25rem;
+  }
+}
+
 .store-bonus {
   margin-top: 0;
   padding: 1rem 1.1rem;

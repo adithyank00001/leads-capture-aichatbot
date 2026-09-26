@@ -48,22 +48,6 @@ const publishedCards: CatalogProduct[] = getPublishedStoreProducts().map(
 /** Display-only "Out of stock" cards. Not buyable. */
 const teaserCards: CatalogProduct[] = [
   {
-    id: "usa-leads-premium",
-    title: "USA Leads Premium Pack (10 Lakhs+ Contacts)",
-    subtitle: "300+ categories · State & timezone tagged · Clean B2B emails",
-    price: 897,
-    compareAtPrice: 2997,
-    currencySymbol: "₹",
-    image:
-      "https://res.cloudinary.com/ntv0bhpy/image/upload/v1789746243/Creating_educational_social_medi__20260918210816_1.webp",
-    imageAlt: "USA Premium Leads — 10 Lakhs+ verified B2B contacts",
-    href: null,
-    badge: "Out of stock",
-    rating: 4.8,
-    reviewCount: 86,
-    available: false,
-  },
-  {
     id: "real-estate-leads",
     title: "Real Estate Leads Bundle — India",
     subtitle: "Buyers, agents & property leads · City-wise Excel sheets",

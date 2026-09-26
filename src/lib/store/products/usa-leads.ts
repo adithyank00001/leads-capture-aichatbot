@@ -2,18 +2,17 @@ import type { StoreProductConfig } from "@/lib/store/product-content";
 
 /**
  * USA Leads Premium Pack.
- * Secret test URL: /store/product/usa-leads
- * Keep published: false until you are ready for the homepage.
- * Replace the placeholder PDF before real sales.
+ * Public page: /store/product/usa-leads
+ * Shown on the store homepage when published: true.
  */
 export const usaLeads: StoreProductConfig = {
   slug: "usa-leads",
   contentId: "usa-leads",
-  published: false,
+  published: true,
 
   catalogSubtitle:
     "300+ industries · Instant Excel & CSV download · 3 premium bonuses included",
-  badge: "New",
+  badge: "🔥 Raising",
   topSelling: false,
 
   download: {

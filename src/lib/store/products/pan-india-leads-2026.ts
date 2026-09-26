@@ -134,7 +134,7 @@ export const panIndiaLeads2026: StoreProductConfig = {
   bonusIncluded: [
     {
       label: "USA Leads Database (10 Lakhs+ leads with 300+ categories)",
-      value: 897,
+      value: 397,
     },
     { label: "CRM Tracking Blueprint System", value: 497 },
     { label: "And many more..." },

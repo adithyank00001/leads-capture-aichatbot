@@ -37,8 +37,10 @@ export function ProductDetails({
         {product.bonusIncluded.length > 0 ? (
           <div className="store-bonus-wrap">
             <p className="store-bonus-surprise">
-              Wait… we have a surprise for you.{" "}
-              <span aria-hidden="true">😉👇</span>
+              Wait… we have a surprise for you.
+              <span className="store-bonus-surprise-emoji" aria-hidden="true">
+                😉👇
+              </span>
             </p>
             <div className="store-bonus">
               <div className="store-bonus-heading">
