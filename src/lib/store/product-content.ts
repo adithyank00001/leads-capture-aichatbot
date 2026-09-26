@@ -42,10 +42,14 @@ export type ProductReview = {
 export type StoreProductContent = {
   /** Small brand name in the header */
   brandName: string;
+  /** Small line above the title (buy box). Falls back to default if empty. */
+  eyebrow?: string;
   /** Product title */
   title: string;
   /** Short line under the title */
   subtitle: string;
+  /** Optional first sentence of subtitle (can be styled differently). */
+  subtitleLead?: string;
   /** Main selling price */
   price: number;
   /** Old price (crossed out). Set null to hide */
@@ -76,6 +80,8 @@ export type StoreProductContent = {
   trustItems: Array<{ title: string; description: string }>;
   /** Long description paragraphs (About this product) */
   description: string[];
+  /** Optional bold line at the top of About (product-specific). */
+  aboutHeadline?: string;
   /** How customers use the product */
   useCases: ProductUseCase[];
   /** Headline above the included checklist */
@@ -91,6 +97,14 @@ export type StoreProductContent = {
   /** Steps in “How it works” */
   howItWorks: string[];
   faqs: ProductFaq[];
+  /**
+   * Optional bottom CTA block.
+   * Only products that set this will show it (e.g. USA leads).
+   */
+  finalCta?: {
+    headline: string;
+    body: string;
+  };
   /** Primary buy button */
   buyButtonLabel: string;
   /** Secondary button */

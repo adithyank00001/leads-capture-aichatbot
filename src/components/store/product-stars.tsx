@@ -16,7 +16,7 @@ export function ProductStars({ rating }: { rating: number }) {
             className={cn(
               "size-3.5",
               filled
-                ? "fill-[var(--store-ink)] text-[var(--store-ink)]"
+                ? "fill-[#F5B200] text-[#F5B200]"
                 : "text-[var(--store-line)]",
             )}
           />

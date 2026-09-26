@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { ProductReviewFormLazy } from "@/components/store/product-review-form-lazy";
 import { ProductStars } from "@/components/store/product-stars";
+import { StoreFinalCtaBuyButton } from "@/components/store/store-buy-cta-button";
 import { cloudinaryDeliveryUrl } from "@/lib/store/cloudinary";
 import type { StoreProductContent } from "@/lib/store/product-content";
 
@@ -34,40 +35,62 @@ export function ProductDetails({
           })}
         </ul>
         {product.bonusIncluded.length > 0 ? (
-          <div className="store-bonus">
-            <p className="store-bonus-label">Bonus database</p>
-            <ul className="store-bonus-list">
-              {product.bonusIncluded.map((item) => {
-                const isMore = item.label
-                  .toLowerCase()
-                  .includes("and many more");
-                return (
-                  <li
-                    key={item.label}
-                    className={isMore ? "store-bonus-more" : undefined}
-                  >
-                    <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[var(--store-accent)]" />
-                    <span>
-                      {item.label}
-                      {typeof item.value === "number" ? (
-                        <>
-                          {" "}
-                          <span className="store-category-value">
-                            Value : Rs {item.value}
-                          </span>
-                        </>
-                      ) : null}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
+          <div className="store-bonus-wrap">
+            <p className="store-bonus-surprise">
+              Wait… we have a surprise for you.{" "}
+              <span aria-hidden="true">😉👇</span>
+            </p>
+            <div className="store-bonus">
+              <div className="store-bonus-heading">
+                <span className="store-bonus-emoji" aria-hidden="true">
+                  🎁
+                </span>
+                <div className="store-bonus-heading-text">
+                  <p className="store-bonus-title">Exclusive Free Bonuses</p>
+                  <p className="store-bonus-urgency">(Only Available Today)</p>
+                </div>
+              </div>
+              <ul className="store-bonus-list">
+                {product.bonusIncluded.map((item) => {
+                  const isMore = item.label
+                    .toLowerCase()
+                    .includes("and many more");
+                  return (
+                    <li
+                      key={item.label}
+                      className={isMore ? "store-bonus-more" : undefined}
+                    >
+                      <span
+                        className="store-bonus-item-emoji"
+                        aria-hidden="true"
+                      >
+                        🔥
+                      </span>
+                      <span>
+                        {item.label}
+                        {typeof item.value === "number" ? (
+                          <>
+                            {" "}
+                            <span className="store-category-value">
+                              Value : Rs {item.value}
+                            </span>
+                          </>
+                        ) : null}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           </div>
         ) : null}
       </article>
 
       <article className="store-about">
         <h2>About this product</h2>
+        {product.aboutHeadline?.trim() ? (
+          <p className="store-about-headline">{product.aboutHeadline.trim()}</p>
+        ) : null}
         {product.description.map((paragraph) => (
           <p key={paragraph.slice(0, 40)}>{paragraph}</p>
         ))}
@@ -152,6 +175,19 @@ export function ProductDetails({
           </div>
         </div>
       </div>
+
+      {product.finalCta ? (
+        <section className="store-final-cta" aria-label="Final call to action">
+          <h2 className="store-final-cta-headline">
+            {product.finalCta.headline}
+          </h2>
+          <p className="store-final-cta-body">{product.finalCta.body}</p>
+          <div className="store-final-cta-actions">
+            <StoreFinalCtaBuyButton label={product.buyButtonLabel} />
+            <p className="store-final-cta-note">{product.footerNote}</p>
+          </div>
+        </section>
+      ) : null}
 
       {children}
     </section>

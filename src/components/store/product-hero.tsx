@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Check,
-  ChevronRight,
   Download,
   Lock,
   Minus,
@@ -15,6 +14,7 @@ import {
 
 import { ProductImage } from "@/components/store/product-image";
 import { ProductStars } from "@/components/store/product-stars";
+import { StoreBuyCtaButton } from "@/components/store/store-buy-cta-button";
 import {
   trackStoreInitiateCheckout,
   trackStoreViewContent,
@@ -44,7 +44,12 @@ function prefetchZoomLightbox() {
 
 function RazorpayLogo({ className }: { className?: string }) {
   return (
-    <span className={cn("store-razorpay-logo-sm inline-flex items-center gap-1.5", className)}>
+    <span
+      className={cn(
+        "store-razorpay-logo-sm inline-flex items-center gap-1.5",
+        className,
+      )}
+    >
       <svg
         viewBox="0 0 24 24"
         xmlns="http://www.w3.org/2000/svg"
@@ -257,7 +262,8 @@ function resolveOfferTimer(now = Date.now()): {
   const existing = readOfferTimerState();
 
   let deadlineMs = existing?.deadlineMs ?? now + OFFER_START_MS;
-  let dayKey = existing && isValidDayKey(existing.dayKey) ? existing.dayKey : today;
+  let dayKey =
+    existing && isValidDayKey(existing.dayKey) ? existing.dayKey : today;
 
   if (!existing) {
     writeOfferTimerState({ deadlineMs, dayKey: today });
@@ -575,8 +581,7 @@ export function ProductHero({ product }: Props) {
         currency: data.currency ?? "INR",
         name: data.productName ?? product.brandName,
         description:
-          data.description ??
-          "Complete payment to receive your leads database",
+          data.description ?? "Complete payment to receive your leads database",
         order_id: data.orderId,
         // No email/phone prefill — Razorpay collects both on checkout.
         handler: (response) => {
@@ -657,9 +662,20 @@ export function ProductHero({ product }: Props) {
         </section>
 
         <section className="store-buybox" aria-label="Buy product">
-          <p className="store-eyebrow">Digital download · Instant access</p>
+          <p className="store-eyebrow">
+            {product.eyebrow?.trim() || "Digital download · Instant access"}
+          </p>
           <h1 className="store-title">{product.title}</h1>
-          <p className="store-subtitle">{product.subtitle}</p>
+          <p className="store-subtitle">
+            {product.subtitleLead?.trim() ? (
+              <>
+                <span className="store-subtitle-lead">
+                  {product.subtitleLead.trim()}
+                </span>{" "}
+              </>
+            ) : null}
+            {product.subtitle}
+          </p>
 
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <ProductStars rating={product.rating} />
@@ -695,9 +711,18 @@ export function ProductHero({ product }: Props) {
             {product.highlights.map((item) => {
               const text = typeof item === "string" ? item : item.text;
               const badge = typeof item === "string" ? undefined : item.badge;
+              const isBonusHighlight = Boolean(
+                badge && /bonus|🎁/i.test(badge),
+              );
               return (
                 <li key={text}>
-                  <Check className="size-4 shrink-0 text-[var(--store-accent)]" />
+                  {isBonusHighlight ? (
+                    <span className="store-highlight-emoji" aria-hidden="true">
+                      🔥
+                    </span>
+                  ) : (
+                    <Check className="size-4 shrink-0 text-[var(--store-accent)]" />
+                  )}
                   <span>
                     {badge ? (
                       <span className="store-highlight-badge">{badge}</span>
@@ -774,32 +799,20 @@ export function ProductHero({ product }: Props) {
 
           <div id="buy" className="mt-8 space-y-3">
             <div className="flex justify-center">
-              <div className="hover:scale-[1.04] transition-all duration-200 will-change-transform rounded-[14px] p-[1px] bg-gradient-to-b from-[#FFB06A] to-[#FF8A3D] hover:from-[#E8883A] hover:to-[#D46A1C] w-full">
-                <button
-                  type="button"
-                  onClick={() => void handleBuy()}
-                  disabled={startingCheckout}
-                  aria-busy={startingCheckout}
-                  className="rounded-[13px] font-medium transition-all will-change-transform flex items-center justify-center gap-2 bg-gradient-to-b from-[#E36F02] to-[#FC7B02] text-white shadow-[0px_2px_10.1px_0px_#FC7B0233] hover:shadow-[0px_2px_10.1px_0px_#FC7B0244] relative overflow-hidden z-10 before:absolute before:inset-0 before:bg-gradient-to-b before:from-[#D45E00] before:to-[#F07310] before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-200 before:z-0 before:content-[''] text-[16px] py-[11.7px] px-[22px] w-full disabled:opacity-80 disabled:cursor-wait"
-                >
-                  <span className="relative z-10 flex items-center gap-2">
-                    {buyButtonText}
-                    {!startingCheckout ? (
-                      <ChevronRight className="size-4" />
-                    ) : null}
-                  </span>
-                </button>
-              </div>
+              <StoreBuyCtaButton
+                onClick={() => void handleBuy()}
+                disabled={startingCheckout}
+                busy={startingCheckout}
+              >
+                {buyButtonText}
+              </StoreBuyCtaButton>
             </div>
             {payError ? (
               <p className="text-center text-sm text-red-600" role="alert">
                 {payError}
               </p>
             ) : null}
-            <div
-              className="store-pay-secure"
-              aria-label="Secured by Razorpay"
-            >
+            <div className="store-pay-secure" aria-label="Secured by Razorpay">
               <Lock className="size-3.5 shrink-0 text-[var(--store-accent)]" />
               <span>Secured by</span>
               <RazorpayLogo />
@@ -839,24 +852,19 @@ export function ProductHero({ product }: Props) {
             ) : null}
           </div>
           <div className="store-sticky-buy-actions">
-            <div className="hover:scale-[1.04] transition-all duration-200 will-change-transform rounded-[14px] p-[1px] bg-gradient-to-b from-[#FFB06A] to-[#FF8A3D] hover:from-[#E8883A] hover:to-[#D46A1C] w-full">
-              <button
-                type="button"
-                onClick={() => void handleBuy()}
-                disabled={startingCheckout}
-                aria-busy={startingCheckout}
-                className="rounded-[13px] font-medium transition-all will-change-transform flex items-center justify-center gap-2 bg-gradient-to-b from-[#E36F02] to-[#FC7B02] text-white shadow-[0px_2px_10.1px_0px_#FC7B0233] hover:shadow-[0px_2px_10.1px_0px_#FC7B0244] relative overflow-hidden z-10 before:absolute before:inset-0 before:bg-gradient-to-b before:from-[#D45E00] before:to-[#F07310] before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-200 before:z-0 before:content-[''] text-[16px] py-[11.7px] px-[22px] w-full min-h-[2.85rem] disabled:opacity-80 disabled:cursor-wait"
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  {buyButtonText}
-                  {!startingCheckout ? (
-                    <ChevronRight className="size-4" />
-                  ) : null}
-                </span>
-              </button>
-            </div>
+            <StoreBuyCtaButton
+              onClick={() => void handleBuy()}
+              disabled={startingCheckout}
+              busy={startingCheckout}
+              buttonClassName="min-h-[2.85rem]"
+            >
+              {buyButtonText}
+            </StoreBuyCtaButton>
             {payError ? (
-              <p className="text-center text-[11px] leading-snug text-red-600" role="alert">
+              <p
+                className="text-center text-[11px] leading-snug text-red-600"
+                role="alert"
+              >
                 {payError}
               </p>
             ) : (

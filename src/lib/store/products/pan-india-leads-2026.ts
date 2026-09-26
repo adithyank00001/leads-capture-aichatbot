@@ -37,7 +37,7 @@ export const panIndiaLeads2026: StoreProductConfig = {
     "Lifetime access to all downloaded files",
     {
       text: "More than 10 Lakhs+ free USA Leads databases with 300+ categories",
-      badge: "Bonus",
+      badge: "🎁 Bonus",
     },
   ],
   socialProofTag: "🔥 150+ sold yesterday!",
