@@ -23,7 +23,7 @@ export const usaLeads: StoreProductConfig = {
   },
   driveDownloadUrl: null,
 
-  price: 1,
+  price: 397,
   compareAtPrice: 4997,
   currency: "INR",
   currencySymbol: "₹",
@@ -56,10 +56,6 @@ export const usaLeads: StoreProductConfig = {
     {
       src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1790456846/Untitled_design_1_2.jpg",
       alt: "300+ industry categories — real estate, SaaS, law firms, finance, e-commerce, logistics, and more",
-    },
-    {
-      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1789829921/Corporate_database_poster_typogr__20260918155251_1.webp",
-      alt: "Corporate USA database categories for sales and marketing teams",
     },
   ],
 
