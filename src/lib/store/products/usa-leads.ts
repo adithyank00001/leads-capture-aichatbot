@@ -53,8 +53,12 @@ export const usaLeads: StoreProductConfig = {
       alt: "10 Lakh+ Verified USA Business Leads — 300+ industries with free HNI, Real Estate, and Map Scraper bonuses",
     },
     {
-      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1790456846/Untitled_design_1_2.jpg",
-      alt: "300+ industry categories — real estate, SaaS, law firms, finance, e-commerce, logistics, and more",
+      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1790496367/Untitled_design_26.jpg",
+      alt: "This database includes 300+ industry categories — real estate, SaaS, law firms, finance, e-commerce, logistics, and more",
+    },
+    {
+      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1790497451/68156f21-036c-4a78-b341-c8571a43a8e3.png",
+      alt: "USA Leads Database folder properties — 1.55 GB, 2,195 files across 222 folders",
     },
   ],
 
