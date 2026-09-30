@@ -36,8 +36,15 @@ export const panIndiaLeads2026: StoreProductConfig = {
     "Includes Name, Email, Phone, WhatsApp & Location details",
     "Lifetime access to all downloaded files",
     {
-      text: "More than 10 Lakhs+ free USA Leads databases with 300+ categories",
+      text: "Google Business Leads Scraper Tool + USA Leads Database (10Lakh+) & More...(WORTH ₹2500+)",
       badge: "🎁 Bonus",
+      worth: "WORTH ₹2500+",
+      points: [
+        "Google Business Leads Scraper Tool",
+        "USA Leads Database (10Lakh+)",
+        "CRM Tracking Blueprint System",
+        "& More...",
+      ],
     },
   ],
   socialProofTag: "🔥 100+ sold yesterday!",
@@ -129,12 +136,16 @@ export const panIndiaLeads2026: StoreProductConfig = {
     { label: "Hotels / Restaurants / Bars", value: 277 },
     { label: "Real Estate Agents", value: 797 },
     { label: "Online User & Shopper Database", value: 227 },
-    { label: "And many more..." },
+    { label: "More than 200+ Categories" },
   ],
   bonusIncluded: [
     {
       label: "USA Leads Database (10 Lakhs+ leads with 300+ categories)",
       value: 397,
+    },
+    {
+      label: "Google Business Leads Scraper tool",
+      value: 997,
     },
     { label: "CRM Tracking Blueprint System", value: 497 },
     { label: "And many more..." },

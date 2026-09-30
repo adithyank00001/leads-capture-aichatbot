@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Check,
+  CircleCheck,
   Download,
   Lock,
   Minus,
@@ -711,24 +711,58 @@ export function ProductHero({ product }: Props) {
             {product.highlights.map((item) => {
               const text = typeof item === "string" ? item : item.text;
               const badge = typeof item === "string" ? undefined : item.badge;
+              const worth = typeof item === "string" ? undefined : item.worth;
+              const points =
+                typeof item === "string" ? undefined : item.points;
               const isBonusHighlight = Boolean(
                 badge && /bonus|🎁/i.test(badge),
               );
+              const hasBonusPoints = Boolean(points && points.length > 0);
               return (
-                <li key={text}>
+                <li
+                  key={text}
+                  className={
+                    isBonusHighlight ? "store-highlight-bonus" : undefined
+                  }
+                >
                   {isBonusHighlight ? (
                     <span className="store-highlight-emoji" aria-hidden="true">
                       🔥
                     </span>
                   ) : (
-                    <Check className="size-4 shrink-0 text-[var(--store-accent)]" />
+                    <CircleCheck
+                      className="size-4 shrink-0 text-[var(--store-accent)]"
+                      strokeWidth={2.25}
+                      aria-hidden="true"
+                    />
                   )}
-                  <span>
-                    {badge ? (
-                      <span className="store-highlight-badge">{badge}</span>
-                    ) : null}
-                    {text}
-                  </span>
+                  {hasBonusPoints ? (
+                    <div className="store-highlight-bonus-body">
+                      <p className="store-highlight-bonus-urgency">
+                        Only Available Today
+                      </p>
+                      <div className="store-highlight-bonus-top">
+                        {badge ? (
+                          <span className="store-highlight-badge">{badge}</span>
+                        ) : null}
+                        {worth ? (
+                          <span className="store-highlight-worth">{worth}</span>
+                        ) : null}
+                      </div>
+                      <ul className="store-highlight-bonus-points">
+                        {points!.map((point) => (
+                          <li key={point}>{point}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <span>
+                      {badge ? (
+                        <span className="store-highlight-badge">{badge}</span>
+                      ) : null}
+                      {text}
+                    </span>
+                  )}
                 </li>
               );
             })}

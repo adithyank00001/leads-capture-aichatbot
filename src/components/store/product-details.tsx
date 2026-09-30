@@ -22,7 +22,10 @@ export function ProductDetails({
         <p className="store-included-note">{product.includedNote}</p>
         <ul className="store-category-grid">
           {product.included.map((item) => {
-            const isMore = item.label.toLowerCase().includes("and many more");
+            const labelLower = item.label.toLowerCase();
+            const isMore =
+              labelLower.includes("and many more") ||
+              labelLower.includes("more than 200");
             return (
               <li
                 key={item.label}
@@ -56,7 +59,7 @@ export function ProductDetails({
                 {product.bonusIncluded.map((item) => {
                   const isMore = item.label
                     .toLowerCase()
-                    .includes("and many more");
+                    .includes("many more");
                   return (
                     <li
                       key={item.label}

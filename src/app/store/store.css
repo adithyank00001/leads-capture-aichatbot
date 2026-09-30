@@ -366,13 +366,85 @@
   gap: 0.55rem;
 }
 
-.store-highlights li {
+.store-highlights > li {
   display: flex;
   align-items: flex-start;
   gap: 0.55rem;
   font-size: 0.925rem;
   font-weight: 600;
   color: var(--store-ink);
+}
+
+.store-highlights > li.store-highlight-bonus {
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  border: 1px solid #fdba74;
+  color: #9a3412;
+  font-weight: 700;
+  box-shadow: 0 8px 20px rgba(154, 52, 18, 0.08);
+}
+
+.store-highlight-bonus-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.store-highlight-bonus-urgency {
+  margin: 0 0 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #c2410c;
+}
+
+.store-highlight-bonus-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.55rem;
+  margin-bottom: 0.45rem;
+}
+
+.store-highlight-worth {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fff;
+  background: #ea580c;
+}
+
+.store-highlight-bonus-points {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.store-highlight-bonus-points li {
+  position: relative;
+  padding-left: 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #9a3412;
+  line-height: 1.35;
+}
+
+.store-highlight-bonus-points li::before {
+  content: "🎁";
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: 400;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: inherit;
 }
 
 .store-highlight-emoji {
@@ -385,15 +457,15 @@
 .store-highlight-badge {
   display: inline-block;
   margin-right: 0.45rem;
-  padding: 0.1rem 0.45rem;
+  padding: 0.12rem 0.5rem;
   border-radius: 4px;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   vertical-align: middle;
   color: #9a3412;
-  background: #ffedd5;
+  background: #ffffff;
   border: 1px solid #fdba74;
 }
 

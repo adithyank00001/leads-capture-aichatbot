@@ -10,7 +10,6 @@ import {
 } from "@/lib/store/download";
 import {
   getStoreProductForPurchaseSlug,
-  LIVE_ADS_PRODUCT_SLUG,
   storeProduct,
 } from "@/lib/store/products";
 
@@ -79,7 +78,8 @@ async function loadPdfAttachment(download: ResolvedStoreDownload | null): Promis
 }
 
 /**
- * Email the buyer their PDF + Google Drive link after a paid store order.
+ * Email the buyer their PDF after a paid store order.
+ * Optional Google Drive link only if the product sets `driveDownloadUrl`.
  * Safe to call twice (webhook + success page) — Resend Idempotency-Key dedupes.
  * Never throws.
  */
@@ -113,11 +113,8 @@ export async function sendStorePurchaseEmail(
   }
 
   const product = getStoreProductForPurchaseSlug(input.productSlug);
-  const envDriveUrl =
-    product?.slug === LIVE_ADS_PRODUCT_SLUG
-      ? serverEnv.storeDriveDownloadUrl?.trim() || ""
-      : "";
-  const driveUrl = product?.driveDownloadUrl?.trim() || envDriveUrl;
+  // India (and others): only use per-product driveDownloadUrl. No env fallback.
+  const driveUrl = product?.driveDownloadUrl?.trim() || "";
   const productTitle =
     input.productTitle?.trim() || product?.title || storeProduct.title;
   const priceLabel = formatMoney(input.value, input.currency);

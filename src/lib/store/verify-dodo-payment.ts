@@ -7,7 +7,6 @@ import {
   type MetaCustomerInfo,
 } from "@/lib/meta/user-data";
 import { storeProduct } from "@/lib/store/product-content";
-import { serverEnv } from "@/lib/env.server";
 
 export type StorePaymentVerification =
   | {
@@ -160,7 +159,7 @@ export async function verifyStoreDodoPayment(input: {
       productTitle: storeProduct.title,
       productSlug: "pan-india-leads-2026",
       digitalProductsDelivered: Boolean(payment.digital_products_delivered),
-      driveDownloadUrl: serverEnv.storeDriveDownloadUrl?.trim() || null,
+      driveDownloadUrl: null,
     };
   } catch {
     return { ok: false, reason: "verify_failed" };

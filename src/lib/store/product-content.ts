@@ -66,6 +66,10 @@ export type StoreProductContent = {
         text: string;
         /** Optional small tag next to the line (e.g. "Bonus") */
         badge?: string;
+        /** Optional worth tag shown beside the badge (bonus rows) */
+        worth?: string;
+        /** Optional bullet list under the badge/worth row */
+        points?: string[];
       }
   >;
   /** Overlay tag on the main product image */
