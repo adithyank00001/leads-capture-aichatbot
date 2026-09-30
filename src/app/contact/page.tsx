@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 
 import { ContactForm } from "@/components/legal/contact-form";
 import { LegalPageShell, LegalP } from "@/components/legal/legal-page-shell";
+import { WhatsAppIcon } from "@/components/marketing/whatsapp-icon";
 import { publicConfig } from "@/lib/config";
+import { getWhatsAppHref } from "@/lib/marketing/whatsapp";
 
 export const metadata: Metadata = {
   title: `Contact — ${publicConfig.appName}`,
@@ -21,18 +23,40 @@ export default function ContactPage() {
         the Refund Policy.
       </LegalP>
 
-      <div className="rounded-lg border border-[#D8E2EC] bg-[#F7FAFC] px-4 py-4 sm:px-5">
-        <p className="text-sm font-medium text-[var(--landing-navy)]">Email</p>
-        <a
-          href="mailto:support@growscalex.com"
-          className="mt-1 inline-block text-[17px] font-semibold text-[var(--landing-orange)] hover:underline"
-        >
-          support@growscalex.com
-        </a>
-        <p className="mt-2 text-sm leading-relaxed text-[#5B6B7C]">
-          Prefer the form? Fill it in and we will receive your message at the
-          same inbox.
-        </p>
+      <div className="space-y-3">
+        <div className="rounded-lg border border-[#D8E2EC] bg-[#F7FAFC] px-4 py-4 sm:px-5">
+          <p className="text-sm font-medium text-[var(--landing-navy)]">Email</p>
+          <a
+            href="mailto:support@growscalex.com"
+            className="mt-1 inline-block text-[17px] font-semibold text-[var(--landing-orange)] hover:underline"
+          >
+            support@growscalex.com
+          </a>
+          <p className="mt-2 text-sm leading-relaxed text-[#5B6B7C]">
+            Prefer the form? Fill it in and we will receive your message at the
+            same inbox.
+          </p>
+        </div>
+
+        <div className="rounded-lg border border-[#D8E2EC] bg-[#F7FAFC] px-4 py-4 sm:px-5">
+          <p className="text-sm font-medium text-[var(--landing-navy)]">
+            WhatsApp
+          </p>
+          <a
+            href={getWhatsAppHref(
+              "Hi, I have a question about growscaleX support.",
+            )}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-1 inline-flex items-center gap-2 text-[17px] font-semibold text-[var(--landing-navy)] hover:underline"
+          >
+            <WhatsAppIcon className="size-5 text-[#101828]" />
+            <span>8891993882</span>
+          </a>
+          <p className="mt-2 text-sm leading-relaxed text-[#5B6B7C]">
+            Message us on WhatsApp for faster support replies.
+          </p>
+        </div>
       </div>
 
       <div className="space-y-3">
