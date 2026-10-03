@@ -22,6 +22,8 @@ import type { Database } from "@/lib/supabase/admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import DodoPayments from "dodopayments";
 
+export const dynamic = "force-dynamic";
+
 async function loadPurchaseCustomerInfo(
   paymentId: string,
   fallbackEmail: string | null,

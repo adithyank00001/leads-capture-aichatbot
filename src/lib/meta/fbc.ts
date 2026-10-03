@@ -1,6 +1,7 @@
 /** Meta click-id helpers (shared client + server). Format: fb.{subdomainIndex}.{creationTimeMs}.{fbclid} */
 
 const FBC_COOKIE = "_fbc";
+const FBP_COOKIE = "_fbp";
 const FBC_MAX_AGE_SECONDS = 90 * 24 * 60 * 60;
 /** Meta: when generating on the server without writing a cookie, use subdomain index 1. */
 const DEFAULT_SUBDOMAIN_INDEX = 1;
@@ -15,6 +16,47 @@ export function isValidFbc(value: string | null | undefined): value is string {
   return trimmed.length > 0 && FBC_PATTERN.test(trimmed);
 }
 
+/**
+ * Unwrap encodeURIComponent transport layers (%25 → %) only.
+ * Stops before decoding the fbclid itself (%2F must stay %2F, not /).
+ */
+export function unwrapTransportEncoding(value: string): string {
+  let current = value;
+  while (current.includes("%25")) {
+    let decoded: string;
+    try {
+      decoded = decodeURIComponent(current);
+    } catch {
+      break;
+    }
+    if (decoded === current) {
+      break;
+    }
+    current = decoded;
+  }
+  return current;
+}
+
+/**
+ * _fbc must stay plain (Meta compares fbclid exactly).
+ * Older builds / Meta Pixel may stack encodeURIComponent (%2F → %252F → %25252F…).
+ */
+export function normalizeFbcCookieValue(
+  raw: string | null | undefined,
+): string | undefined {
+  if (!raw?.trim()) {
+    return undefined;
+  }
+
+  const value = unwrapTransportEncoding(raw.trim());
+  return isValidFbc(value) ? value : undefined;
+}
+
+function isSafeFbcCookieValue(value: string): boolean {
+  // Cookie values cannot contain ";" (it ends the cookie). Keep _fbc plain otherwise.
+  return isValidFbc(value) && !value.includes(";") && !/[\r\n]/.test(value);
+}
+
 export function extractFbclidFromUrl(
   url: string | null | undefined,
 ): string | undefined {
@@ -22,24 +64,14 @@ export function extractFbclidFromUrl(
     return undefined;
   }
 
-  try {
-    const parsed = url.includes("://")
-      ? new URL(url)
-      : new URL(url, "https://placeholder.local");
-    const fbclid = parsed.searchParams.get("fbclid")?.trim();
-    return fbclid || undefined;
-  } catch {
-    // Fallback for odd relative / partial strings
-    const match = /(?:^|[?&#])fbclid=([^&#]+)/i.exec(url);
-    if (!match?.[1]) {
-      return undefined;
-    }
-    try {
-      return decodeURIComponent(match[1].replace(/\+/g, " ")).trim() || undefined;
-    } catch {
-      return match[1].trim() || undefined;
-    }
+  // Meta rejects a decoded/modified fbclid — keep the raw query value (no URLSearchParams).
+  // If the URL was over-encoded (%252F), unwrap transport layers only.
+  const match = /(?:^|[?&#])fbclid=([^&#]+)/i.exec(url);
+  const fbclid = match?.[1]?.trim();
+  if (!fbclid) {
+    return undefined;
   }
+  return unwrapTransportEncoding(fbclid) || undefined;
 }
 
 export function extractFbclidFromFbc(fbc: string): string | undefined {
@@ -99,7 +131,7 @@ export function resolveFbc(input: {
   return undefined;
 }
 
-function readBrowserCookie(name: string): string | undefined {
+function readRawBrowserCookie(name: string): string | undefined {
   if (typeof document === "undefined") {
     return undefined;
   }
@@ -115,25 +147,32 @@ function readBrowserCookie(name: string): string | undefined {
       continue;
     }
     const raw = trimmed.slice(eq + 1).trim();
-    if (!raw) {
-      return undefined;
-    }
-    try {
-      return decodeURIComponent(raw);
-    } catch {
-      return raw;
-    }
+    return raw || undefined;
   }
   return undefined;
 }
 
-const FBP_COOKIE = "_fbp";
+function readBrowserFbpCookie(): string | undefined {
+  const raw = readRawBrowserCookie(FBP_COOKIE);
+  if (!raw) {
+    return undefined;
+  }
+  // _fbp is digits-only; decode is safe and matches older cookie writes.
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+}
+
 const FBP_PATTERN = /^fb\.\d+\.\d+\.\d+$/;
 
 export function isValidFbp(value: string | null | undefined): value is string {
   if (!value) return false;
   const trimmed = value.trim();
-  return trimmed.length > 0 && trimmed.length <= 512 && FBP_PATTERN.test(trimmed);
+  return (
+    trimmed.length > 0 && trimmed.length <= 512 && FBP_PATTERN.test(trimmed)
+  );
 }
 
 /**
@@ -146,23 +185,25 @@ export function ensureBrowserFbcCookie(): string | undefined {
   }
 
   const pageUrl = window.location.href;
+  const rawCookie = readRawBrowserCookie(FBC_COOKIE);
+  const normalizedCookie = normalizeFbcCookieValue(rawCookie);
   const resolved = resolveFbc({
-    cookieFbc: readBrowserCookie(FBC_COOKIE),
+    cookieFbc: normalizedCookie,
     urls: [pageUrl],
   });
 
-  if (!resolved) {
+  if (!resolved || !isSafeFbcCookieValue(resolved)) {
     return undefined;
   }
 
-  const existing = readBrowserCookie(FBC_COOKIE)?.trim();
-  if (existing === resolved) {
+  // Rewrite when missing, logical value changed, or legacy %25 encoding is still stored.
+  if (rawCookie === resolved) {
     return resolved;
   }
 
-  const secure =
-    window.location.protocol === "https:" ? "; Secure" : "";
-  document.cookie = `${FBC_COOKIE}=${encodeURIComponent(resolved)}; Path=/; Max-Age=${FBC_MAX_AGE_SECONDS}; SameSite=Lax${secure}`;
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  // Plain write — never encodeURIComponent (that created %252525… loops).
+  document.cookie = `${FBC_COOKIE}=${resolved}; Path=/; Max-Age=${FBC_MAX_AGE_SECONDS}; SameSite=Lax${secure}`;
 
   return resolved;
 }
@@ -186,7 +227,7 @@ export function readBrowserMetaClickIds(): {
     fbc = undefined;
   }
 
-  const fbpRaw = readBrowserCookie(FBP_COOKIE)?.trim();
+  const fbpRaw = readBrowserFbpCookie()?.trim();
   const fbp = isValidFbp(fbpRaw) ? fbpRaw : undefined;
   const resolvedFbc = isValidFbc(fbc) ? fbc : undefined;
 

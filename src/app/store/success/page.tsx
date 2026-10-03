@@ -17,6 +17,8 @@ import {
 import { sendStorePurchaseEmail } from "@/lib/store/send-purchase-email";
 import { verifyStoreDodoPayment } from "@/lib/store/verify-dodo-payment";
 
+export const dynamic = "force-dynamic";
+
 /** Success-page email is only a short backup; late revisits must not re-send (Resend idempotency ~24h). */
 const SUCCESS_EMAIL_BACKUP_MAX_AGE_MS = 6 * 60 * 60 * 1000;
 

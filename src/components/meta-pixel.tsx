@@ -39,11 +39,22 @@ function PixelTracker() {
     if (!isPublicMetaPagePath(pathname)) {
       return;
     }
-    try {
-      ensureBrowserFbcCookie();
-    } catch {
-      // ignore
-    }
+    // Meta's fbevents.js may re-encode _fbc when fbclid contains "%".
+    // Re-assert a plain cookie after load so CAPI/cookie stay Meta-correct.
+    const timers = [0, 100, 500, 1000, 2000].map((ms) =>
+      window.setTimeout(() => {
+        try {
+          ensureBrowserFbcCookie();
+        } catch {
+          // ignore
+        }
+      }, ms),
+    );
+    return () => {
+      for (const id of timers) {
+        window.clearTimeout(id);
+      }
+    };
   }, [pathname, searchParams]);
 
   useEffect(() => {
@@ -115,6 +126,13 @@ export function MetaPixel() {
         id="meta-fbevents"
         src="https://connect.facebook.net/en_US/fbevents.js"
         strategy="afterInteractive"
+        onLoad={() => {
+          try {
+            ensureBrowserFbcCookie();
+          } catch {
+            // ignore
+          }
+        }}
       />
       <Suspense fallback={null}>
         <PixelTracker />

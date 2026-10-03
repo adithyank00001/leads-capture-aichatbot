@@ -10,7 +10,10 @@ import { getStoreProductPath, storeProducts } from "@/lib/store/products";
 function getStoreSlugPagePaths(): string[] {
   return storeProducts
     .map((product) => getStoreProductPath(product))
-    .filter((pagePath) => !(PUBLIC_META_PAGE_PATHS as readonly string[]).includes(pagePath));
+    .filter(
+      (pagePath) =>
+        !(PUBLIC_META_PAGE_PATHS as readonly string[]).includes(pagePath),
+    );
 }
 
 /**
@@ -56,18 +59,26 @@ var customData=contentName?{content_name:contentName}:{};
 window.__LEADCX_META__={initialPageViewKey:key,initialPageViewEventId:eventId,pixelBootstrapped:true,pixelPageViewQueued:true,capiPageViewSent:false};
 try{
 var m=/(?:^|[?&#])fbclid=([^&#]+)/i.exec(location.href);
-var fbclid=m&&m[1]?decodeURIComponent(String(m[1]).replace(/\\+/g," ")).trim():"";
-if(fbclid){
-var existing="";
+var fbclid=m&&m[1]?String(m[1]).trim():"";
+while(fbclid.indexOf("%25")>=0){
+try{var fd=decodeURIComponent(fbclid);if(fd===fbclid)break;fbclid=fd;}catch(e){break;}
+}
+if(fbclid&&fbclid.indexOf(";")<0){
+var raw="";
 var parts=document.cookie.split(";");
 for(var c=0;c<parts.length;c++){
 var t=parts[c].trim();
-if(t.indexOf("_fbc=")===0){existing=decodeURIComponent(t.slice(5));break;}
+if(t.indexOf("_fbc=")===0){raw=t.slice(5);break;}
+}
+var existing=raw;
+while(existing.indexOf("%25")>=0){
+try{var d=decodeURIComponent(existing);if(d===existing||d.indexOf("fb.")!==0)break;existing=d;}catch(e){break;}
 }
 var fbc="fb.1."+Date.now()+"."+fbclid;
-if(!existing||existing.indexOf("."+fbclid)<0){
+if(!existing||existing.indexOf("."+fbclid)<0||raw!==existing){
 var secure=location.protocol==="https:"?"; Secure":"";
-document.cookie="_fbc="+encodeURIComponent(fbc)+"; Path=/; Max-Age=7776000; SameSite=Lax"+secure;
+if(existing&&existing.indexOf("."+fbclid)>=0){fbc=existing;}
+document.cookie="_fbc="+fbc+"; Path=/; Max-Age=7776000; SameSite=Lax"+secure;
 }
 }
 }catch(e){}

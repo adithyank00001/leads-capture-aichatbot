@@ -13,6 +13,8 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+export const dynamic = "force-dynamic";
+
 type ThankYouPageProps = {
   searchParams: Promise<{
     payment_id?: string;

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { isValidFbc, resolveFbc } from "@/lib/meta/fbc";
+import { isValidFbc, normalizeFbcCookieValue, resolveFbc } from "@/lib/meta/fbc";
 
 /** Dodo metadata values max 500 chars. */
 export const META_ATTR_MAX_VALUE_LEN = 500;
@@ -31,7 +31,10 @@ function truncateMetaValue(value: string): string {
   return value.slice(0, META_ATTR_MAX_VALUE_LEN);
 }
 
-function parseCookieValue(cookieHeader: string | null, name: string): string | undefined {
+function parseCookieValue(
+  cookieHeader: string | null,
+  name: string,
+): string | undefined {
   if (!cookieHeader) {
     return undefined;
   }
@@ -50,6 +53,10 @@ function parseCookieValue(cookieHeader: string | null, name: string): string | u
     const raw = trimmed.slice(eq + 1).trim();
     if (!raw) {
       return undefined;
+    }
+    // _fbc must stay plain — never decodeURIComponent the fbclid itself.
+    if (name === "_fbc") {
+      return normalizeFbcCookieValue(raw);
     }
     try {
       return decodeURIComponent(raw);
@@ -148,16 +155,13 @@ export function getMetaAttributionFromRequest(
 
   const fbc = resolveFbc({
     cookieFbc,
-    urls: [
-      options.eventSourceUrl,
-      request.url,
-      request.headers.get("referer"),
-    ],
+    urls: [options.eventSourceUrl, request.url, request.headers.get("referer")],
   });
 
   return {
     ...(fbp ? { fbp: truncateMetaValue(fbp) } : {}),
-    ...(fbc ? { fbc: truncateMetaValue(fbc) } : {}),
+    // Never truncate fbc — Meta flags a cut fbclid as "modified".
+    ...(fbc ? { fbc } : {}),
     ...(clientIp ? { clientIp: truncateMetaValue(clientIp) } : {}),
     ...(userAgent ? { userAgent: truncateMetaValue(userAgent) } : {}),
   };
@@ -172,14 +176,17 @@ export function metaAttributionToMetadata(
   if (attribution.fbp) {
     metadata[META_ATTR_KEYS.fbp] = truncateMetaValue(attribution.fbp);
   }
-  if (attribution.fbc) {
-    metadata[META_ATTR_KEYS.fbc] = truncateMetaValue(attribution.fbc);
+  // Omit (don't slice) an fbc too long for Dodo, so a cut click id never reaches Meta.
+  if (attribution.fbc && attribution.fbc.length <= META_ATTR_MAX_VALUE_LEN) {
+    metadata[META_ATTR_KEYS.fbc] = attribution.fbc;
   }
   if (attribution.clientIp) {
     metadata[META_ATTR_KEYS.clientIp] = truncateMetaValue(attribution.clientIp);
   }
   if (attribution.userAgent) {
-    metadata[META_ATTR_KEYS.userAgent] = truncateMetaValue(attribution.userAgent);
+    metadata[META_ATTR_KEYS.userAgent] = truncateMetaValue(
+      attribution.userAgent,
+    );
   }
 
   return metadata;

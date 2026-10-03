@@ -11,6 +11,8 @@ import { isValidFbc, isValidFbp } from "@/lib/meta/fbc";
 import { assertMetaEventsRateLimits } from "@/lib/rate-limit";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
 type MetaEventsBody = {
   eventName?: unknown;
   eventId?: unknown;
