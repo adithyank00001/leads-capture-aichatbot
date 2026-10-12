@@ -36,9 +36,9 @@ export const panIndiaLeads2026: StoreProductConfig = {
     "Includes Name, Email, Phone, WhatsApp & Location details",
     "Lifetime access to all downloaded files",
     {
-      text: "Google Business Leads Scraper Tool + USA Leads Database (10Lakh+) & More...(WORTH ₹2500+)",
+      text: "Google Business Leads Scraper Tool + USA Leads Database (10Lakh+) & More...(WORTH ₹5000+)",
       badge: "🎁 Bonus",
-      worth: "WORTH ₹2500+",
+      worth: "WORTH ₹5000+",
       points: [
         "Google Business Leads Scraper Tool",
         "USA Leads Database (10Lakh+)",
@@ -141,13 +141,11 @@ export const panIndiaLeads2026: StoreProductConfig = {
   bonusIncluded: [
     {
       label: "USA Leads Database (10 Lakhs+ leads with 300+ categories)",
-      value: 397,
     },
     {
       label: "Google Business Leads Scraper tool",
-      value: 997,
     },
-    { label: "CRM Tracking Blueprint System", value: 497 },
+    { label: "CRM Tracking Blueprint System" },
     { label: "And many more..." },
   ],
   reviews: [
