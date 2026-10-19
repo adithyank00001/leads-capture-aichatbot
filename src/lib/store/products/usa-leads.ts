@@ -42,9 +42,9 @@ export const usaLeads: StoreProductConfig = {
     "Pitch the Decision-Makers (CEOs, Founders, and Owners).",
     "Instant Download (Excel & CSV) to start outreach in 5 minutes.",
     {
-      text: "INCLUDES PREMIUM BONUSES (Worth ₹2500+)",
+      text: "INCLUDES PREMIUM BONUSES (Worth ₹5000+)",
       badge: "🎁 Bonus",
-      worth: "WORTH ₹2500+",
+      worth: "WORTH ₹5000+",
       points: [
         "Google Business Leads Scraper Tool",
         "10 Lakh+ Premium HNI Database",
@@ -140,19 +140,15 @@ export const usaLeads: StoreProductConfig = {
   bonusIncluded: [
     {
       label: "BONUS 1: Google Business Leads Scraper Tool",
-      value: 997,
     },
     {
       label: "BONUS 2: 10 Lakh+ India’s Premium HNI Database",
-      value: 499,
     },
     {
       label: "BONUS 3: 10 Lakh+ India’s Premium Real Estate Database",
-      value: 499,
     },
     {
       label: "BONUS 4: CRM Tracking Blueprint System",
-      value: 497,
     },
     { label: "Many more" },
   ],

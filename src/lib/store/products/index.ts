@@ -6,6 +6,7 @@
  */
 
 import type { StoreProductConfig } from "@/lib/store/product-content";
+import { hniDatabase } from "@/lib/store/products/hni-database";
 import { panIndiaLeads2026 } from "@/lib/store/products/pan-india-leads-2026";
 import { usaLeads } from "@/lib/store/products/usa-leads";
 
@@ -52,6 +53,7 @@ function withLivePriceOverride(product: StoreProductConfig): StoreProductConfig 
 const REGISTERED_PRODUCTS: StoreProductConfig[] = [
   panIndiaLeads2026,
   usaLeads,
+  hniDatabase,
 ];
 
 export const storeProducts: StoreProductConfig[] =
