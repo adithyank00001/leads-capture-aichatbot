@@ -112,6 +112,20 @@ export async function sendStorePurchaseEmail(
     return;
   }
 
+  // Never send GrowScaleX email for ByePanda orders
+  if (input.productSlug?.trim() === "kids-bundle") {
+    console.info(
+      JSON.stringify({
+        level: "info",
+        route: "store/purchase-email",
+        message: "Purchase email skipped — ByePanda order",
+        paymentId,
+        timestamp: new Date().toISOString(),
+      }),
+    );
+    return;
+  }
+
   const product = getStoreProductForPurchaseSlug(input.productSlug);
   // India (and others): only use per-product driveDownloadUrl. No env fallback.
   const driveUrl = product?.driveDownloadUrl?.trim() || "";

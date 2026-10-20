@@ -64,7 +64,7 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
 
   if (token) {
     const purchase = await getPaidPurchaseByDownloadToken(token);
-    if (purchase) {
+    if (purchase && purchase.product_slug !== "kids-bundle") {
       const paymentId = purchase.razorpay_payment_id ?? paymentIdParam;
       verification = {
         ok: true,
@@ -86,7 +86,7 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
 
   if (!verification.ok && paymentIdParam) {
     const purchase = await getPaidPurchaseByPaymentId(paymentIdParam);
-    if (purchase?.download_token) {
+    if (purchase?.download_token && purchase.product_slug !== "kids-bundle") {
       verification = {
         ok: true,
         paymentId: purchase.razorpay_payment_id ?? paymentIdParam,
