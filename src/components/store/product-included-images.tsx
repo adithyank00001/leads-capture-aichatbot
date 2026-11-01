@@ -54,7 +54,7 @@ export function ProductIncludedImages({ images }: Props) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={cloudinaryDeliveryUrl(img.src, {
-                width: 1600,
+                width: 1200,
                 quality: "good",
               })}
               alt={img.alt}
