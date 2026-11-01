@@ -750,98 +750,86 @@ export function DiscountProductHero({ product }: Props) {
                       strokeWidth={2.25}
                     />
                   )}
-                  <div
-                    className={
-                      isBonusHighlight
-                        ? "store-highlight-bonus-body"
-                        : undefined
-                    }
-                  >
-                    {isBonusHighlight ? (
+                  {hasBonusPoints ? (
+                    <div className="store-highlight-bonus-body">
                       <p className="store-highlight-bonus-urgency">
-                        ⚡ ONLY FOR TODAY BEFORE THE TIMER HITS 00:00:00
+                        Only Available Today
                       </p>
-                    ) : null}
-                    <div
-                      className={
-                        isBonusHighlight
-                          ? "store-highlight-bonus-top"
-                          : undefined
-                      }
-                    >
-                      <span>{text}</span>
-                      {worth ? (
-                        <span className="store-highlight-worth">{worth}</span>
-                      ) : null}
-                    </div>
-                    {hasBonusPoints && points ? (
+                      <div className="store-highlight-bonus-top">
+                        {badge ? (
+                          <span className="store-highlight-badge">{badge}</span>
+                        ) : null}
+                        {worth ? (
+                          <span className="store-highlight-worth">{worth}</span>
+                        ) : null}
+                      </div>
                       <ul className="store-highlight-bonus-points">
-                        {points.map((pt) => (
-                          <li key={pt}>{pt}</li>
+                        {points!.map((point) => (
+                          <li key={point}>{point}</li>
                         ))}
                       </ul>
-                    ) : null}
-                  </div>
+                    </div>
+                  ) : (
+                    <span>
+                      {badge ? (
+                        <span className="store-highlight-badge">{badge}</span>
+                      ) : null}
+                      {text}
+                    </span>
+                  )}
                 </li>
               );
             })}
           </ul>
 
-          {product.options.map((option) => (
-            <div key={option.id} className="store-option-group">
-              <p className="store-option-title">
-                {option.label}
-                {selections[option.id] ? (
-                  <span>
-                    :{" "}
-                    {option.values.find(
-                      (v) => v.value === selections[option.id],
-                    )?.label}
-                  </span>
-                ) : null}
-              </p>
-              <div className="store-option-pills">
-                {option.values.map((value) => {
-                  const selected = selections[option.id] === value.value;
-                  return (
-                    <button
-                      key={value.value}
-                      type="button"
-                      className={cn(
-                        "store-pill",
-                        selected && "is-selected",
-                      )}
-                      onClick={() => selectOption(option.id, value.value)}
-                    >
-                      {value.label}
-                      {value.priceAdjust ? (
-                        <span className="opacity-70">
-                          {" "}
-                          +
-                          {formatMoney(
-                            value.priceAdjust,
-                            product.currencySymbol,
-                          )}
-                        </span>
-                      ) : null}
-                    </button>
-                  );
-                })}
+          <div className="mt-8 space-y-6">
+            {product.options.map((option) => (
+              <div key={option.id}>
+                <div className="mb-2.5 flex items-baseline justify-between gap-3">
+                  <p className="store-option-label">{option.name}</p>
+                  <p className="text-sm text-[var(--store-muted)]">
+                    {
+                      option.values.find(
+                        (v) => v.value === selections[option.id],
+                      )?.label
+                    }
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {option.values.map((value) => {
+                    const selected = selections[option.id] === value.value;
+                    return (
+                      <button
+                        key={value.value}
+                        type="button"
+                        onClick={() => selectOption(option.id, value.value)}
+                        className={cn("store-chip", selected && "is-active")}
+                      >
+                        {value.label}
+                        {value.priceAdjust ? (
+                          <span className="opacity-70">
+                            {" "}
+                            +
+                            {formatMoney(
+                              value.priceAdjust,
+                              product.currencySymbol,
+                            )}
+                          </span>
+                        ) : null}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
 
-          <div className="store-quantity-wrap">
-            <label htmlFor="quantity" className="store-option-title">
-              Quantity
-            </label>
-            <div className="store-quantity-row">
-              <div className="store-stepper">
+            <div>
+              <p className="store-option-label mb-2.5">Quantity</p>
+              <div className="store-qty">
                 <button
                   type="button"
                   aria-label="Decrease quantity"
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  disabled={quantity <= 1}
                 >
                   <Minus className="size-4" />
                 </button>
