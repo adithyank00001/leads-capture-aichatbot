@@ -9,6 +9,11 @@ export type ProductImage = {
   alt: string;
 };
 
+export type StoreIncludedImage = {
+  src: string;
+  alt?: string;
+};
+
 export type ProductOption = {
   id: string;
   label: string;
@@ -96,6 +101,8 @@ export type StoreProductContent = {
   included: Array<{ label: string; value?: number }>;
   /** Extra bonus databases shown under the main list */
   bonusIncluded: Array<{ label: string; value?: number }>;
+  /** Optional preview/sample screenshots shown at the end of "What's included" */
+  includedImages?: Array<StoreIncludedImage | string>;
   /** Customer reviews */
   reviews: ProductReview[];
   /** Steps in “How it works” */

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, ZoomIn, ZoomOut } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from "lucide-react";
 
 import { cloudinaryDeliveryUrl } from "@/lib/store/cloudinary";
 
@@ -10,6 +10,9 @@ type Props = {
   src: string;
   alt: string;
   onClose: () => void;
+  deliveryWidth?: number;
+  onPrev?: () => void;
+  onNext?: () => void;
 };
 
 type Point = { x: number; y: number };
@@ -19,7 +22,14 @@ function distance(a: Point, b: Point) {
 }
 
 /** Full-screen product image zoom — mobile pinch + drag friendly. */
-export function ProductImageZoomLightbox({ src, alt, onClose }: Props) {
+export function ProductImageZoomLightbox({
+  src,
+  alt,
+  onClose,
+  deliveryWidth = 1100,
+  onPrev,
+  onNext,
+}: Props) {
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -51,6 +61,10 @@ export function ProductImageZoomLightbox({ src, alt, onClose }: Props) {
   }
 
   useEffect(() => {
+    applyZoom(1);
+  }, [src]);
+
+  useEffect(() => {
     setMounted(true);
   }, []);
 
@@ -68,6 +82,14 @@ export function ProductImageZoomLightbox({ src, alt, onClose }: Props) {
       if (event.key === "-" || event.key === "_") {
         applyZoom(Math.max(1, zoomRef.current - 0.25));
       }
+      if (event.key === "ArrowLeft" && onPrev) {
+        applyZoom(1);
+        onPrev();
+      }
+      if (event.key === "ArrowRight" && onNext) {
+        applyZoom(1);
+        onNext();
+      }
     }
 
     window.addEventListener("keydown", onKeyDown);
@@ -76,7 +98,7 @@ export function ProductImageZoomLightbox({ src, alt, onClose }: Props) {
       document.body.style.touchAction = previousTouchAction;
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [onClose]);
+  }, [onClose, onPrev, onNext]);
 
   // Non-passive listeners so phones don't steal pinch / scroll gestures
   useEffect(() => {
@@ -236,6 +258,18 @@ export function ProductImageZoomLightbox({ src, alt, onClose }: Props) {
         className="store-zoom-toolbar"
         onClick={(event) => event.stopPropagation()}
       >
+        {onPrev ? (
+          <button
+            type="button"
+            onClick={() => {
+              applyZoom(1);
+              onPrev();
+            }}
+            aria-label="Previous image"
+          >
+            <ChevronLeft className="size-4" />
+          </button>
+        ) : null}
         <button
           type="button"
           onClick={() => zoomBy(-0.25)}
@@ -247,6 +281,18 @@ export function ProductImageZoomLightbox({ src, alt, onClose }: Props) {
         <button type="button" onClick={() => zoomBy(0.25)} aria-label="Zoom in">
           <ZoomIn className="size-4" />
         </button>
+        {onNext ? (
+          <button
+            type="button"
+            onClick={() => {
+              applyZoom(1);
+              onNext();
+            }}
+            aria-label="Next image"
+          >
+            <ChevronRight className="size-4" />
+          </button>
+        ) : null}
         <button type="button" onClick={onClose} aria-label="Close zoom">
           <X className="size-4" />
         </button>
@@ -266,7 +312,10 @@ export function ProductImageZoomLightbox({ src, alt, onClose }: Props) {
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={cloudinaryDeliveryUrl(src, { width: 1100, quality: "good" })}
+          src={cloudinaryDeliveryUrl(src, {
+            width: deliveryWidth,
+            quality: "good",
+          })}
           alt={alt}
           className="store-zoom-image"
           style={{

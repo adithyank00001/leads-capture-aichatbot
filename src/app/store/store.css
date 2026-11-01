@@ -1212,6 +1212,45 @@
   font-weight: 700;
 }
 
+.store-included-images {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.store-included-image-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.85rem;
+  border: 1px solid var(--store-line);
+  background: var(--store-surface);
+  box-shadow: 0 4px 16px rgba(16, 24, 40, 0.04);
+  cursor: zoom-in;
+  display: block;
+  text-align: left;
+  padding: 0;
+  width: 100%;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.store-included-image-card:hover {
+  border-color: rgba(37, 99, 235, 0.45);
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.08);
+}
+
+.store-included-image-card:focus-visible {
+  outline: 2px solid var(--store-accent);
+  outline-offset: 2px;
+}
+
+.store-included-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
 .store-details-split {
   display: grid;
   gap: 2.5rem;

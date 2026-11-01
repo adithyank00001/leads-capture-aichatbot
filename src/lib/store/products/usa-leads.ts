@@ -152,6 +152,20 @@ export const usaLeads: StoreProductConfig = {
     },
     { label: "Many more" },
   ],
+  includedImages: [
+    {
+      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1793537250/f5177202-709c-4731-993d-773636ab4ee2.png",
+      alt: "USA Database folders and business categories preview",
+    },
+    {
+      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1793547524/e786c402-d001-4fc3-b66c-c981428a6c6e.png",
+      alt: "USA Leads database 300+ industry categories list",
+    },
+    {
+      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1793547544/0c4529f9-972d-4ecc-91b4-ae16845fb4c1.png",
+      alt: "USA B2B Leads sample spreadsheet preview",
+    },
+  ],
 
   reviews: [
     {

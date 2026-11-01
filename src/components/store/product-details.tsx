@@ -1,6 +1,7 @@
 import { Check, Plus, ShieldCheck } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { ProductIncludedImages } from "@/components/store/product-included-images";
 import { ProductReviewFormLazy } from "@/components/store/product-review-form-lazy";
 import { ProductStars } from "@/components/store/product-stars";
 import { StoreFinalCtaBuyButton } from "@/components/store/store-buy-cta-button";
@@ -88,6 +89,9 @@ export function ProductDetails({
               </ul>
             </div>
           </div>
+        ) : null}
+        {product.includedImages && product.includedImages.length > 0 ? (
+          <ProductIncludedImages images={product.includedImages} />
         ) : null}
       </article>
 
