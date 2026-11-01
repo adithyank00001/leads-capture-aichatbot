@@ -50,7 +50,7 @@ export const panIndiaLeads2026: StoreProductConfig = {
   socialProofTag: "🔥 100+ sold yesterday!",
   images: [
     {
-      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1790006128/ChatGPT_Image_Sep_21_2026_09_19_48_PM.webp",
+      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1793519670/Indian_Leads_Database_Promo.jpg",
       alt: "110 Crore+ Indian Leads database with 200+ categories and 10 Lakhs+ USA leads bonus",
     },
     {

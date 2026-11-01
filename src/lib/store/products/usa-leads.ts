@@ -22,7 +22,7 @@ export const usaLeads: StoreProductConfig = {
   },
   driveDownloadUrl: null,
 
-  price: 397,
+  price: 297,
   compareAtPrice: 4997,
   currency: "INR",
   currencySymbol: "₹",
@@ -117,7 +117,7 @@ export const usaLeads: StoreProductConfig = {
     {
       title: "💸 No Monthly Bills",
       description:
-        "Pay just ₹397 once. Keep the data forever and close as many US clients as you want.",
+        "Pay just ₹297 once. Keep the data forever and close as many US clients as you want.",
     },
   ],
 
@@ -205,7 +205,7 @@ export const usaLeads: StoreProductConfig = {
   ],
 
   howItWorks: [
-    "Secure Checkout: Pay ₹397 once with Razorpay on this page.",
+    "Secure Checkout: Pay ₹297 once with Razorpay on this page.",
     "Instant Delivery: You are redirected to a secure download page with the USA database, bonuses, and scraper tool. Backup links also arrive by email.",
     "Download & Launch: Open the Excel or CSV files, import into your tools, and start outreach the same day.",
   ],
@@ -219,12 +219,12 @@ export const usaLeads: StoreProductConfig = {
     {
       question: "How do I access the Google Map Scraper Tool and Bonuses?",
       answer:
-        "As soon as your payment of ₹397 is successful, you will be redirected to a secure download page containing the USA Database, all bonus databases, and the scraper tool. You will also receive an email with the backup download links.",
+        "As soon as your payment of ₹297 is successful, you will be redirected to a secure download page containing the USA Database, all bonus databases, and the scraper tool. You will also receive an email with the backup download links.",
     },
     {
       question: "Is this a one-time payment?",
       answer:
-        "Yes! There are absolutely no hidden fees or monthly subscriptions. You pay ₹397 once and retain lifetime access to the files.",
+        "Yes! There are absolutely no hidden fees or monthly subscriptions. You pay ₹297 once and retain lifetime access to the files.",
     },
     {
       question: "Are the phone numbers and emails verified?",
