@@ -28,8 +28,7 @@ export function buildAbandonedRecoveryEmailHtml(params: {
   toEmail: string;
   targetUrl: string;
 }) {
-  const { toEmail, targetUrl } = params;
-  const username = toEmail.split("@")[0] || "there";
+  const { targetUrl } = params;
   const safeTargetUrl = escapeHtml(targetUrl);
 
   return `
@@ -86,7 +85,7 @@ export function buildAbandonedRecoveryEmailHtml(params: {
                 <tr>
                   <td>
                     <div style="font-size: 12px; font-weight: 800; color: #047857; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;">
-                      🔥 100Rs Additional Off Applied
+                      🔥 100Rs Extra Off Applied
                     </div>
                     <div style="font-size: 30px; font-weight: 800; color: #065f46; line-height: 1.1;">
                       ₹297 <span style="font-size: 24px; font-weight: 700; color: #9ca3af; text-decoration: line-through; text-decoration-thickness: 2.5px; margin-left: 10px;">₹397</span>
@@ -202,7 +201,7 @@ Don't miss out on the 110Cr+ verified leads database!
 Get instant access to the entire leads database today with an exclusive extra offer of ₹100 OFF applied to your order.
 
 Your Special Price: ₹297 ONLY (Regular: ₹397 | MRP: ₹4,997)
-Discount: 100Rs additional Off applied
+Discount: 100Rs Extra Off applied
 Validity: Valid for next 24 hours only
 
 Claim your ₹297 special price here:

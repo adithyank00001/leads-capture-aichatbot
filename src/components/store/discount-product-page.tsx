@@ -5,7 +5,7 @@ import type { StoreProductConfig } from "@/lib/store/product-content";
 
 /**
  * Isolated product page for the ₹297 discount duplicate of the PAN India Leads product.
- * Uses DiscountProductHero to show "100Rs additional Off applied" and "Valid for 24 hours" tags.
+ * Uses DiscountProductHero to show "100Rs Extra Off applied" and "Valid for 24 hours" tags.
  */
 export function DiscountProductPage({
   product,

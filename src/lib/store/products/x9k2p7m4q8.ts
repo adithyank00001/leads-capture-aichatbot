@@ -2,7 +2,7 @@ import type { StoreProductConfig } from "@/lib/store/product-content";
 
 /**
  * Isolated duplicate discount page for PAN India Leads 2026.
- * Price: ₹297 (₹100 additional off applied).
+ * Price: ₹297 (₹100 extra off applied).
  * Hard-to-type random slug: x9k2p7m4q8.
  * URL: /store/product/x9k2p7m4q8
  * Completely isolated; kept unpublished so it never appears on the homepage.

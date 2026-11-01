@@ -154,7 +154,7 @@ export default function RecoverAbandonedCheckoutsPage() {
                 Abandoned Checkout Email Sender
               </h1>
               <p className="mt-1 text-sm text-slate-600">
-                Send persuasive recovery emails offering ₹100 additional off (₹297) for the 110Cr+ Indian Database.
+                Send persuasive recovery emails offering ₹100 extra off (₹297) for the 110Cr+ Indian Database.
               </p>
             </div>
           </div>

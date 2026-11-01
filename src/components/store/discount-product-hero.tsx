@@ -377,7 +377,7 @@ type Props = {
 
 /**
  * Isolated hero component for the ₹297 discount duplicate page.
- * Includes clear visible tags: "100Rs additional Off applied" and "Valid for 24 hours"
+ * Includes clear visible tags: "100Rs Extra Off applied" and "Valid for 24 hours"
  * near price and above sticky cta button.
  */
 export function DiscountProductHero({ product }: Props) {
@@ -712,7 +712,7 @@ export function DiscountProductHero({ product }: Props) {
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs sm:text-sm font-bold text-emerald-800 border border-emerald-300 shadow-xs">
               <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-              100Rs additional Off applied
+              100Rs Extra Off applied
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs sm:text-sm font-semibold text-amber-900 border border-amber-300 shadow-xs">
               <Clock className="size-3.5 text-amber-700 shrink-0" />
@@ -850,7 +850,7 @@ export function DiscountProductHero({ product }: Props) {
             <div className="flex flex-wrap items-center justify-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-800 border border-emerald-300">
                 <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                100Rs additional Off applied
+                100Rs Extra Off applied
               </span>
               <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-900 border border-amber-300">
                 <Clock className="size-3 text-amber-700 shrink-0" />
@@ -904,7 +904,7 @@ export function DiscountProductHero({ product }: Props) {
         <div className="mb-2 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] sm:text-xs font-bold text-emerald-800 border border-emerald-300 shadow-xs">
             <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            100Rs additional Off applied
+            100Rs Extra Off applied
           </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] sm:text-xs font-semibold text-amber-900 border border-amber-300 shadow-xs">
             <Clock className="size-3 text-amber-700 shrink-0" />
