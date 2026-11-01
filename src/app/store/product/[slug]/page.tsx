@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { DiscountProductPage } from "@/components/store/discount-product-page";
 import { StoreProductPage } from "@/components/store/product-page";
 import {
+  DISCOUNT_INDIAN_DATABASE_SLUG,
   getStoreProductBySlug,
   LIVE_ADS_PRODUCT_SLUG,
   storeProducts,
@@ -67,6 +69,9 @@ export default async function StoreSlugProductPage({ params }: Props) {
   const product = getSlugProduct(slug);
   if (!product) {
     notFound();
+  }
+  if (slug === DISCOUNT_INDIAN_DATABASE_SLUG) {
+    return <DiscountProductPage product={product} />;
   }
   return <StoreProductPage product={product} />;
 }

@@ -9,6 +9,7 @@ import type { StoreProductConfig } from "@/lib/store/product-content";
 import { hniDatabase } from "@/lib/store/products/hni-database";
 import { panIndiaLeads2026 } from "@/lib/store/products/pan-india-leads-2026";
 import { usaLeads } from "@/lib/store/products/usa-leads";
+import { panIndiaLeadsDiscount297 } from "@/lib/store/products/x9k2p7m4q8";
 
 /**
  * Live ads product. Served ONLY at /store/product.
@@ -18,6 +19,9 @@ export const LIVE_ADS_PRODUCT_SLUG = "pan-india-leads-2026";
 
 /** URL of the live ads product page. Never change. */
 export const LIVE_ADS_PRODUCT_PATH = "/store/product";
+
+/** Isolated discount duplicate slug for the Indian Leads Database. */
+export const DISCOUNT_INDIAN_DATABASE_SLUG = "x9k2p7m4q8";
 
 /**
  * Old slugs saved on past purchases before the store was renamed.
@@ -54,6 +58,7 @@ const REGISTERED_PRODUCTS: StoreProductConfig[] = [
   panIndiaLeads2026,
   usaLeads,
   hniDatabase,
+  panIndiaLeadsDiscount297,
 ];
 
 export const storeProducts: StoreProductConfig[] =
