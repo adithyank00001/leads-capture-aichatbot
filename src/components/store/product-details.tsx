@@ -214,6 +214,7 @@ export function ProductDetails({
             <p className="store-final-cta-body !mx-auto">{finalCta.body}</p>
             <div className="store-final-cta-actions">
               <StoreFinalCtaBuyButton
+                pulse
                 buttonClassName="min-h-[3.25rem] text-sm sm:text-base lg:text-lg font-black tracking-wide uppercase px-4 sm:px-6"
               >
                 <span className="inline-flex items-center gap-2">

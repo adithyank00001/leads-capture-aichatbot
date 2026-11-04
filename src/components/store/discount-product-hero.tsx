@@ -865,6 +865,7 @@ export function DiscountProductHero({ product }: Props) {
                 onClick={() => void handleBuy()}
                 disabled={startingCheckout}
                 busy={startingCheckout}
+                pulse
               >
                 {buyButtonText}
               </StoreBuyCtaButton>
@@ -964,6 +965,7 @@ export function DiscountProductHero({ product }: Props) {
               disabled={startingCheckout}
               busy={startingCheckout}
               buttonClassName="min-h-[2.85rem] px-4 sm:px-6 text-[15px] sm:text-base font-bold"
+              pulse
             >
               {buyButtonText}
             </StoreBuyCtaButton>
