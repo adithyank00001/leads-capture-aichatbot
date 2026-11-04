@@ -185,18 +185,73 @@ export function ProductDetails({
         </div>
       </div>
 
-      {product.finalCta ? (
-        <section className="store-final-cta" aria-label="Final call to action">
-          <h2 className="store-final-cta-headline">
-            {product.finalCta.headline}
-          </h2>
-          <p className="store-final-cta-body">{product.finalCta.body}</p>
-          <div className="store-final-cta-actions">
-            <StoreFinalCtaBuyButton label={product.buyButtonLabel} />
-            <p className="store-final-cta-note">{product.footerNote}</p>
-          </div>
-        </section>
-      ) : null}
+      {/* Guaranteed Purchase Box */}
+      <div className="rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+        <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+          <ShieldCheck className="size-8" />
+        </div>
+        <div className="flex-1">
+          <h3 className="text-lg font-bold text-[var(--store-ink)]">
+            7-Days Money Back Guarantee
+          </h3>
+          <p className="mt-1 text-sm text-[var(--store-muted)]">
+            Access link is generated on your screen immediately upon successful checkout and also
+            emailed to you for permanent access. If you don&apos;t get access, you will receive a
+            full refund — so there is no risk for you.
+          </p>
+        </div>
+      </div>
+
+      {/* Final Call to Action */}
+      {(() => {
+        const finalCta = product.finalCta ?? {
+          headline: "Take Action Now, Don't Regret Later.",
+          body: "Next time the price will be higher — don't miss this opportunity.",
+        };
+        return (
+          <section className="store-final-cta !mt-0 !text-center" aria-label="Final call to action">
+            <h2 className="store-final-cta-headline">{finalCta.headline}</h2>
+            <p className="store-final-cta-body !mx-auto">{finalCta.body}</p>
+            <div className="store-final-cta-actions">
+              <StoreFinalCtaBuyButton
+                buttonClassName="min-h-[3.25rem] text-sm sm:text-base lg:text-lg font-black tracking-wide uppercase px-4 sm:px-6"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <span>Download Now</span>
+                  <span className="font-black text-white">
+                    {product.currencySymbol}{product.price}
+                  </span>
+                  {product.compareAtPrice ? (
+                    <del
+                      className="line-through decoration-white text-white/80 text-xs sm:text-sm font-bold"
+                      style={{
+                        textDecoration: "line-through",
+                        textDecorationThickness: "2px",
+                        textDecorationColor: "#ffffff",
+                      }}
+                    >
+                      {product.currencySymbol}{product.compareAtPrice}
+                    </del>
+                  ) : null}
+                </span>
+              </StoreFinalCtaBuyButton>
+              <div className="flex justify-center items-center pt-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={cloudinaryDeliveryUrl(
+                    "https://res.cloudinary.com/ntv0bhpy/image/upload/v1793718383/image-removebg-preview_5.png",
+                    { width: 700, quality: "good" },
+                  )}
+                  alt="Supported Payment Methods: UPI, Google Pay, PhonePe, Cards, NetBanking"
+                  loading="lazy"
+                  className="h-auto w-auto max-w-[190px] sm:max-w-[220px] max-h-5 object-contain"
+                />
+              </div>
+              <p className="store-final-cta-note">{product.footerNote}</p>
+            </div>
+          </section>
+        );
+      })()}
 
       {children}
     </section>

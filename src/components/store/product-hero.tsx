@@ -8,6 +8,7 @@ import {
   Lock,
   Minus,
   Plus,
+  ShieldCheck,
   Zap,
   ZoomIn,
 } from "lucide-react";
@@ -27,6 +28,7 @@ import {
   type RazorpaySuccessResponse,
 } from "@/lib/store/load-razorpay";
 import { formatMoney, formatReviewCount } from "@/lib/store/product-format";
+import { cloudinaryDeliveryUrl } from "@/lib/store/cloudinary";
 import type { StoreProductConfig } from "@/lib/store/product-content";
 import { cn } from "@/lib/utils";
 
@@ -846,8 +848,21 @@ export function ProductHero({ product }: Props) {
                 {payError}
               </p>
             ) : null}
-            <div className="store-pay-secure" aria-label="Secured by Razorpay">
-              <Lock className="size-3.5 shrink-0 text-[var(--store-accent)]" />
+            {/* Supported Payment Systems: UPI, Cards, NetBanking */}
+            <div className="flex justify-center items-center pt-1.5 pb-0.5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={cloudinaryDeliveryUrl(
+                  "https://res.cloudinary.com/ntv0bhpy/image/upload/v1793718383/image-removebg-preview_5.png",
+                  { width: 700, quality: "good" },
+                )}
+                alt="Supported Payment Methods: UPI, Google Pay, PhonePe, Cards, NetBanking"
+                loading="lazy"
+                className="h-auto w-auto max-w-[190px] sm:max-w-[220px] max-h-5 object-contain"
+              />
+            </div>
+            <div className="store-pay-secure !mt-1" aria-label="Secured by Razorpay">
+              <Lock className="size-3.5 shrink-0 text-emerald-600" />
               <span>Secured by</span>
               <RazorpayLogo />
             </div>
@@ -856,19 +871,37 @@ export function ProductHero({ product }: Props) {
             </p>
           </div>
 
-          <div className="store-trust">
-            {product.trustItems.map((item, index) => {
-              const Icon = index === 0 ? Zap : index === 1 ? Lock : Download;
-              return (
-                <div key={item.title} className="store-trust-item">
-                  <Icon className="size-4 text-[var(--store-accent)]" />
-                  <div>
-                    <p>{item.title}</p>
-                    <span>{item.description}</span>
-                  </div>
-                </div>
-              );
-            })}
+          {/* Quick Trust Badges Grid right below CTA */}
+          <div className="mt-3 grid grid-cols-3 gap-2 text-center pt-2">
+            <div className="rounded-xl border border-slate-200/90 bg-white/90 p-2.5 sm:p-3 shadow-xs flex flex-col items-center justify-center gap-0.5">
+              <span className="text-base sm:text-lg">⚡</span>
+              <span className="text-[11px] sm:text-xs font-bold text-slate-800 leading-tight">
+                Instant Access
+              </span>
+              <span className="text-[10px] text-slate-500 hidden sm:inline">Google Drive</span>
+            </div>
+            <div className="rounded-xl border border-slate-200/90 bg-white/90 p-2.5 sm:p-3 shadow-xs flex flex-col items-center justify-center gap-0.5">
+              <span className="text-base sm:text-lg">🔒</span>
+              <span className="text-[11px] sm:text-xs font-bold text-slate-800 leading-tight">
+                Safe & Secure
+              </span>
+              <span className="text-[10px] text-slate-500 hidden sm:inline">Razorpay Checkout</span>
+            </div>
+            <div className="rounded-xl border border-slate-200/90 bg-white/90 p-2.5 sm:p-3 shadow-xs flex flex-col items-center justify-center gap-0.5">
+              <span className="text-base sm:text-lg">♾️</span>
+              <span className="text-[11px] sm:text-xs font-bold text-slate-800 leading-tight">
+                Lifetime Access
+              </span>
+              <span className="text-[10px] text-slate-500 hidden sm:inline">No Watermark</span>
+            </div>
+          </div>
+
+          {/* 7-Days Money Back Guarantee Trust Badge */}
+          <div className="mt-3 flex items-center justify-center gap-2.5 rounded-2xl border-2 border-emerald-300/90 bg-emerald-50/95 py-2.5 sm:py-3 px-4 text-center shadow-xs">
+            <ShieldCheck className="size-5 sm:size-6 shrink-0 text-emerald-600" strokeWidth={2.5} />
+            <span className="text-sm sm:text-base font-black text-emerald-950 tracking-tight">
+              7-Days Money Back Guarantee
+            </span>
           </div>
         </section>
       </div>
@@ -885,12 +918,16 @@ export function ProductHero({ product }: Props) {
               </span>
             ) : null}
           </div>
-          <div className="store-sticky-buy-actions">
+          <div className="store-sticky-buy-actions flex flex-col lg:flex-row lg:items-center lg:justify-end gap-2 lg:gap-4">
+            <p className="text-center lg:text-left !text-base sm:!text-lg lg:!text-xl font-black tracking-tight text-slate-900 leading-tight">
+              <span>Offer Ends Today. </span>
+              <span className="text-red-600 font-black">HURRY UP!</span>
+            </p>
             <StoreBuyCtaButton
               onClick={() => void handleBuy()}
               disabled={startingCheckout}
               busy={startingCheckout}
-              buttonClassName="min-h-[2.85rem]"
+              buttonClassName="min-h-[2.85rem] px-4 sm:px-6 text-[15px] sm:text-base font-bold"
             >
               {buyButtonText}
             </StoreBuyCtaButton>

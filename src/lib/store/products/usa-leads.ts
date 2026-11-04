@@ -250,10 +250,11 @@ export const usaLeads: StoreProductConfig = {
   buyButtonLabel: "Download My US Leads Now",
   secondaryButtonLabel: "Add to cart",
   buyUrl: "#buy",
-  footerNote: "One-Time Payment | Instant Download",
+  footerNote:
+    "Pay securely with Razorpay · Instant Google Drive link after payment",
 
   finalCta: {
-    headline: "Start closing US clients today.",
-    body: "Skip the scraping. Skip the expensive monthly tools. Instantly download 10 Lakh+ verified US business leads plus free bonuses.",
+    headline: "Take Action Now, Don't Regret Later.",
+    body: "Next time the price will be higher — don't miss this opportunity.",
   },
 };

@@ -142,4 +142,8 @@ export const hniDatabase: StoreProductConfig = {
   secondaryButtonLabel: "Add to cart",
   buyUrl: "#buy",
   footerNote: "Pay securely with Razorpay · Instant download after payment",
+  finalCta: {
+    headline: "Take Action Now, Don't Regret Later.",
+    body: "Next time the price will be higher — don't miss this opportunity.",
+  },
 };

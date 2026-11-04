@@ -47,10 +47,18 @@ export function StoreBuyCtaButton({
 }
 
 /** Final CTA: same button UI, triggers the real #buy checkout button. */
-export function StoreFinalCtaBuyButton({ label }: { label: string }) {
+export function StoreFinalCtaBuyButton({
+  label,
+  children,
+  buttonClassName,
+}: {
+  label?: string;
+  children?: ReactNode;
+  buttonClassName?: string;
+}) {
   return (
     <StoreBuyCtaButton
-      buttonClassName="min-h-[2.85rem]"
+      buttonClassName={buttonClassName ?? "min-h-[2.85rem]"}
       onClick={() => {
         const buyButton = document.querySelector("#buy button");
         if (buyButton instanceof HTMLButtonElement) {
@@ -60,7 +68,7 @@ export function StoreFinalCtaBuyButton({ label }: { label: string }) {
         document.getElementById("buy")?.scrollIntoView({ behavior: "smooth" });
       }}
     >
-      {label}
+      {children ?? label}
     </StoreBuyCtaButton>
   );
 }
