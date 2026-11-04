@@ -120,6 +120,7 @@ export async function POST(request: Request) {
       currency,
       receipt,
       notes: {
+        store: "growscale",
         product_slug: product.slug,
         product_title: product.title,
         quantity: String(quantity),

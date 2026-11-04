@@ -9,8 +9,10 @@ import {
 } from "@/lib/meta/store-purchase-meta";
 import {
   getMetaAttributionFromPurchase,
+  getStorePurchaseByOrderId,
   markStorePurchasePaid,
 } from "@/lib/store/purchases";
+import { isGrowscaleProductSlug } from "@/lib/store/products";
 import { fetchRazorpayPaymentCustomer } from "@/lib/store/razorpay-customer";
 import { sendStorePurchaseEmail } from "@/lib/store/send-purchase-email";
 import { verifyRazorpayWebhookSignature } from "@/lib/store/verify";
@@ -60,13 +62,33 @@ export async function POST(request: Request) {
       const paymentId = payment.id;
       const orderId = payment.order_id;
 
-      // Ignore ByePanda store orders (handled exclusively by ByePanda store)
-      const noteSlug = payment.notes?.product_slug?.trim();
-      if (noteSlug === "kids-bundle") {
+      // 1. If store is explicitly tagged and not growscale, ignore immediately.
+      const orderStore = payment.notes?.store?.trim()?.toLowerCase();
+      if (orderStore && orderStore !== "growscale") {
         return NextResponse.json({
           ok: true,
-          ignored: "ByePanda order",
+          ignored: `Order belongs to another store: ${orderStore}`,
         });
+      }
+
+      // 2. In multi-store Razorpay accounts, manually verify the product belongs to Growscale store
+      const noteSlug = payment.notes?.product_slug?.trim();
+      if (noteSlug && !isGrowscaleProductSlug(noteSlug)) {
+        return NextResponse.json({
+          ok: true,
+          ignored: `Product "${noteSlug}" does not belong to Growscale store.`,
+        });
+      }
+
+      // 3. If noteSlug is missing, check if this order was registered in Growscale database
+      if (!noteSlug) {
+        const existing = await getStorePurchaseByOrderId(orderId);
+        if (!existing || !isGrowscaleProductSlug(existing.product_slug)) {
+          return NextResponse.json({
+            ok: true,
+            ignored: "Order does not belong to Growscale store.",
+          });
+        }
       }
 
       // Fetch full payment for name + any fields webhook payload omitted.
@@ -80,10 +102,10 @@ export async function POST(request: Request) {
         customerName: razorpayCustomer.name,
       });
 
-      if (purchase.product_slug === "kids-bundle") {
+      if (!isGrowscaleProductSlug(purchase.product_slug)) {
         return NextResponse.json({
           ok: true,
-          ignored: "ByePanda order",
+          ignored: `Product "${purchase.product_slug}" does not belong to Growscale store.`,
         });
       }
 
@@ -129,6 +151,9 @@ export async function POST(request: Request) {
 
       // Ack Razorpay fast; finish Meta + email in background (same as Dodo).
       after(async () => {
+        if (!isGrowscaleProductSlug(purchase.product_slug)) {
+          return;
+        }
         await Promise.all([
           sendPurchaseEvent({
             paymentId,

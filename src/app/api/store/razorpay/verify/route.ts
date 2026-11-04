@@ -16,6 +16,7 @@ import {
   getMetaAttributionFromPurchase,
   markStorePurchasePaid,
 } from "@/lib/store/purchases";
+import { isGrowscaleProductSlug } from "@/lib/store/products";
 import { fetchRazorpayPaymentCustomer } from "@/lib/store/razorpay-customer";
 import { sendStorePurchaseEmail } from "@/lib/store/send-purchase-email";
 import { verifyRazorpayPaymentSignature } from "@/lib/store/verify";
@@ -73,6 +74,13 @@ export async function POST(request: Request) {
       customerName: razorpayCustomer.name,
     });
 
+    if (!isGrowscaleProductSlug(purchase.product_slug)) {
+      return NextResponse.json({
+        ok: true,
+        ignored: `Product "${purchase.product_slug}" does not belong to Growscale store.`,
+      });
+    }
+
     const email = purchase.customer_email ?? customerEmail;
     const phone = purchase.customer_phone ?? razorpayCustomer.phone;
     const fullName = purchase.customer_name ?? razorpayCustomer.name;
@@ -115,6 +123,9 @@ export async function POST(request: Request) {
 
     // Reply fast to the buyer; finish Meta + email in background (same as Dodo).
     after(async () => {
+      if (!isGrowscaleProductSlug(purchase.product_slug)) {
+        return;
+      }
       await Promise.all([
         sendPurchaseEvent({
           paymentId,

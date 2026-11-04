@@ -10,6 +10,7 @@ import {
 } from "@/lib/store/download";
 import {
   getStoreProductForPurchaseSlug,
+  isGrowscaleProductSlug,
   storeProduct,
 } from "@/lib/store/products";
 
@@ -112,13 +113,13 @@ export async function sendStorePurchaseEmail(
     return;
   }
 
-  // Never send GrowScaleX email for ByePanda orders
-  if (input.productSlug?.trim() === "kids-bundle") {
+  // Manually check that the product exists in Growscale store before sending email
+  if (!isGrowscaleProductSlug(input.productSlug)) {
     console.info(
       JSON.stringify({
         level: "info",
         route: "store/purchase-email",
-        message: "Purchase email skipped — ByePanda order",
+        message: `Growscale email skipped — product "${input.productSlug}" does not belong to Growscale store`,
         paymentId,
         timestamp: new Date().toISOString(),
       }),
@@ -127,10 +128,23 @@ export async function sendStorePurchaseEmail(
   }
 
   const product = getStoreProductForPurchaseSlug(input.productSlug);
+  if (!product) {
+    console.warn(
+      JSON.stringify({
+        level: "warn",
+        route: "store/purchase-email",
+        message: `Growscale email skipped — could not find product config for slug "${input.productSlug}" in Growscale store`,
+        paymentId,
+        timestamp: new Date().toISOString(),
+      }),
+    );
+    return;
+  }
+
   // India (and others): only use per-product driveDownloadUrl. No env fallback.
-  const driveUrl = product?.driveDownloadUrl?.trim() || "";
+  const driveUrl = product.driveDownloadUrl?.trim() || "";
   const productTitle =
-    input.productTitle?.trim() || product?.title || storeProduct.title;
+    input.productTitle?.trim() || product.title;
   const priceLabel = formatMoney(input.value, input.currency);
   const firstName =
     input.customerName?.trim().split(/\s+/)[0] ||

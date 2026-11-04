@@ -24,6 +24,30 @@ export const LIVE_ADS_PRODUCT_PATH = "/store/product";
 export const DISCOUNT_INDIAN_DATABASE_SLUG = "x9k2p7m4q8";
 
 /**
+ * Valid Growscale store product slugs.
+ * Used to strictly verify incoming Razorpay webhook/verify orders belong to Growscale.
+ */
+export const GROWSCALE_PRODUCT_SLUGS = [
+  "pan-india-leads-2026",
+  "x9k2p7m4q8",
+  "usa-leads",
+  "hni-database",
+  "poster-pack",
+] as const;
+
+export function isGrowscaleProductSlug(slug: string | null | undefined): boolean {
+  if (!slug) return false;
+  const clean = slug.trim();
+  return (
+    clean === LIVE_ADS_PRODUCT_SLUG ||
+    clean === DISCOUNT_INDIAN_DATABASE_SLUG ||
+    clean === "usa-leads" ||
+    clean === "hni-database" ||
+    LEGACY_LIVE_PURCHASE_SLUGS.includes(clean)
+  );
+}
+
+/**
  * Old slugs saved on past purchases before the store was renamed.
  * Those buyers must keep getting the live ads product's file. Never remove.
  * These are NOT pages and are never used for new orders.
@@ -92,13 +116,20 @@ export function getStoreProductBySlug(
 
 /**
  * Product for a saved purchase row (download + email).
- * Empty or legacy slug = live ads product. Unknown slug = null.
+ * Strictly checks that the slug is a verified Growscale product.
+ * Returns null if the slug is unknown, missing, or belongs to another store.
  */
 export function getStoreProductForPurchaseSlug(
   slug: string | null | undefined,
 ): StoreProductConfig | null {
-  const trimmed = slug?.trim() ?? "";
-  if (!trimmed || LEGACY_LIVE_PURCHASE_SLUGS.includes(trimmed)) {
+  if (!slug) {
+    return null;
+  }
+  const trimmed = slug.trim();
+  if (!trimmed || !isGrowscaleProductSlug(trimmed)) {
+    return null;
+  }
+  if (LEGACY_LIVE_PURCHASE_SLUGS.includes(trimmed)) {
     return storeProduct;
   }
   return getStoreProductBySlug(trimmed);
