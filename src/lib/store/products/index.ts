@@ -35,6 +35,13 @@ export const GROWSCALE_PRODUCT_SLUGS = [
   "poster-pack",
 ] as const;
 
+/**
+ * Old slugs saved on past purchases before the store was renamed.
+ * Those buyers must keep getting the live ads product's file. Never remove.
+ * These are NOT pages and are never used for new orders.
+ */
+const LEGACY_LIVE_PURCHASE_SLUGS = ["poster-pack"];
+
 export function isGrowscaleProductSlug(slug: string | null | undefined): boolean {
   if (!slug) return false;
   const clean = slug.trim();
@@ -46,13 +53,6 @@ export function isGrowscaleProductSlug(slug: string | null | undefined): boolean
     LEGACY_LIVE_PURCHASE_SLUGS.includes(clean)
   );
 }
-
-/**
- * Old slugs saved on past purchases before the store was renamed.
- * Those buyers must keep getting the live ads product's file. Never remove.
- * These are NOT pages and are never used for new orders.
- */
-const LEGACY_LIVE_PURCHASE_SLUGS = ["poster-pack"];
 
 /**
  * NEXT_PUBLIC_STORE_PRICE_INR overrides the price of the live ads product ONLY.
