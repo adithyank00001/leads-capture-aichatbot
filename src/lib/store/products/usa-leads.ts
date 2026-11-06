@@ -22,7 +22,6 @@ export const usaLeads: StoreProductConfig = {
   },
   driveDownloadUrl: null,
 
-  price: 297,
   price: 397,
   compareAtPrice: 4997,
   currency: "INR",
@@ -30,15 +29,15 @@ export const usaLeads: StoreProductConfig = {
 
   brandName: "Verified Seller",
   eyebrow: "Land High-Paying US Clients Today:",
-  title: "Get 10 Lakh+ Verified USA B2B Leads Database (Latest Edition)",
+  title: "Get 100 Million+ Verified USA B2B Leads Database (Latest Edition)",
   subtitleLead: "Ready to start closing clients who pay in dollars?",
   subtitle:
-    "Get instant access to 10 Lakh+ verified US business owners. Stop guessing and start closing high-ticket client today.",
+    "Get instant access to 100 Million+ verified US business owners. Stop guessing and start closing high-ticket client today.",
   rating: 4.9,
   reviewCount: 500,
   socialProofTag: "🔥 50+ sold yesterday!",
   highlights: [
-    "10,00,000+ Verified US Prospects ready to be pitched.",
+    "100 Million+ Verified US Prospects ready to be pitched.",
     "Direct Emails & Phone Numbers to skip the gatekeepers.",
     "Pitch the Decision-Makers (CEOs, Founders, and Owners).",
     "Instant Download (Excel & CSV) to start outreach in 5 minutes.",
@@ -59,7 +58,7 @@ export const usaLeads: StoreProductConfig = {
   images: [
     {
       src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1790444255/Software_poster_advertising_busi__20260926230518_1.jpg",
-      alt: "10 Lakh+ Verified USA Business Leads — 300+ industries with free HNI, Real Estate, and Map Scraper bonuses",
+      alt: "100 Million+ Verified USA Business Leads — 300+ industries with free HNI, Real Estate, and Map Scraper bonuses",
     },
     {
       src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1790496367/Untitled_design_26.jpg",
@@ -118,7 +117,6 @@ export const usaLeads: StoreProductConfig = {
     {
       title: "💸 No Monthly Bills",
       description:
-        "Pay just ₹297 once. Keep the data forever and close as many US clients as you want.",
         "Pay just ₹397 once. Keep the data forever and close as many US clients as you want.",
     },
   ],
@@ -127,7 +125,7 @@ export const usaLeads: StoreProductConfig = {
   includedNote:
     "Skip the hard part of finding leads. Get a massive, ready-to-use list of Leads across 300+ US industries. Start sending pitches and closing deals.",
   included: [
-    { label: "10 Lakh+ Verified USA Business Contacts" },
+    { label: "100 Million+ Verified USA Business Contacts" },
     { label: "300+ Industry Categories (Easily find your exact target niche)" },
     { label: "Directly talk to Founder, CEO, Owner & Decision-Maker" },
     { label: "Verified Email Addresses (High inbox delivery for cold emails)" },
@@ -236,13 +234,11 @@ export const usaLeads: StoreProductConfig = {
     {
       question: "How do I access the Google Map Scraper Tool and Bonuses?",
       answer:
-        "As soon as your payment of ₹297 is successful, you will be redirected to a secure download page containing the USA Database, all bonus databases, and the scraper tool. You will also receive an email with the backup download links.",
         "As soon as your payment of ₹397 is successful, you will be redirected to a secure download page containing the USA Database, all bonus databases, and the scraper tool. You will also receive an email with the backup download links.",
     },
     {
       question: "Is this a one-time payment?",
       answer:
-        "Yes! There are absolutely no hidden fees or monthly subscriptions. You pay ₹297 once and retain lifetime access to the files.",
         "Yes! There are absolutely no hidden fees or monthly subscriptions. You pay ₹397 once and retain lifetime access to the files.",
     },
     {
