@@ -52,15 +52,18 @@ export function ProductDetails({
                   🎁
                 </span>
                 <div className="store-bonus-heading-text">
-                  <p className="store-bonus-title">Exclusive Free Bonuses</p>
+                  <p className="store-bonus-title">
+                    Exclusive Free Bonuses
+                    {product.bonusWorth ? ` (${product.bonusWorth})` : ""}
+                  </p>
                   <p className="store-bonus-urgency">(Only Available Today)</p>
                 </div>
               </div>
               <ul className="store-bonus-list">
                 {product.bonusIncluded.map((item) => {
-                  const isMore = item.label
-                    .toLowerCase()
-                    .includes("many more");
+                  const isMore =
+                    item.label.toLowerCase().includes("many more") ||
+                    item.label.toLowerCase().includes("& more");
                   return (
                     <li
                       key={item.label}

@@ -120,6 +120,8 @@ export type StoreProductContent = {
   included: Array<{ label: string; value?: number }>;
   /** Extra bonus databases shown under the main list */
   bonusIncluded: Array<{ label: string; value?: number }>;
+  /** Optional bonus worth badge/text (e.g. "Worth ₹5,000+") */
+  bonusWorth?: string;
   /** Optional preview/sample screenshots shown at the end of "What's included" */
   includedImages?: Array<StoreIncludedImage | string>;
   /** Optional dedicated preview section */

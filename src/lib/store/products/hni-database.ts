@@ -15,11 +15,11 @@ export const hniDatabase: StoreProductConfig = {
   topSelling: true,
 
   download: {
-    relativePrivatePath: "store/downloads/HNI-DATABASE-SAMPLE.pdf",
-    fileName: "HNI-DATABASE-SAMPLE.pdf",
+    relativePrivatePath: "store/downloads/INDIA-PREMIUM-HNI-DATABASE-2026.pdf",
+    fileName: "INDIA-PREMIUM-HNI-DATABASE-2026.pdf",
     contentType: "application/pdf",
   },
-  driveDownloadUrl: null,
+  driveDownloadUrl: "https://drive.google.com/drive/folders/1-FRBd3s2S5SpwOBdYnIw9GKo0pdyEBrI",
 
   price: 1,
   compareAtPrice: 1499,
@@ -41,6 +41,17 @@ export const hniDatabase: StoreProductConfig = {
     "Filterable Data: Sort by Income, Profession, and Interest",
     "Zero Subscriptions: Pay once, own the list forever",
     "Instant Delivery: Download immediately after payment",
+    {
+      text: "Google Business Leads Scraper Tool + USA Leads Database (10Lakh+) & More...(WORTH ₹5000+)",
+      badge: "🎁 Bonus",
+      worth: "WORTH ₹5000+",
+      points: [
+        "Google Business Leads Scraper Tool",
+        "USA Leads Database (10Lakh+)",
+        "CRM Tracking Blueprint System",
+        "& More...",
+      ],
+    },
   ],
 
   images: [
@@ -128,7 +139,24 @@ export const hniDatabase: StoreProductConfig = {
         "🛍️ Buyer Interests: Tagged for Real Estate, Luxury Cars, Travel & Investments.",
     },
   ],
-  bonusIncluded: [],
+  bonusWorth: "Worth ₹5,000+",
+  bonusIncluded: [
+    {
+      label: "BONUS 1: Google Business Leads Scraper Tool",
+      value: 2000,
+    },
+    {
+      label: "BONUS 2: USA Leads Database (10Lakh+)",
+      value: 2000,
+    },
+    {
+      label: "BONUS 3: CRM Tracking Blueprint System",
+      value: 1000,
+    },
+    {
+      label: "& More...",
+    },
+  ],
 
   previewSection: {
     headline: "HNI Leads Database Preview",
