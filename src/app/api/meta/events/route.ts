@@ -140,8 +140,11 @@ export async function POST(request: Request) {
       authEmail = null;
     }
 
-    // Prefer guest checkout email (store) when present — better Purchase match later.
-    const email = guestEmail ?? authEmail;
+    // For PageView or ViewContent, visitors are browsing publicly.
+    // Never attach a logged-in dashboard/admin session email to public page views.
+    const isPublicBrowsingEvent =
+      eventName === "PageView" || eventName === "ViewContent";
+    const email = isPublicBrowsingEvent ? guestEmail : (guestEmail ?? authEmail);
 
     const fromCookies = getMetaAttributionFromRequest(request, {
       eventSourceUrl,

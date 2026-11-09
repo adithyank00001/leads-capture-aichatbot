@@ -21,7 +21,7 @@ export const hniDatabase: StoreProductConfig = {
   },
   driveDownloadUrl: "https://drive.google.com/drive/folders/1-FRBd3s2S5SpwOBdYnIw9GKo0pdyEBrI",
 
-  price: 1,
+  price: 397,
   compareAtPrice: 1499,
   currency: "INR",
   currencySymbol: "₹",
@@ -214,7 +214,7 @@ export const hniDatabase: StoreProductConfig = {
     {
       question: "Is this a monthly subscription?",
       answer:
-        "No. This is a strict one-time payment of ₹1. You download the Excel/CSV files and own the data forever.",
+        "No. This is a strict one-time payment of ₹397. You download the Excel/CSV files and own the data forever.",
     },
     {
       question: "Will this work with my CRM or Meta ad accounts?",
@@ -239,6 +239,6 @@ export const hniDatabase: StoreProductConfig = {
   footerNote: "Pay securely with Razorpay · Instant Google Drive link after payment",
   finalCta: {
     headline: "Take Action Now, Don't Regret Later.",
-    body: "Next time the price will be higher — get 10 Lakh+ India HNI contacts today for just ₹1.",
+    body: "Next time the price will be higher — get 10 Lakh+ India HNI contacts today for just ₹397.",
   },
 };
