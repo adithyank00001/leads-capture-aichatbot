@@ -689,25 +689,32 @@ export function DiscountProductHero({ product }: Props) {
             </span>
           </div>
 
-          <div className="mt-6 flex flex-wrap items-baseline gap-3">
-            <p className="store-price">
-              {formatMoney(unitPrice, product.currencySymbol)}
-            </p>
-            <p className="text-xl sm:text-2xl font-bold text-slate-400 line-through decoration-2">
-              {formatMoney(397, product.currencySymbol)}
-            </p>
-            {product.compareAtPrice != null && product.compareAtPrice > 397 ? (
-              <p className="store-compare text-xs sm:text-sm text-slate-400 opacity-80">
-                {formatMoney(product.compareAtPrice, product.currencySymbol)}
+          <div className="mt-6 space-y-1.5">
+            <div className="flex flex-wrap items-baseline gap-2.5 sm:gap-3">
+              <p className="store-price">
+                {formatMoney(unitPrice, product.currencySymbol)}
               </p>
-            ) : null}
-            <span className="store-save">
-              Save{" "}
-              {formatMoney(
-                (product.compareAtPrice ?? 4997) - unitPrice,
-                product.currencySymbol,
-              )}
-            </span>
+              <p className="text-xl sm:text-2xl font-bold text-slate-400 line-through decoration-2">
+                {formatMoney(397, product.currencySymbol)}
+              </p>
+              {product.compareAtPrice != null && product.compareAtPrice > 397 ? (
+                <p className="store-compare text-xs sm:text-sm text-slate-400 opacity-80">
+                  {formatMoney(product.compareAtPrice, product.currencySymbol)}
+                </p>
+              ) : null}
+              <span className="text-xs sm:text-sm text-[var(--store-muted)] font-normal">
+                (GST included)
+              </span>
+            </div>
+            <div>
+              <span className="store-save inline-flex !mb-0">
+                Save{" "}
+                {formatMoney(
+                  (product.compareAtPrice ?? 4997) - unitPrice,
+                  product.currencySymbol,
+                )}
+              </span>
+            </div>
           </div>
 
           {/* Promotional tags clearly visible near price */}

@@ -687,24 +687,31 @@ export function ProductHero({ product }: Props) {
             </span>
           </div>
 
-          <div className="mt-6 flex flex-wrap items-end gap-3">
-            <p className="store-price">
-              {formatMoney(unitPrice, product.currencySymbol)}
-            </p>
-            {product.compareAtPrice != null ? (
-              <p className="store-compare">
-                {formatMoney(product.compareAtPrice, product.currencySymbol)}
+          <div className="mt-6 space-y-1.5">
+            <div className="flex flex-wrap items-end gap-2.5 sm:gap-3">
+              <p className="store-price">
+                {formatMoney(unitPrice, product.currencySymbol)}
               </p>
-            ) : null}
+              {product.compareAtPrice != null ? (
+                <p className="store-compare">
+                  {formatMoney(product.compareAtPrice, product.currencySymbol)}
+                </p>
+              ) : null}
+              <span className="pb-1 text-xs sm:text-sm text-[var(--store-muted)] font-normal">
+                (GST included)
+              </span>
+            </div>
             {product.compareAtPrice != null &&
             product.compareAtPrice > unitPrice ? (
-              <span className="store-save">
-                Save{" "}
-                {formatMoney(
-                  product.compareAtPrice - unitPrice,
-                  product.currencySymbol,
-                )}
-              </span>
+              <div>
+                <span className="store-save inline-flex !mb-0">
+                  Save{" "}
+                  {formatMoney(
+                    product.compareAtPrice - unitPrice,
+                    product.currencySymbol,
+                  )}
+                </span>
+              </div>
             ) : null}
           </div>
           <OfferCountdown />

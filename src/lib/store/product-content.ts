@@ -35,6 +35,7 @@ export type ProductFaq = {
 export type ProductUseCase = {
   title: string;
   description: string;
+  icon?: string;
 };
 
 export type ProductReview = {
@@ -44,7 +45,19 @@ export type ProductReview = {
   rating?: number;
 };
 
+export type StorePreviewSection = {
+  headline: string;
+  images: Array<StoreIncludedImage | string>;
+};
+
+export type StoreGoodFit = {
+  headline: string;
+  points: string[];
+};
+
 export type StoreProductContent = {
+  /** Optional announcement banner displayed at the very top of the page */
+  topBanner?: string;
   /** Small brand name in the header */
   brandName: string;
   /** Small line above the title (buy box). Falls back to default if empty. */
@@ -91,8 +104,14 @@ export type StoreProductContent = {
   description: string[];
   /** Optional bold line at the top of About (product-specific). */
   aboutHeadline?: string;
+  /** Optional bold subheading above useCases */
+  useCasesHeadline?: string;
+  /** Optional note / intro text under useCasesHeadline */
+  useCasesNote?: string;
   /** How customers use the product */
   useCases: ProductUseCase[];
+  /** Optional qualification checklist (e.g. This Is a Good Fit If You…) */
+  goodFit?: StoreGoodFit;
   /** Headline above the included checklist */
   includedHeadline: string;
   /** Short note under the included headline */
@@ -103,6 +122,8 @@ export type StoreProductContent = {
   bonusIncluded: Array<{ label: string; value?: number }>;
   /** Optional preview/sample screenshots shown at the end of "What's included" */
   includedImages?: Array<StoreIncludedImage | string>;
+  /** Optional dedicated preview section */
+  previewSection?: StorePreviewSection;
   /** Customer reviews */
   reviews: ProductReview[];
   /** Steps in “How it works” */

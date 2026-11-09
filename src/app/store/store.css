@@ -1003,6 +1003,23 @@
   letter-spacing: -0.015em;
 }
 
+.store-about-subheading {
+  font-family: var(--font-store-display), ui-serif, Georgia, serif;
+  margin: 1.6rem 0 0.5rem;
+  color: var(--store-ink);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+}
+
+.store-about-note {
+  margin: 0 0 1rem;
+  color: var(--store-muted);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
 .store-about p + p {
   margin-top: 0.85rem;
 }
@@ -1037,6 +1054,43 @@
 
 .store-use-cases strong {
   font-weight: 700;
+}
+
+.store-good-fit-card {
+  margin-top: 1.75rem;
+  padding: 1.35rem 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  background: rgba(236, 253, 245, 0.55);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.05);
+}
+
+.store-good-fit-title {
+  font-family: var(--font-store-display), ui-serif, Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: #064e3b;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.store-good-fit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.store-good-fit-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #064e3b;
+  font-weight: 500;
 }
 
 .store-included-headline {

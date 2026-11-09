@@ -95,6 +95,16 @@ export function ProductDetails({
         ) : null}
       </article>
 
+      {product.previewSection ? (
+        <article
+          className="store-preview"
+          aria-label={product.previewSection.headline}
+        >
+          <h2>{product.previewSection.headline}</h2>
+          <ProductIncludedImages images={product.previewSection.images} />
+        </article>
+      ) : null}
+
       <article className="store-about">
         <h2>About this product</h2>
         {product.aboutHeadline?.trim() ? (
@@ -103,17 +113,55 @@ export function ProductDetails({
         {product.description.map((paragraph) => (
           <p key={paragraph.slice(0, 40)}>{paragraph}</p>
         ))}
+        {product.useCasesHeadline?.trim() ? (
+          <h3 className="store-about-subheading">
+            {product.useCasesHeadline.trim()}
+          </h3>
+        ) : null}
+        {product.useCasesNote?.trim() ? (
+          <p className="store-about-note">{product.useCasesNote.trim()}</p>
+        ) : null}
         {product.useCases.length > 0 ? (
           <ul className="store-use-cases">
             {product.useCases.map((useCase) => (
               <li key={useCase.title}>
-                <Check className="mt-0.5 size-4 shrink-0 text-[var(--store-accent)]" />
+                {useCase.icon ? (
+                  <span
+                    className="mt-0.5 text-base sm:text-lg leading-none shrink-0 select-none"
+                    aria-hidden="true"
+                  >
+                    {useCase.icon}
+                  </span>
+                ) : (
+                  <Check className="mt-0.5 size-4 shrink-0 text-[var(--store-accent)]" />
+                )}
                 <div>
                   <strong>{useCase.title}:</strong> {useCase.description}
                 </div>
               </li>
             ))}
           </ul>
+        ) : null}
+
+        {product.goodFit ? (
+          <div className="store-good-fit-card">
+            <h3 className="store-good-fit-title">
+              <span aria-hidden="true">✅</span>
+              <span>{product.goodFit.headline}</span>
+            </h3>
+            <ul className="store-good-fit-list">
+              {product.goodFit.points.map((point) => (
+                <li key={point}>
+                  <Check
+                    className="mt-0.5 size-4 shrink-0 text-emerald-600"
+                    strokeWidth={2.5}
+                    aria-hidden="true"
+                  />
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         ) : null}
       </article>
 
@@ -158,12 +206,15 @@ export function ProductDetails({
         <article>
           <h2>How it works</h2>
           <ol>
-            {product.howItWorks.map((step, index) => (
-              <li key={step}>
-                <span>{index + 1}</span>
-                <p>{step}</p>
-              </li>
-            ))}
+            {product.howItWorks.map((step, index) => {
+              const cleanStep = step.replace(/^\d+[\s—\.\-]+\s*/, "");
+              return (
+                <li key={step}>
+                  <span>{index + 1}</span>
+                  <p>{cleanStep}</p>
+                </li>
+              );
+            })}
           </ol>
         </article>
 
