@@ -134,7 +134,10 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
     ? isPaidRecently(verification.paidAt)
     : false;
 
-  if (verification.ok) {
+  const isSampleProduct =
+    verification.ok && verification.productSlug === "sample-product";
+
+  if (verification.ok && !isSampleProduct) {
     await Promise.all([
       sendPurchaseEventFromPageRequest({
         paymentId: verification.paymentId,
@@ -183,7 +186,7 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
 
   return (
     <div className="store-root min-h-full">
-      {verification.ok ? (
+      {verification.ok && !isSampleProduct ? (
         <MetaPixelPurchase
           eventId={verification.paymentId}
           value={verification.value}
@@ -209,7 +212,9 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
                 Your payment is confirmed. Download the PDF package below.
               </p>
 
-              {verification.email && paidRecently ? (
+              {verification.email &&
+              paidRecently &&
+              verification.productSlug !== "sample-product" ? (
                 <p className="mt-3 text-sm text-[var(--store-muted)]">
                   We also emailed the PDF to{" "}
                   <strong>{verification.email}</strong>. Check inbox (and

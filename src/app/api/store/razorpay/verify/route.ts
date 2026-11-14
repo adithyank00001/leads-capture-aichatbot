@@ -123,7 +123,10 @@ export async function POST(request: Request) {
 
     // Reply fast to the buyer; finish Meta + email in background (same as Dodo).
     after(async () => {
-      if (!isGrowscaleProductSlug(purchase.product_slug)) {
+      if (
+        !isGrowscaleProductSlug(purchase.product_slug) ||
+        purchase.product_slug === "sample-product"
+      ) {
         return;
       }
       await Promise.all([

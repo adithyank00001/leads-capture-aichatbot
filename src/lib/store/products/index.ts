@@ -8,6 +8,7 @@
 import type { StoreProductConfig } from "@/lib/store/product-content";
 import { hniDatabase } from "@/lib/store/products/hni-database";
 import { panIndiaLeads2026 } from "@/lib/store/products/pan-india-leads-2026";
+import { sampleProduct } from "@/lib/store/products/sample-product";
 import { usaLeads } from "@/lib/store/products/usa-leads";
 import { panIndiaLeadsDiscount297 } from "@/lib/store/products/x9k2p7m4q8";
 
@@ -32,6 +33,7 @@ export const GROWSCALE_PRODUCT_SLUGS = [
   "x9k2p7m4q8",
   "usa-leads",
   "hni-database",
+  "sample-product",
   "poster-pack",
 ] as const;
 
@@ -50,6 +52,7 @@ export function isGrowscaleProductSlug(slug: string | null | undefined): boolean
     clean === DISCOUNT_INDIAN_DATABASE_SLUG ||
     clean === "usa-leads" ||
     clean === "hni-database" ||
+    clean === "sample-product" ||
     LEGACY_LIVE_PURCHASE_SLUGS.includes(clean)
   );
 }
@@ -83,6 +86,7 @@ const REGISTERED_PRODUCTS: StoreProductConfig[] = [
   usaLeads,
   hniDatabase,
   panIndiaLeadsDiscount297,
+  sampleProduct,
 ];
 
 export const storeProducts: StoreProductConfig[] =

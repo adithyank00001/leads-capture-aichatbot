@@ -113,6 +113,20 @@ export async function sendStorePurchaseEmail(
     return;
   }
 
+  // Intentionally skip email for the sample testing product (isolated testing)
+  if (input.productSlug === "sample-product") {
+    console.info(
+      JSON.stringify({
+        level: "info",
+        route: "store/purchase-email",
+        message: "Purchase email skipped for sample test product (isolated testing)",
+        paymentId,
+        timestamp: new Date().toISOString(),
+      }),
+    );
+    return;
+  }
+
   // Manually check that the product exists in Growscale store before sending email
   if (!isGrowscaleProductSlug(input.productSlug)) {
     console.info(
