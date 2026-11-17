@@ -48,7 +48,7 @@ export function buildStorePurchaseCustomData(input: StorePurchaseMetaInput) {
     currency,
     order_id: orderId,
     content_ids: [input.productSlug],
-    content_name: input.productTitle,
+    content_name: (input.productTitle || "").replace(/\s+/g, " ").trim(),
     content_type: "product",
     content_category: "digital_leads_database",
     num_items: quantity,

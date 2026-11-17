@@ -122,7 +122,7 @@ export async function POST(request: Request) {
       notes: {
         store: "growscale",
         product_slug: product.slug,
-        product_title: product.title,
+        product_title: product.title.replace(/\s+/g, " ").trim(),
         quantity: String(quantity),
         ...(email ? { customer_email: email } : {}),
         ...metaNotes,

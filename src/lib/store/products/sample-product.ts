@@ -1,20 +1,19 @@
 import type { StoreProductConfig } from "@/lib/store/product-content";
 
 /**
- * Sample test product page.
- * Public URL: /store/product/sample-product
+ * 25 Lakh+ All India Business Owners & Real Estate Owners Contact Leads Database (2026)
+ * Public URL: /store/product/business-and-real-estate-owner-db
  * Hidden from the homepage while published: false.
- * Strictly ₹1 test price, fully isolated, no emails sent.
  */
 export const sampleProduct: StoreProductConfig = {
-  slug: "sample-product",
-  contentId: "sample-product",
+  slug: "business-and-real-estate-owner-db",
+  contentId: "business-and-real-estate-owner-db",
   published: false,
 
   catalogSubtitle:
-    "Sample test product · Sample Excel & CSV download · Strictly for testing",
-  badge: "Sample Test",
-  topSelling: false,
+    "25 Lakh+ High-Quality Verified Contacts across All India · Exclusive Real Estate Leads",
+  badge: "Digital Products",
+  topSelling: true,
 
   download: {
     relativePrivatePath: "store/downloads/SAMPLE-TEST-DOCUMENT.pdf",
@@ -23,47 +22,44 @@ export const sampleProduct: StoreProductConfig = {
   },
   driveDownloadUrl: null,
 
-  price: 1,
-  compareAtPrice: 99,
+  price: 397,
+  compareAtPrice: 4997,
   currency: "INR",
   currencySymbol: "₹",
 
-  brandName: "Sample Verified Seller",
-  eyebrow: "Sample Testing Page · Not A Real Product · Test Mode:",
+  brandName: "Growscale Store",
+  eyebrow: "Digital download · Instant access",
   title:
-    "Sample Product Headline Title – Sample Test Leads Database (Sample Edition)",
-  subtitleLead:
-    "This is a sample product test page. All details shown here are sample details.",
+    "25 Lakh+ All India Business Owners\n&\nReal Estate Owners Contact Leads Database (2026)",
+  subtitleLead: "",
   subtitle:
-    "This is a sample product description. All details on this page are sample details created strictly for testing and checkout verification. Not a real commercial product.",
-  rating: 5.0,
-  reviewCount: 10,
-  socialProofTag: "🧪 Sample test mode active",
+    "Unlock 25 Lakh+ Verified Indian B2B Contacts & Exclusive Real Estate Leads to Scale Your Sales & Marketing Instantly.",
+  rating: 4.9,
+  reviewCount: 350,
+  socialProofTag: "🔥 100+ sold yesterday!",
   highlights: [
-    "Sample Highlight 1: Sample test data entries and sample fields",
-    "Sample Highlight 2: Sample filterable test columns for verification",
-    "Sample Highlight 3: Sample testing checklist with instant sample download",
+    "⚡ Instant digital download via Google Drive",
+    "📊 25 Lakh+ High-Quality Verified Contacts across All India",
+    "🏢 Exclusive Real Estate Business Owner data included",
+    "📋 Organized Excel File (Ready to Use)",
+    "♾️ Lifetime access to all downloaded files (One-time payment)",
     {
-      text: "Sample Test Bonus Pack Included (Sample Worth ₹5000+)",
-      badge: "🎁 Sample Bonus",
-      worth: "SAMPLE ₹5000",
+      text: "Bonus WORTH ₹5000+ Included",
+      badge: "🎁 Bonus WORTH ₹5000+",
+      worth: "WORTH ₹5000+",
       points: [
-        "Sample Test Scraper Tool",
-        "Sample Test Leads List (10Lakh+)",
-        "Sample CRM Tracking Blueprint",
-        "Sample & More...",
+        "Google Business Leads Scraper Tool",
+        "HNI Leads Database (10 Lakh+)",
+        "CRM Tracking Blueprint System",
+        "& More...",
       ],
     },
   ],
 
   images: [
     {
-      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1794229789/Premium_HNI_Database_Access.png",
-      alt: "Sample test product cover image",
-    },
-    {
-      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1794229856/1362015f-b6fb-41bf-8fda-a20884414eb2.png",
-      alt: "Sample test spreadsheet preview",
+      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1794939281/b7ab41a0-08e6-41b7-ae27-959980e25095.png",
+      alt: "25 Lakh+ All India Business Owners & Real Estate Owners Contact Leads Database (2026)",
     },
   ],
 
@@ -72,133 +68,170 @@ export const sampleProduct: StoreProductConfig = {
 
   trustItems: [
     {
-      title: "Sample instant access",
+      title: "Instant Access: Google Drive",
       description:
-        "Sample download link generated immediately after ₹1 test payment",
+        "Direct Google Drive link unlocked immediately after payment",
     },
     {
-      title: "Sample secure payment",
-      description: "Sample test payment encrypted and processed by Razorpay",
+      title: "Safe & Secure: Razorpay Checkout",
+      description: "100% encrypted and safe payment processing via Razorpay",
     },
     {
-      title: "Sample lifetime access",
-      description: "Sample test files available for testing and verification",
+      title: "Lifetime Access: No Watermark",
+      description:
+        "Organized Excel files with full lifetime access & no watermarks",
+    },
+    {
+      title: "7-Days Money Back Guarantee",
+      description: "Full refund protection if you don't get immediate access",
     },
   ],
 
   description: [
-    "This is a sample product page created solely for test and verification purposes.",
-    "All details, headlines, bullet points, numbers, and descriptions on this page are sample details and do not represent a real commercial product.",
-    "You can safely use this page to test the complete live payment flow at ₹1.",
+    "Stop struggling to find your next B2B clients. This 25 Lakh+ PAN India Database gives you instant access to verified business owners across the country, giving you the best data to get unlimited leads in the Indian market.",
+    "This high-quality Excel data is categorized and structured so you can immediately reach your ideal customers. It is the perfect tool to grow your sales using:",
   ],
 
-  useCasesHeadline: "Sample Test Scenarios",
-  useCasesNote: "Sample test cases for verifying checkout functionality:",
+  useCasesHeadline: "Proven Ways to Scale Your Sales",
+  useCasesNote: "The perfect tool to grow your sales using:",
   useCases: [
     {
-      icon: "🧪",
-      title: "Sample Test Scenario 1",
+      icon: "💬",
+      title: "WhatsApp Marketing",
       description:
-        "Verifying live payment gateway integration at the minimum ₹1 fee.",
+        "Send special offers directly to specific lists so more people reply.",
     },
     {
-      icon: "🔄",
-      title: "Sample Test Scenario 2",
-      description: "Verifying redirect to the order success screen.",
+      icon: "✉️",
+      title: "Cold Email Campaigns",
+      description:
+        "Email thousands of exact buyers at once to promote your software, products, or services.",
     },
     {
-      icon: "📁",
-      title: "Sample Test Scenario 3",
-      description: "Verifying direct sample download token generation.",
+      icon: "📞",
+      title: "Direct Telecalling",
+      description:
+        "Equip your sales team with direct mobile numbers for active Indian business owners and real estate professionals.",
+    },
+    {
+      icon: "🎯",
+      title: "Custom Ad Audiences",
+      description:
+        "Upload these lists to Facebook or Google Ads to create highly profitable lookalike audiences.",
     },
   ],
 
-  includedHeadline: "What's Included (Sample Test Details)",
-  includedNote: "Sample test package structured for testing:",
+  includedHeadline:
+    "The Complete Business Owner\n&\nReal estate Owners Database (25Lakh+ contacts)",
+  includedNote:
+    "Stop guessing and start connecting. This database is sorted state-by-state and comes in a neat Excel File that is ready to use right away. Every single contact row includes the following essential details:",
   included: [
+    { label: "Business Name" },
+    { label: "Owner Name" },
+    { label: "Mobile / Phone Numbers" },
+    { label: "Email IDs" },
+    { label: "City & State Details" },
+    { label: "Website Details (If Available)" },
+    { label: "Product / Service Details" },
+    { label: "Business Category" },
+    { label: "RTO / GST (if available)" },
     {
-      label: "Sample Test Item 1: Sample contacts sheet (Excel & CSV format)",
+      label:
+        "Plus: The Real Estate Master Database (A dedicated segment exclusively featuring verified real estate business owners, brokers, property buyers, and agents to hyper-target your campaigns in the real estate sector.)",
     },
-    { label: "Sample Test Item 2: Sample data structure guidelines" },
-    { label: "Sample Test Item 3: Sample testing verification guide" },
-    { label: "Sample & More..." },
   ],
 
-  bonusWorth: "Sample Worth ₹5,000",
+  bonusWorth: "Worth ₹5000+",
   bonusIncluded: [
     {
-      label: "SAMPLE BONUS 1: Sample Scraper Tool",
-      value: 2000,
+      label: "HNI Leads Database (10 Lakhs+ leads with 300+ categories)",
     },
     {
-      label: "SAMPLE BONUS 2: Sample Test Database (10Lakh+)",
-      value: 2000,
+      label: "Google Business Leads Scraper tool",
     },
     {
-      label: "SAMPLE BONUS 3: Sample CRM Blueprint",
-      value: 1000,
+      label: "CRM Tracking Blueprint System",
     },
     {
-      label: "Sample & More...",
+      label: "And many more...",
     },
   ],
 
   reviews: [
     {
-      name: "Sample Tester One",
+      name: "Rahul Verma",
       avatar:
-        "https://res.cloudinary.com/ntv0bhpy/image/upload/v1794230900/efa29118-49ce-406d-bde9-365e14f57ea7.png",
+        "https://res.cloudinary.com/ntv0bhpy/image/upload/v1794934955/034a01cb-dac5-488d-a25b-8502db0fb5b5.png",
       quote:
-        "This is a sample test review. The sample ₹1 checkout flow and instant sample download worked cleanly.",
+        "The phone numbers and emails are very active. I sent messages this morning and many people replied. Getting the exact Owner Name makes sales very easy. Very happy with this!",
       rating: 5,
     },
     {
-      name: "Sample Tester Two",
+      name: "Karthik Iyer",
       avatar:
-        "https://res.cloudinary.com/ntv0bhpy/image/upload/v1794230869/84054a7f-a272-47a4-897e-93eadd42491a.png",
+        "https://res.cloudinary.com/ntv0bhpy/image/upload/v1794934746/6fa0e1c7-c05b-4558-b518-2104db36a5db.png",
       quote:
-        "Sample test review confirming that payment verification and sample file downloading are functioning.",
+        "I got the Google Drive download link on my screen immediately after payment. The delivery is super fast and fully automatic. Highly recommended!",
+      rating: 5,
+    },
+    {
+      name: "Amit Patel",
+      avatar:
+        "https://res.cloudinary.com/ntv0bhpy/image/upload/v1794934807/44a09b63-7ec4-4355-b547-bd7eee446bdf.png",
+      quote:
+        "The Excel file is very clean and ready to use. I love the state-wise lists. My calling team started using it directly on the first day itself. Great time saver!",
+      rating: 5,
+    },
+    {
+      name: "Vikram Malhotra",
+      avatar:
+        "https://res.cloudinary.com/ntv0bhpy/image/upload/v1794934694/eb9acea2-86e4-4983-87de-18bb0fa35489.png",
+      quote:
+        "The exclusive real estate contacts are amazing. Having extra details like Business Category and GST is very helpful for finding the right buyers. Best value for ₹397.",
       rating: 5,
     },
   ],
 
   howItWorks: [
-    "Step 1 (Sample): Click the test button and pay sample ₹1 via Razorpay.",
-    "Step 2 (Sample): Payment confirmation is verified by the server.",
-    "Step 3 (Sample): Instant access to the sample test download file.",
+    "Secure Checkout: Choose your payment method and complete the purchase via Razorpay on this page.",
+    "Instant Delivery: You will immediately receive an email containing your secure Google Drive access link.",
+    "Download & Launch: Download the Excel files, import the contacts into your marketing tools, and start making revenue from the very next day.",
   ],
 
   faqs: [
     {
-      question: "Is this a real product?",
+      question: "When will I receive my product?",
       answer:
-        "No. This is a sample product page with sample details created exclusively for testing.",
+        "Instantly. As soon as your Razorpay payment clears, the Google Drive link will appear on your screen and be sent to your email.",
     },
     {
-      question: "Will any confirmation email be sent?",
+      question: "How long will I have access to the content in the database?",
       answer:
-        "No. Confirmation emails are completely disabled for this sample test product.",
+        "Forever. This is a one-time payment for lifetime access. No recurring subscriptions.",
     },
     {
-      question: "How much is charged?",
+      question: "Are these leads actually useful?",
       answer:
-        "A sample charge of ₹1 (minimum transaction) for checkout testing.",
+        "Yes, they contain vital direct contact info including Mobile numbers, Email IDs, and Owner Names to ensure you reach decision-makers.",
     },
     {
-      question: "What files do I get?",
+      question: "What format is the database delivered in?",
       answer:
-        "A sample test PDF containing sample verification details.",
+        "It is delivered in a universal Excel and CSV format that is ready to use immediately.",
+    },
+    {
+      question: "Does this database cover all states in India?",
+      answer:
+        "Yes, this is a complete All India database with state-wise categorization.",
     },
   ],
 
-  buyButtonLabel: "Download Sample (₹1 Test)",
+  buyButtonLabel: "Download My Leads Now",
   secondaryButtonLabel: "Add to cart",
   buyUrl: "#buy",
-  footerNote:
-    "Sample test mode · Pay ₹1 securely with Razorpay · Instant sample download · No emails sent",
+  footerNote: "Pay securely with Razorpay · Instant Google Drive link after payment",
   finalCta: {
-    headline: "Sample Testing Page Final Call to Action",
-    body: "This is a sample test product. Test price is strictly ₹1.",
+    headline: "Take Action Now, Don't Regret Later.",
+    body: "Next time the price will be higher — don't miss this opportunity.",
   },
 };
-

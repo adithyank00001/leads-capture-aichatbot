@@ -214,7 +214,7 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
 
               {verification.email &&
               paidRecently &&
-              verification.productSlug !== "sample-product" ? (
+              !isSampleProduct ? (
                 <p className="mt-3 text-sm text-[var(--store-muted)]">
                   We also emailed the PDF to{" "}
                   <strong>{verification.email}</strong>. Check inbox (and

@@ -19,7 +19,7 @@ export function ProductDetails({
     <section className="store-details" aria-label="Product details">
       <article className="store-included">
         <h2>What&apos;s included</h2>
-        <p className="store-included-headline">{product.includedHeadline}</p>
+        <p className="store-included-headline whitespace-pre-line">{product.includedHeadline}</p>
         <p className="store-included-note">{product.includedNote}</p>
         <ul className="store-category-grid">
           {product.included.map((item) => {

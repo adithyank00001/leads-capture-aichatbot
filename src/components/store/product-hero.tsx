@@ -381,6 +381,10 @@ type Props = {
  * CTA → InitiateCheckout (Pixel + CAPI) + Razorpay (email/phone collected there).
  */
 export function ProductHero({ product }: Props) {
+  const isCustomProduct =
+    product.slug === "sample-product" ||
+    product.slug === "business-real-estate-leads" ||
+    product.slug === "business-and-real-estate-owner-db";
   const [activeImage, setActiveImage] = useState(0);
   const [zoomOpen, setZoomOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -577,6 +581,8 @@ export function ProductHero({ product }: Props) {
 
       await scriptReady;
 
+      const hidePhonePe = isCustomProduct;
+
       await openRazorpayCheckout({
         key: data.keyId,
         amount: data.amount,
@@ -585,6 +591,46 @@ export function ProductHero({ product }: Props) {
         description:
           data.description ?? "Complete payment to receive your leads database",
         order_id: data.orderId,
+        ...(hidePhonePe
+          ? {
+            config: {
+              display: {
+                blocks: {
+                  upi: {
+                    name: "Pay via UPI",
+                    instruments: [
+                      {
+                        method: "upi",
+                        flows: ["intent", "qr", "collect"],
+                        apps: ["google_pay", "paytm", "bhim", "cred"],
+                      },
+                    ],
+                  },
+                  cards: {
+                    name: "Debit / Credit Cards",
+                    instruments: [
+                      {
+                        method: "card",
+                      },
+                    ],
+                  },
+                  netbanking: {
+                    name: "Net Banking",
+                    instruments: [
+                      {
+                        method: "netbanking",
+                      },
+                    ],
+                  },
+                },
+                sequence: ["block.upi", "block.cards", "block.netbanking"],
+                preferences: {
+                  show_default_blocks: false,
+                },
+              },
+            },
+          }
+          : {}),
         // No email/phone prefill — Razorpay collects both on checkout.
         handler: (response) => {
           void verifyAndRedirect(response).catch((error) => {
@@ -629,7 +675,13 @@ export function ProductHero({ product }: Props) {
               sizes="(max-width: 1024px) 100vw, 52vw"
             />
             {product.socialProofTag ? (
-              <span className="store-social-proof">
+              <span
+                className={cn(
+                  "store-social-proof",
+                  isCustomProduct &&
+                    "!top-auto !bottom-3 !left-3 !bg-gradient-to-r !from-red-600 !via-orange-600 !to-amber-500 !text-white !border-white/40 !rounded-full !px-3.5 !py-1.5 !text-xs sm:!text-[13px] !font-extrabold !tracking-wide !shadow-[0_4px_18px_rgba(220,38,38,0.55)] ring-2 ring-white/50"
+                )}
+              >
                 {product.socialProofTag}
               </span>
             ) : null}
@@ -639,35 +691,37 @@ export function ProductHero({ product }: Props) {
             </span>
           </button>
 
-          <div className="mt-3 grid grid-cols-3 gap-2.5 sm:mt-4 sm:gap-3">
-            {product.images.map((image, index) => {
-              const selected = index === activeImage;
-              return (
-                <button
-                  key={image.src}
-                  type="button"
-                  onClick={() => setActiveImage(index)}
-                  className={cn("store-thumb", selected && "is-active")}
-                  aria-label={`Show image ${index + 1}`}
-                  aria-pressed={selected}
-                >
-                  <ProductImage
-                    src={image.src}
-                    alt=""
-                    sizes="120px"
-                    width={150}
-                  />
-                </button>
-              );
-            })}
-          </div>
+          {product.images.length > 1 && !isCustomProduct ? (
+            <div className="mt-3 grid grid-cols-3 gap-2.5 sm:mt-4 sm:gap-3">
+              {product.images.map((image, index) => {
+                const selected = index === activeImage;
+                return (
+                  <button
+                    key={image.src}
+                    type="button"
+                    onClick={() => setActiveImage(index)}
+                    className={cn("store-thumb", selected && "is-active")}
+                    aria-label={`Show image ${index + 1}`}
+                    aria-pressed={selected}
+                  >
+                    <ProductImage
+                      src={image.src}
+                      alt=""
+                      sizes="120px"
+                      width={150}
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
         </section>
 
         <section className="store-buybox" aria-label="Buy product">
           <p className="store-eyebrow">
             {product.eyebrow?.trim() || "Digital download · Instant access"}
           </p>
-          <h1 className="store-title">{product.title}</h1>
+          <h1 className="store-title whitespace-pre-line">{product.title}</h1>
           <p className="store-subtitle">
             {product.subtitleLead?.trim() ? (
               <>
@@ -702,7 +756,7 @@ export function ProductHero({ product }: Props) {
               </span>
             </div>
             {product.compareAtPrice != null &&
-            product.compareAtPrice > unitPrice ? (
+              product.compareAtPrice > unitPrice ? (
               <div>
                 <span className="store-save inline-flex !mb-0">
                   Save{" "}

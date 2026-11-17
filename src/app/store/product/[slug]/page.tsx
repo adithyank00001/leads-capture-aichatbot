@@ -40,9 +40,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const image = product.images[0];
   // Draft products stay out of Google until published.
   const indexable = product.published;
+  const cleanTitle = product.title.replace(/\s+/g, " ").trim();
 
   return {
-    title: { absolute: `${product.title} | growscaleX` },
+    title: { absolute: `${cleanTitle} | growscaleX` },
     description: product.subtitle,
     robots: {
       index: indexable,
@@ -50,14 +51,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       googleBot: { index: indexable, follow: indexable },
     },
     openGraph: {
-      title: `${product.title} | growscaleX`,
+      title: `${cleanTitle} | growscaleX`,
       description: product.subtitle,
       type: "website",
       images: image ? [{ url: image.src, alt: image.alt }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
-      title: `${product.title} | growscaleX`,
+      title: `${cleanTitle} | growscaleX`,
       description: product.subtitle,
       images: image ? [image.src] : undefined,
     },

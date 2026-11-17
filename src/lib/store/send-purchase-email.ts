@@ -113,13 +113,13 @@ export async function sendStorePurchaseEmail(
     return;
   }
 
-  // Intentionally skip email for the sample testing product (isolated testing)
+  // Intentionally skip email for sample test product
   if (input.productSlug === "sample-product") {
     console.info(
       JSON.stringify({
         level: "info",
         route: "store/purchase-email",
-        message: "Purchase email skipped for sample test product (isolated testing)",
+        message: "Purchase email skipped for sample test product",
         paymentId,
         timestamp: new Date().toISOString(),
       }),

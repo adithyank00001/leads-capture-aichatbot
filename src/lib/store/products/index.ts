@@ -33,6 +33,8 @@ export const GROWSCALE_PRODUCT_SLUGS = [
   "x9k2p7m4q8",
   "usa-leads",
   "hni-database",
+  "business-and-real-estate-owner-db",
+  "business-real-estate-leads",
   "sample-product",
   "poster-pack",
 ] as const;
@@ -52,6 +54,8 @@ export function isGrowscaleProductSlug(slug: string | null | undefined): boolean
     clean === DISCOUNT_INDIAN_DATABASE_SLUG ||
     clean === "usa-leads" ||
     clean === "hni-database" ||
+    clean === "business-and-real-estate-owner-db" ||
+    clean === "business-real-estate-leads" ||
     clean === "sample-product" ||
     LEGACY_LIVE_PURCHASE_SLUGS.includes(clean)
   );

@@ -14,7 +14,8 @@ function storeContentPayload(input: {
 }) {
   const quantity = input.quantity ?? 1;
   const contentIds = input.contentIds ?? [STORE_PRODUCT_ID];
-  const contentName = input.contentName ?? STORE_PRODUCT_NAME;
+  const rawName = input.contentName ?? STORE_PRODUCT_NAME;
+  const contentName = rawName.replace(/\s+/g, " ").trim();
   const itemPrice = quantity > 0 ? input.value / quantity : input.value;
 
   return {
@@ -43,7 +44,9 @@ export function trackStoreViewContent(input?: {
   contentName?: string;
   contentIds?: string[];
 }): void {
-  if (input?.contentIds?.includes("sample-product")) return;
+  if (input?.contentIds?.includes("sample-product")) {
+    return;
+  }
   const value = input?.value ?? 397;
   const currency = input?.currency ?? "INR";
   const payload = storeContentPayload({
@@ -72,7 +75,9 @@ export function trackStoreInitiateCheckout(input: {
   /** Optional — only if already known before Razorpay. */
   email?: string | null;
 }): void {
-  if (input?.contentIds?.includes("sample-product")) return;
+  if (input?.contentIds?.includes("sample-product")) {
+    return;
+  }
   const email = input.email ? normalizeStoreEmail(input.email) : "";
   if (email) {
     setPixelUserData({ em: email });

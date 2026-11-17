@@ -96,7 +96,9 @@ export function MetaPixelPurchase({
       {
         value: purchaseValue,
         currency: currency ?? "USD",
-        ...(contentName ? { content_name: contentName } : {}),
+        ...(contentName
+          ? { content_name: contentName.replace(/\s+/g, " ").trim() }
+          : {}),
         ...(ids
           ? {
               content_ids: ids,
