@@ -8,7 +8,7 @@ import type { StoreProductConfig } from "@/lib/store/product-content";
 export const sampleProduct: StoreProductConfig = {
   slug: "business-and-real-estate-owner-db",
   contentId: "business-and-real-estate-owner-db",
-  published: false,
+  published: true,
 
   catalogSubtitle:
     "25 Lakh+ High-Quality Verified Contacts across All India · Exclusive Real Estate Leads",
