@@ -22,7 +22,7 @@ export const sampleProduct: StoreProductConfig = {
   },
   driveDownloadUrl: null,
 
-  price: 397,
+  price: 1,
   compareAtPrice: 4997,
   currency: "INR",
   currencySymbol: "₹",
