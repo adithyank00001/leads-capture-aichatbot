@@ -21,6 +21,7 @@ declare global {
       pixelBootstrapped?: boolean;
       pixelPageViewQueued?: boolean;
       capiPageViewSent?: boolean;
+      testEventCode?: string;
     };
   }
 }
@@ -78,6 +79,9 @@ function PixelTracker() {
           "PageView",
           boot.initialPageViewEventId,
           contentName ? { content_name: contentName } : {},
+          undefined,
+          undefined,
+          boot.testEventCode,
         );
       }
       return;

@@ -41,22 +41,33 @@ export function getMetaPixelBootstrapScript(): string {
   const namesJson = JSON.stringify(names);
 
   // Keep this self-contained — no imports at runtime.
-  // PageView key must match getMetaPageViewKey() in meta-pixel.tsx (path, or path?query).
+  // 1. Unconditionally initialize window.fbq queue and pixel ID so client components can safely call fbq.
+  // 2. Normalize path and queue initial PageView for allowed public marketing/product pages.
   return `(function(){try{
+!function(f,n){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];}(window);
+fbq('init','${pixelId}');
 var paths=${pathsJson};
 var names=${namesJson};
-var path=location.pathname||"/";
-if(path.indexOf("/embed")===0||path.indexOf("/auth")===0||path.indexOf("/dashboard")===0||path.indexOf("/products")===0||path.indexOf("/location-leads")===0||path.indexOf("/complete-profile")===0)return;
+var rawPath=location.pathname||"/";
+if(rawPath.indexOf("/embed")===0||rawPath.indexOf("/auth")===0||rawPath.indexOf("/dashboard")===0||rawPath.indexOf("/products")===0||rawPath.indexOf("/location-leads")===0||rawPath.indexOf("/complete-profile")===0)return;
+var path=rawPath.replace(/\\/+$/,"")||"/";
 var allowed=false;
 for(var i=0;i<paths.length;i++){if(paths[i]===path){allowed=true;break;}}
+if(!allowed&&/^\\/store\\/product\\/[a-z0-9-]+$/.test(path)){allowed=true;}
 if(!allowed)return;
 var rawSearch=location.search||"";
 var query=rawSearch.charAt(0)==="?"?rawSearch.slice(1):rawSearch;
 var key=query?path+"?"+query:path;
 var eventId=(typeof crypto!=="undefined"&&crypto.randomUUID)?crypto.randomUUID():("evt_"+Date.now()+"_"+Math.random().toString(36).slice(2,11));
-var contentName=names[path]||null;
+var contentName=names[path]||names[rawPath]||null;
+if(!contentName&&path.indexOf("/store/product/")===0){contentName="Store Product: "+path.slice(15);}
 var customData=contentName?{content_name:contentName}:{};
-window.__LEADCX_META__={initialPageViewKey:key,initialPageViewEventId:eventId,pixelBootstrapped:true,pixelPageViewQueued:true,capiPageViewSent:false};
+var testCodeMatch=/(?:^|[?&#])(?:test_event_code|testCode)=([^&#]+)/i.exec(location.href);
+var testEventCode=testCodeMatch&&testCodeMatch[1]?decodeURIComponent(testCodeMatch[1]).trim():"";
+window.__LEADCX_META__={initialPageViewKey:key,initialPageViewEventId:eventId,pixelBootstrapped:true,pixelPageViewQueued:true,capiPageViewSent:false,testEventCode:testEventCode||undefined};
 try{
 var m=/(?:^|[?&#])fbclid=([^&#]+)/i.exec(location.href);
 var fbclid=m&&m[1]?String(m[1]).trim():"";
@@ -82,11 +93,8 @@ document.cookie="_fbc="+fbc+"; Path=/; Max-Age=7776000; SameSite=Lax"+secure;
 }
 }
 }catch(e){}
-!function(f,n){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];}(window);
-fbq('init','${pixelId}');
-fbq('track','PageView',customData,{eventID:eventId});
+var eventOptions={eventID:eventId};
+if(testEventCode){eventOptions.test_event_code=testEventCode;}
+fbq('track','PageView',customData,eventOptions);
 }catch(e){}})();`;
 }

@@ -81,6 +81,7 @@ export type SendCapiEventInput = {
   attribution: MetaAttribution;
   customData?: Record<string, unknown>;
   eventTimeSeconds?: number;
+  testEventCode?: string | null;
 };
 
 /**
@@ -135,7 +136,7 @@ export async function sendCapiEvent(input: SendCapiEventInput): Promise<void> {
       data: [eventPayload],
     };
 
-    const testCode = serverEnv.metaCapiTestEventCode;
+    const testCode = input.testEventCode?.trim() || serverEnv.metaCapiTestEventCode;
     if (testCode) {
       body.test_event_code = testCode;
     }

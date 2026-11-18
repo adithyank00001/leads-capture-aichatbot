@@ -4,20 +4,56 @@ export const FB_PIXEL_ID =
 declare global {
   interface Window {
     fbq: (...args: unknown[]) => void;
+    __LEADCX_META__?: {
+      initialPageViewKey?: string;
+      initialPageViewEventId?: string;
+      pixelBootstrapped?: boolean;
+      pixelPageViewQueued?: boolean;
+      capiPageViewSent?: boolean;
+      testEventCode?: string;
+    };
   }
 }
 
+export type TrackEventOptions = {
+  eventID?: string;
+  test_event_code?: string;
+};
+
+export function getBrowserTestEventCode(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  try {
+    const fromBoot = window.__LEADCX_META__?.testEventCode?.trim();
+    if (fromBoot && /^TEST\d+$/i.test(fromBoot)) {
+      return fromBoot;
+    }
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("test_event_code") || params.get("testCode");
+    if (code && /^TEST\d+$/i.test(code.trim())) {
+      return code.trim();
+    }
+    const envCode = process.env.NEXT_PUBLIC_META_TEST_EVENT_CODE?.trim();
+    if (envCode && /^TEST\d+$/i.test(envCode)) {
+      return envCode;
+    }
+  } catch {
+    // ignore
+  }
+  return undefined;
+}
+
 export const pageview = (eventID?: string) => {
-  if (eventID) {
-    window.fbq?.("track", "PageView", {}, { eventID });
+  const testCode = getBrowserTestEventCode();
+  const options: Record<string, unknown> = {};
+  if (eventID) options.eventID = eventID;
+  if (testCode) options.test_event_code = testCode;
+
+  if (Object.keys(options).length > 0) {
+    window.fbq?.("track", "PageView", {}, options);
     return;
   }
 
   window.fbq?.("track", "PageView");
-};
-
-export type TrackEventOptions = {
-  eventID?: string;
 };
 
 export const track = (
@@ -25,8 +61,17 @@ export const track = (
   options: Record<string, unknown> = {},
   eventOptions: TrackEventOptions = {},
 ) => {
+  const testCode = eventOptions.test_event_code || getBrowserTestEventCode();
+  const extra: Record<string, unknown> = {};
   if (eventOptions.eventID) {
-    window.fbq?.("track", name, options, { eventID: eventOptions.eventID });
+    extra.eventID = eventOptions.eventID;
+  }
+  if (testCode) {
+    extra.test_event_code = testCode;
+  }
+
+  if (Object.keys(extra).length > 0) {
+    window.fbq?.("track", name, options, extra);
     return;
   }
 

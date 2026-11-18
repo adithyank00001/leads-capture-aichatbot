@@ -4,12 +4,10 @@ import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   CircleCheck,
-  Download,
   Lock,
   Minus,
   Plus,
   ShieldCheck,
-  Zap,
   ZoomIn,
 } from "lucide-react";
 
@@ -581,8 +579,6 @@ export function ProductHero({ product }: Props) {
 
       await scriptReady;
 
-      const hidePhonePe = isCustomProduct;
-
       await openRazorpayCheckout({
         key: data.keyId,
         amount: data.amount,
@@ -591,46 +587,6 @@ export function ProductHero({ product }: Props) {
         description:
           data.description ?? "Complete payment to receive your leads database",
         order_id: data.orderId,
-        ...(hidePhonePe
-          ? {
-            config: {
-              display: {
-                blocks: {
-                  upi: {
-                    name: "Pay via UPI",
-                    instruments: [
-                      {
-                        method: "upi",
-                        flows: ["intent", "qr", "collect"],
-                        apps: ["google_pay", "paytm", "bhim", "cred"],
-                      },
-                    ],
-                  },
-                  cards: {
-                    name: "Debit / Credit Cards",
-                    instruments: [
-                      {
-                        method: "card",
-                      },
-                    ],
-                  },
-                  netbanking: {
-                    name: "Net Banking",
-                    instruments: [
-                      {
-                        method: "netbanking",
-                      },
-                    ],
-                  },
-                },
-                sequence: ["block.upi", "block.cards", "block.netbanking"],
-                preferences: {
-                  show_default_blocks: false,
-                },
-              },
-            },
-          }
-          : {}),
         // No email/phone prefill — Razorpay collects both on checkout.
         handler: (response) => {
           void verifyAndRedirect(response).catch((error) => {

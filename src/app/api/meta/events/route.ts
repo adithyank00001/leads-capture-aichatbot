@@ -18,12 +18,19 @@ type MetaEventsBody = {
   eventId?: unknown;
   eventSourceUrl?: unknown;
   customData?: unknown;
+  testEventCode?: unknown;
   /** Guest checkout email (store). Optional — improves CAPI match quality. */
   email?: unknown;
   /** Browser _fbp / _fbc — preferred when Cookie header is incomplete. */
   fbp?: unknown;
   fbc?: unknown;
 };
+
+function parseTestEventCode(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const trimmed = raw.trim();
+  return /^TEST\d+$/i.test(trimmed) ? trimmed : null;
+}
 
 function parseGuestEmail(raw: unknown): string | null {
   if (typeof raw !== "string") return null;
@@ -160,6 +167,8 @@ export async function POST(request: Request) {
       userAgent: fromCookies.userAgent,
     };
 
+    const testEventCode = parseTestEventCode(body.testEventCode);
+
     await sendCapiEvent({
       eventName,
       eventId,
@@ -167,6 +176,7 @@ export async function POST(request: Request) {
       email,
       attribution,
       customData,
+      testEventCode,
     });
 
     return apiSuccess({ accepted: true });

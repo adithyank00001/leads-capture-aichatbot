@@ -52,7 +52,8 @@ export function isPublicMetaPagePath(pathname: string): boolean {
     return false;
   }
 
-  return PUBLIC_PAGE_EXACT.has(pathname) || STORE_SLUG_PRODUCT_PATH.test(pathname);
+  const clean = pathname.replace(/\/+$/, "") || "/";
+  return PUBLIC_PAGE_EXACT.has(clean) || STORE_SLUG_PRODUCT_PATH.test(clean);
 }
 
 /** Friendly content_name for a public page path, or null if unknown. */
@@ -61,12 +62,13 @@ export function getMetaPageContentName(pathname: string): string | null {
     return null;
   }
 
-  const exact = META_PAGE_CONTENT_NAMES[pathname];
+  const clean = pathname.replace(/\/+$/, "") || "/";
+  const exact = META_PAGE_CONTENT_NAMES[clean] || META_PAGE_CONTENT_NAMES[pathname];
   if (exact) {
     return exact;
   }
 
-  const slug = STORE_SLUG_PRODUCT_PATH.exec(pathname)?.[1];
+  const slug = STORE_SLUG_PRODUCT_PATH.exec(clean)?.[1] || STORE_SLUG_PRODUCT_PATH.exec(pathname)?.[1];
   return slug ? `Store Product: ${slug}` : null;
 }
 
@@ -75,7 +77,7 @@ export function getMetaPageViewKey(
   pathname: string,
   search: string | { toString(): string },
 ): string {
-  const path = pathname || "/";
+  const path = (pathname || "/").replace(/\/+$/, "") || "/";
   const raw = typeof search === "string" ? search : search.toString();
   const query = raw.startsWith("?") ? raw.slice(1) : raw;
   return query ? `${path}?${query}` : path;

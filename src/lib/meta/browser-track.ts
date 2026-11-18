@@ -1,5 +1,5 @@
 import { publicConfig } from "@/lib/config";
-import { track } from "@/lib/fbpixel";
+import { getBrowserTestEventCode, track } from "@/lib/fbpixel";
 import { ensureBrowserFbcCookie, readBrowserMetaClickIds } from "@/lib/meta/fbc";
 import { getMetaPageContentName } from "@/lib/meta/public-pages";
 
@@ -63,6 +63,7 @@ export function forwardCapiEvent(
   params: Record<string, unknown> = {},
   eventSourceUrl?: string,
   userData?: BrowserTrackUserData,
+  testEventCode?: string | null,
 ): void {
   const trimmedId = eventId.trim();
   if (!trimmedId) {
@@ -71,6 +72,7 @@ export function forwardCapiEvent(
 
   const sourceUrl = eventSourceUrl?.trim() || currentPageUrl();
   const email = userData?.email?.trim().toLowerCase() || null;
+  const testCode = testEventCode?.trim() || getBrowserTestEventCode();
 
   let clickIds: { fbp?: string; fbc?: string } = {};
   try {
@@ -85,6 +87,7 @@ export function forwardCapiEvent(
       eventName,
       eventId: trimmedId,
       eventSourceUrl: sourceUrl,
+      ...(testCode ? { testEventCode: testCode } : {}),
       ...(Object.keys(params).length > 0 ? { customData: params } : {}),
       ...(email ? { email } : {}),
       ...(clickIds.fbp ? { fbp: clickIds.fbp } : {}),
@@ -116,6 +119,7 @@ export function trackPixelAndCapi(
   userData?: BrowserTrackUserData,
 ): string {
   const eventId = createEventId();
+  const testCode = getBrowserTestEventCode();
 
   // Persist fbclid → _fbc before Pixel + CAPI so checkout/Purchase still match later.
   try {
@@ -125,12 +129,22 @@ export function trackPixelAndCapi(
   }
 
   try {
-    track(eventName, params, { eventID: eventId });
+    track(eventName, params, {
+      eventID: eventId,
+      ...(testCode ? { test_event_code: testCode } : {}),
+    });
   } catch {
     // Pixel must never break the page.
   }
 
-  forwardCapiEvent(eventName, eventId, params, eventSourceUrl, userData);
+  forwardCapiEvent(
+    eventName,
+    eventId,
+    params,
+    eventSourceUrl,
+    userData,
+    testCode,
+  );
 
   return eventId;
 }
