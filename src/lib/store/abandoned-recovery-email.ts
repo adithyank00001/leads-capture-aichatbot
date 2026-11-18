@@ -171,7 +171,7 @@ export function buildAbandonedRecoveryEmailHtml(params: {
                 🔒 Secured by Razorpay · Instant Google Drive delivery
               </p>
               <p style="margin: 0; font-size: 12px; color: #667085;">
-                Need help? Simply reply to this email or contact support@growscalex.com<br>
+                Need help? Simply reply to this email or contact growscalexx@gmail.com<br>
                 © ${new Date().getFullYear()} growscaleX. All rights reserved.
               </p>
             </td>
@@ -223,7 +223,7 @@ Questions? Reply directly to this email.
 
 Best regards,
 growscaleX Team
-support@growscalex.com
+growscalexx@gmail.com
   `.trim();
 }
 
@@ -255,6 +255,7 @@ export async function sendAbandonedRecoveryEmail(
       subject,
       text,
       html,
+      replyTo: serverEnv.contactInboxEmail,
     });
 
     if (!result.ok) {

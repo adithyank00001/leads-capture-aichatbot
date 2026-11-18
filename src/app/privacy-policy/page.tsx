@@ -76,10 +76,10 @@ export default function PrivacyPolicyPage() {
         <LegalP>
           Where you elect to communicate via{" "}
           <a
-            href="mailto:support@growscalex.com"
+            href="mailto:growscalexx@gmail.com"
             className="font-medium text-[var(--landing-orange)] hover:underline"
           >
-            support@growscalex.com
+            growscalexx@gmail.com
           </a>{" "}
           or the contact form, we process the contents of your message, reply
           address, and any attachments or identifiers you voluntarily include,
@@ -154,10 +154,10 @@ export default function PrivacyPolicyPage() {
           rectification, or deletion of account-adjacent records we control by
           writing to{" "}
               <a
-                href="mailto:support@growscalex.com"
+                href="mailto:growscalexx@gmail.com"
                 className="font-medium text-[var(--landing-orange)] hover:underline"
               >
-                support@growscalex.com
+                growscalexx@gmail.com
               </a>
           , or by submitting the form at{" "}
           <a href="/contact" className="font-medium text-[var(--landing-orange)] hover:underline">

@@ -9,7 +9,7 @@ import { getWhatsAppHref } from "@/lib/marketing/whatsapp";
 export const metadata: Metadata = {
   title: `Contact — ${publicConfig.appName}`,
   description:
-    "Contact growscaleX support for digital product storefront questions. Email support@growscalex.com or use the contact form.",
+    "Contact growscaleX support for digital product storefront questions. Email growscalexx@gmail.com or use the contact form.",
 };
 
 export default function ContactPage() {
@@ -27,10 +27,10 @@ export default function ContactPage() {
         <div className="rounded-lg border border-[#D8E2EC] bg-[#F7FAFC] px-4 py-4 sm:px-5">
           <p className="text-sm font-medium text-[var(--landing-navy)]">Email</p>
           <a
-            href="mailto:support@growscalex.com"
+            href="mailto:growscalexx@gmail.com"
             className="mt-1 inline-block text-[17px] font-semibold text-[var(--landing-orange)] hover:underline"
           >
-            support@growscalex.com
+            growscalexx@gmail.com
           </a>
           <p className="mt-2 text-sm leading-relaxed text-[#5B6B7C]">
             Prefer the form? Fill it in and we will receive your message at the

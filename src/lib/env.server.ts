@@ -97,7 +97,7 @@ export const serverEnv = {
     readOptionalEnv("RESEND_FROM_EMAIL") ??
     "growscaleX Support <support@notification.growscalex.com>",
   contactInboxEmail:
-    readOptionalEnv("CONTACT_INBOX_EMAIL") ?? "support@growscalex.com",
+    readOptionalEnv("CONTACT_INBOX_EMAIL") ?? "growscalexx@gmail.com",
 } as const;
 
 export function getServiceStatus(): {

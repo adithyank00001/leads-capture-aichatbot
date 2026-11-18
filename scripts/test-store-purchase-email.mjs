@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 const from = process.env.RESEND_FROM_EMAIL;
 const key = process.env.RESEND_API_KEY;
-const to = process.env.CONTACT_INBOX_EMAIL || "support@growscalex.com";
+const to = process.env.CONTACT_INBOX_EMAIL || "growscalexx@gmail.com";
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(
   /\/+$/,
   "",

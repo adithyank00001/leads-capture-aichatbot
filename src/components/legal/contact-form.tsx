@@ -69,7 +69,7 @@ export function ContactForm() {
       setMessage("");
     } catch {
       setStatus("error");
-      setStatusText("Network error. Please email support@growscalex.com directly.");
+      setStatusText("Network error. Please email growscalexx@gmail.com directly.");
     } finally {
       setSubmitting(false);
     }

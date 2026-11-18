@@ -146,10 +146,10 @@ export default function TermsOfServicePage() {
         <LegalP>
           Notices and inquiries regarding these Terms may be directed to{" "}
               <a
-                href="mailto:support@growscalex.com"
+                href="mailto:growscalexx@gmail.com"
                 className="font-medium text-[var(--landing-orange)] hover:underline"
               >
-                support@growscalex.com
+                growscalexx@gmail.com
           </a>{" "}
           or submitted through{" "}
           <a href="/contact" className="font-medium text-[var(--landing-orange)] hover:underline">

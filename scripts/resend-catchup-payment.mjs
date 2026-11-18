@@ -23,7 +23,7 @@ const response = await fetch("https://api.resend.com/emails", {
   body: JSON.stringify({
     from,
     to: [to],
-    reply_to: process.env.CONTACT_INBOX_EMAIL || "support@growscalex.com",
+    reply_to: process.env.CONTACT_INBOX_EMAIL || "growscalexx@gmail.com",
     subject:
       "Your leads package is ready — 110Cr+ All India Latest Leads (PAN INDIA DATABASE) 2026",
     text: [

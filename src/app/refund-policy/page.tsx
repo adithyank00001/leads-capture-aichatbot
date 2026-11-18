@@ -76,10 +76,10 @@ export default function RefundPolicyPage() {
           payment disputes initiated by the Purchaser, or processor delays), the
           Purchaser may notify{" "}
               <a
-                href="mailto:support@growscalex.com"
+                href="mailto:growscalexx@gmail.com"
                 className="font-medium text-[var(--landing-orange)] hover:underline"
               >
-                support@growscalex.com
+                growscalexx@gmail.com
               </a>{" "}
           for investigation. Remedies in such narrow contingency are limited, at
           the Operator&apos;s election, to completing delivery or refunding the
@@ -115,10 +115,10 @@ export default function RefundPolicyPage() {
         <LegalP>
           Questions concerning this Policy may be directed to{" "}
               <a
-                href="mailto:support@growscalex.com"
+                href="mailto:growscalexx@gmail.com"
                 className="font-medium text-[var(--landing-orange)] hover:underline"
               >
-                support@growscalex.com
+                growscalexx@gmail.com
           </a>{" "}
           or via{" "}
           <a href="/contact" className="font-medium text-[var(--landing-orange)] hover:underline">
