@@ -16,8 +16,8 @@ export const sampleProduct: StoreProductConfig = {
   topSelling: true,
 
   download: {
-    relativePrivatePath: "store/downloads/SAMPLE-TEST-DOCUMENT.pdf",
-    fileName: "SAMPLE-TEST-DOCUMENT.pdf",
+    relativePrivatePath: "store/downloads/Access Link.pdf",
+    fileName: "Access Link.pdf",
     contentType: "application/pdf",
   },
   driveDownloadUrl: null,
