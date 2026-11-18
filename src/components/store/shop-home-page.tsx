@@ -17,9 +17,15 @@ export function ShopHomePage() {
               Verified Seller
             </span>
           </div>
-          <nav className="flex items-center gap-4 text-sm text-[var(--store-muted)]">
-            <Link href="#products" className="hover:text-[var(--store-ink)]">
+          <nav className="flex items-center gap-3 sm:gap-4 text-sm text-[var(--store-muted)]">
+            <Link href="#products" className="hover:text-[var(--store-ink)] transition-colors">
               All products
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-flex items-center justify-center rounded-lg border border-[var(--store-line)] bg-white px-3.5 py-1.5 text-xs sm:text-sm font-medium text-[var(--store-ink)] shadow-xs transition-colors hover:bg-slate-50 hover:border-slate-300"
+            >
+              Contact
             </Link>
           </nav>
         </div>
