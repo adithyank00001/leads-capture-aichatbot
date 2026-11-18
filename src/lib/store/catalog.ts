@@ -98,6 +98,9 @@ const teaserCards: CatalogProduct[] = [
 ];
 
 const publishedIds = new Set(publishedCards.map((card) => card.id));
+if (publishedIds.has("business-and-real-estate-owner-db")) {
+  publishedIds.add("real-estate-leads");
+}
 
 export const shopCatalog: CatalogProduct[] = [
   ...publishedCards,

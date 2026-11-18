@@ -5,6 +5,9 @@ import { storeFontVariables } from "@/lib/store/fonts";
 
 import "./store/store.css";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: {
     absolute: "Buy Premium Lead Databases | growscaleX Store",
