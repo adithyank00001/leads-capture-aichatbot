@@ -63,10 +63,15 @@ export async function sendResendEmail(
       headers["Idempotency-Key"] = idempotencyKey.slice(0, 256);
     }
 
+    const safeSubject = input.subject
+      .replace(/[\r\n]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
     const body: Record<string, unknown> = {
       from,
       to: recipients,
-      subject: input.subject,
+      subject: safeSubject,
       text: input.text,
     };
 

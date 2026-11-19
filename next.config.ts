@@ -8,10 +8,35 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: projectRoot,
   },
-  // Ensure the paid PDF is bundled with the download API on Vercel.
+  // Ensure paid PDFs are bundled with store APIs and pages on Vercel.
   outputFileTracingIncludes: {
     "/api/store/download": [
+      "./private/store/downloads/**/*",
+      "./private/store/downloads/Access Link.pdf",
       "./private/store/downloads/ALL-INDIA-COMPLETE-DATABASE-PACKAGE-BUNDLE-2026.pdf",
+      "./private/store/downloads/USA-LEADS-PREMIUM-PACK-2026.pdf",
+      "./private/store/downloads/INDIA-PREMIUM-HNI-DATABASE-2026.pdf",
+    ],
+    "/api/store/razorpay/verify": [
+      "./private/store/downloads/**/*",
+      "./private/store/downloads/Access Link.pdf",
+      "./private/store/downloads/ALL-INDIA-COMPLETE-DATABASE-PACKAGE-BUNDLE-2026.pdf",
+      "./private/store/downloads/USA-LEADS-PREMIUM-PACK-2026.pdf",
+      "./private/store/downloads/INDIA-PREMIUM-HNI-DATABASE-2026.pdf",
+    ],
+    "/api/store/razorpay/webhook": [
+      "./private/store/downloads/**/*",
+      "./private/store/downloads/Access Link.pdf",
+      "./private/store/downloads/ALL-INDIA-COMPLETE-DATABASE-PACKAGE-BUNDLE-2026.pdf",
+      "./private/store/downloads/USA-LEADS-PREMIUM-PACK-2026.pdf",
+      "./private/store/downloads/INDIA-PREMIUM-HNI-DATABASE-2026.pdf",
+    ],
+    "/store/success": [
+      "./private/store/downloads/**/*",
+      "./private/store/downloads/Access Link.pdf",
+      "./private/store/downloads/ALL-INDIA-COMPLETE-DATABASE-PACKAGE-BUNDLE-2026.pdf",
+      "./private/store/downloads/USA-LEADS-PREMIUM-PACK-2026.pdf",
+      "./private/store/downloads/INDIA-PREMIUM-HNI-DATABASE-2026.pdf",
     ],
   },
   images: {

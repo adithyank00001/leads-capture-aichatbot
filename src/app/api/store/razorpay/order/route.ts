@@ -131,7 +131,7 @@ export async function POST(request: Request) {
 
     await createStorePurchase({
       productSlug: product.slug,
-      productTitle: product.title,
+      productTitle: product.title.replace(/\s+/g, " ").trim(),
       amountPaise,
       currency,
       quantity,

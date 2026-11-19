@@ -157,8 +157,8 @@ export async function sendStorePurchaseEmail(
 
   // India (and others): only use per-product driveDownloadUrl. No env fallback.
   const driveUrl = product.driveDownloadUrl?.trim() || "";
-  const productTitle =
-    input.productTitle?.trim() || product.title;
+  const rawTitle = input.productTitle?.trim() || product.title;
+  const productTitle = rawTitle.replace(/\s+/g, " ").trim();
   const priceLabel = formatMoney(input.value, input.currency);
   const firstName =
     input.customerName?.trim().split(/\s+/)[0] ||
