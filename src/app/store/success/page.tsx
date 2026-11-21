@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { headers } from "next/headers";
+import { Mail } from "lucide-react";
 
 import { MetaPixelPurchase } from "@/components/meta-pixel-purchase";
 import { serverEnv } from "@/lib/env.server";
@@ -212,17 +213,36 @@ export default async function StoreSuccessPage({ searchParams }: Props) {
                 Your payment is confirmed. Download the PDF package below.
               </p>
 
-              {verification.email &&
-              paidRecently &&
-              !isSampleProduct ? (
-                <p className="mt-3 text-sm text-[var(--store-muted)]">
-                  We also emailed the PDF to{" "}
-                  <strong>{verification.email}</strong>. Check inbox (and
-                  spam).
-                </p>
+              {!isSampleProduct ? (
+                <div className="mt-5 rounded-2xl border-2 border-amber-300 bg-amber-50/90 p-4 sm:p-5 shadow-xs">
+                  <div className="flex items-start gap-3.5">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-amber-400 text-slate-950 shadow-xs">
+                      <Mail className="size-5" aria-hidden="true" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="inline-flex items-center rounded-full bg-amber-200/90 px-2 py-0.5 text-[11px] font-extrabold uppercase tracking-wide text-amber-950">
+                        Important Note
+                      </span>
+                      <p className="mt-2 text-sm font-medium text-amber-950">
+                        The file will also be sent to your email ID
+                        {verification.email ? (
+                          <> (<span className="font-bold underline decoration-amber-400">{verification.email}</span>)</>
+                        ) : null}
+                        .
+                      </p>
+                      <p className="mt-1.5 text-sm font-bold text-amber-900">
+                        👉 If not visible in your inbox, please check your{" "}
+                        <span className="rounded bg-amber-300/90 px-1.5 py-0.5 font-extrabold text-amber-950 underline decoration-amber-600">
+                          SPAM or Junk folder
+                        </span>
+                        !
+                      </p>
+                    </div>
+                  </div>
+                </div>
               ) : null}
 
-              <div className="mt-8 space-y-3">
+              <div className="mt-6 space-y-3">
                 <a
                   className="store-btn-primary"
                   href={verification.downloadHref}
