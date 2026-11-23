@@ -12,8 +12,8 @@ export const sampleProduct: StoreProductConfig = {
 
   catalogSubtitle:
     "25 Lakh+ High-Quality Verified Contacts across All India · Exclusive Real Estate Leads",
-  badge: "Digital Products",
-  topSelling: true,
+  badge: undefined,
+  topSelling: false,
 
   download: {
     relativePrivatePath: "store/downloads/Access Link.pdf",

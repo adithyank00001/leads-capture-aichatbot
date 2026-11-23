@@ -12,15 +12,16 @@ export const carOwnersDatabase: StoreProductConfig = {
 
   catalogSubtitle:
     "70 Lakh+ Verified Indian Car Owners · Instant download · Auto & insurance leads",
-  badge: "Digital Products",
-  topSelling: true,
+  badge: undefined,
+  topSelling: false,
 
   download: {
-    relativePrivatePath: "store/downloads/Access Link.pdf",
-    fileName: "Access Link.pdf",
+    relativePrivatePath: "store/downloads/ALL-INDIA-CAR-OWNERS-DATABASE-2026.pdf",
+    fileName: "ALL-INDIA-CAR-OWNERS-DATABASE-2026.pdf",
     contentType: "application/pdf",
   },
-  driveDownloadUrl: null,
+  driveDownloadUrl:
+    "https://drive.google.com/drive/folders/1ftcocEL3OIco7WHsFt5Kb0r1DxVWseRY?usp=sharing",
 
   price: 397,
   compareAtPrice: 4997,
@@ -57,12 +58,8 @@ export const carOwnersDatabase: StoreProductConfig = {
 
   images: [
     {
-      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1794939281/b7ab41a0-08e6-41b7-ae27-959980e25095.png",
+      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1795425766/fbf80868-5878-4891-8d37-90445f35eaa7.png",
       alt: "70 Lakhs+ All India Car Owners Database (LATEST 2026 DATA)",
-    },
-    {
-      src: "https://res.cloudinary.com/ntv0bhpy/image/upload/v1793519670/Indian_Leads_Database_Promo.jpg",
-      alt: "Indian Leads Database Promo — 70 Lakhs+ Car Owners Leads",
     },
   ],
 
@@ -166,33 +163,33 @@ export const carOwnersDatabase: StoreProductConfig = {
 
   reviews: [
     {
-      name: "Rajesh Sharma",
+      name: "Gaurav Chawla",
       avatar:
-        "https://res.cloudinary.com/ntv0bhpy/image/upload/v1794934955/034a01cb-dac5-488d-a25b-8502db0fb5b5.png",
+        "https://res.cloudinary.com/ntv0bhpy/image/upload/v1795426865/0536c494-55af-40f9-9dc8-6a80976d077a.png",
       quote:
         "We run a multi-brand car service center in Delhi NCR. We started WhatsApp outreach for periodic servicing and AC checkups using this list, and booked 45+ cars in the first week alone. Outstanding value!",
       rating: 5,
     },
     {
-      name: "Suresh Menon",
+      name: "Deepak Bhatia",
       avatar:
-        "https://res.cloudinary.com/ntv0bhpy/image/upload/v1794934746/6fa0e1c7-c05b-4558-b518-2104db36a5db.png",
+        "https://res.cloudinary.com/ntv0bhpy/image/upload/v1795426834/4d8f9ae8-a188-40c6-bbd0-0e29454456d7.png",
       quote:
         "As an insurance POSP, finding active car owners for motor policy renewal is normally very hard. With this database, my calling team has consistent verified contacts every day. Paid for itself 10x over.",
       rating: 5,
     },
     {
-      name: "Vikas Agarwal",
+      name: "Manish Singhal",
       avatar:
-        "https://res.cloudinary.com/ntv0bhpy/image/upload/v1794934807/44a09b63-7ec4-4355-b547-bd7eee446bdf.png",
+        "https://res.cloudinary.com/ntv0bhpy/image/upload/v1794934723/16707f0f-bfd0-474f-9ac8-5f4d12501a25.png",
       quote:
         "Downloaded the Excel sheets via Google Drive right after checkout. The city-wise segregation makes it super easy to filter for our local used car dealership in Pune.",
-      rating: 4,
+      rating: 5,
     },
     {
-      name: "Naveen Reddy",
+      name: "Praveen Saxena",
       avatar:
-        "https://res.cloudinary.com/ntv0bhpy/image/upload/v1794934694/eb9acea2-86e4-4983-87de-18bb0fa35489.png",
+        "https://res.cloudinary.com/ntv0bhpy/image/upload/v1795426880/67db0487-6fc0-4036-92b6-f3cfd7b89caf.png",
       quote:
         "Clean data format, direct phone numbers, and instant delivery. Used it to create Custom Audiences for Meta ads for our ceramic coating studio. Click-through rates have been great.",
       rating: 5,
@@ -222,23 +219,18 @@ export const carOwnersDatabase: StoreProductConfig = {
         "This is a 100% one-time payment of ₹397 for lifetime access. There are no recurring fees or monthly subscriptions.",
     },
     {
-      question: "Which states and cities are included?",
-      answer:
-        "The package covers all major states and cities across India, including metro hubs (Delhi NCR, Mumbai, Bengaluru, Hyderabad, Chennai, Kolkata, Pune, Ahmedabad) as well as Tier 2 and Tier 3 cities.",
-    },
-    {
       question: "Can I use this data for WhatsApp and telecalling?",
       answer:
         "Yes, the data includes mobile numbers and names, making it ready to import into CRM software, bulk WhatsApp outreach tools, and outbound dialers.",
     },
   ],
 
-  buyButtonLabel: "Download Car Owners Database Now",
+  buyButtonLabel: "Download My Leads Now",
   secondaryButtonLabel: "Add to cart",
   buyUrl: "#buy",
   footerNote: "Pay securely with Razorpay · Instant Google Drive link after payment",
   finalCta: {
-    headline: "Fuel Your Auto & Insurance Sales Today",
-    body: "Lock in lifetime access to 70 Lakh+ verified Indian car owners before the special price expires.",
+    headline: "Take Action Now, Don't Regret Later.",
+    body: "Next time the price will be higher — don't miss this opportunity.",
   },
 };

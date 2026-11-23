@@ -383,6 +383,8 @@ export function ProductHero({ product }: Props) {
     product.slug === "sample-product" ||
     product.slug === "business-real-estate-leads" ||
     product.slug === "business-and-real-estate-owner-db";
+  const hideThumbnails =
+    isCustomProduct || product.slug === "car-owners-database";
   const [activeImage, setActiveImage] = useState(0);
   const [zoomOpen, setZoomOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -647,7 +649,7 @@ export function ProductHero({ product }: Props) {
             </span>
           </button>
 
-          {product.images.length > 1 && !isCustomProduct ? (
+          {product.images.length > 1 && !hideThumbnails ? (
             <div className="mt-3 grid grid-cols-3 gap-2.5 sm:mt-4 sm:gap-3">
               {product.images.map((image, index) => {
                 const selected = index === activeImage;

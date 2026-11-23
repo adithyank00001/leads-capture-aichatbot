@@ -7,7 +7,7 @@ export function ProductHeader({ brandName }: { brandName: string }) {
     <header className="store-header">
       <div className="store-shell flex h-14 items-center justify-between sm:h-16">
         <div className="store-header-brand">
-          <BrandLogo href="" size="xs" className="store-header-logo cursor-default pointer-events-none select-none" />
+          <BrandLogo href="/" size="xs" className="store-header-logo select-none" />
           <span className="store-brand store-verified-badge select-none cursor-default">
             <BadgeCheck className="size-4 shrink-0" aria-hidden />
             {brandName}

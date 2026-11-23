@@ -27,7 +27,7 @@ export type CatalogProduct = {
 };
 
 const publishedCards: CatalogProduct[] = getPublishedStoreProducts().map(
-  (product) => ({
+  (product, index) => ({
     id: product.slug,
     title: product.title,
     subtitle: product.catalogSubtitle || product.subtitle,
@@ -37,8 +37,8 @@ const publishedCards: CatalogProduct[] = getPublishedStoreProducts().map(
     image: product.images[0]?.src ?? "",
     imageAlt: product.images[0]?.alt ?? product.title,
     href: getStoreProductPath(product),
-    badge: product.badge,
-    topSelling: product.topSelling,
+    badge: index === 0 ? "Top selling" : undefined,
+    topSelling: index === 0,
     rating: product.rating,
     reviewCount: product.reviewCount,
     available: true,
@@ -58,7 +58,6 @@ const teaserCards: CatalogProduct[] = [
       "https://res.cloudinary.com/ntv0bhpy/image/upload/v1789745763/Poster_promoting_real_estate_leads_20260918210133.webp",
     imageAlt: "Indian Real Estate Leads Bundle",
     href: null,
-    badge: "Out of stock",
     rating: 4.8,
     reviewCount: 64,
     available: false,
@@ -74,7 +73,6 @@ const teaserCards: CatalogProduct[] = [
       "https://res.cloudinary.com/ntv0bhpy/image/upload/v1789745760/Creating_WhatsApp_outreach_scrip__20260918210129.webp",
     imageAlt: "WhatsApp Outreach Scripts Pack",
     href: null,
-    badge: "Out of stock",
     rating: 4.6,
     reviewCount: 86,
     available: false,
@@ -90,7 +88,6 @@ const teaserCards: CatalogProduct[] = [
       "https://res.cloudinary.com/ntv0bhpy/image/upload/v1789745761/Creating_social_media_educationa__20260918210125.webp",
     imageAlt: "CRM Tracking Blueprint System",
     href: null,
-    badge: "Out of stock",
     rating: 4.6,
     reviewCount: 24,
     available: false,

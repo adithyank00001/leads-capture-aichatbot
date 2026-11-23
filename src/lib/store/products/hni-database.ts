@@ -11,8 +11,8 @@ export const hniDatabase: StoreProductConfig = {
 
   catalogSubtitle:
     "10 Lakh+ High‑Value India HNI Contacts · Instant Excel & CSV download · Targeted Audience Segmentation",
-  badge: "Hot Deal",
-  topSelling: true,
+  badge: undefined,
+  topSelling: false,
 
   download: {
     relativePrivatePath: "store/downloads/INDIA-PREMIUM-HNI-DATABASE-2026.pdf",
