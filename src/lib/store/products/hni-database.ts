@@ -34,7 +34,7 @@ export const hniDatabase: StoreProductConfig = {
   subtitle:
     "Get instant access to a massive, ready-to-use pool of high-income Indian prospects. Universal Excel/CSV formats make it perfectly structured for any sales, marketing, or advertising campaign.",
   rating: 4.8,
-  reviewCount: 140,
+  reviewCount: 600,
   socialProofTag: "🔥 80+ downloaded this week!",
   highlights: [
     "10 Lakh+ Contacts: Names, Numbers, Emails, Cities",
