@@ -6,6 +6,7 @@
  */
 
 import type { StoreProductConfig } from "@/lib/store/product-content";
+import { carOwnersDatabase } from "@/lib/store/products/car-owners-database";
 import { hniDatabase } from "@/lib/store/products/hni-database";
 import { panIndiaLeads2026 } from "@/lib/store/products/pan-india-leads-2026";
 import { sampleProduct } from "@/lib/store/products/sample-product";
@@ -37,6 +38,7 @@ export const GROWSCALE_PRODUCT_SLUGS = [
   "business-real-estate-leads",
   "sample-product",
   "poster-pack",
+  "car-owners-database",
 ] as const;
 
 /**
@@ -57,6 +59,7 @@ export function isGrowscaleProductSlug(slug: string | null | undefined): boolean
     clean === "business-and-real-estate-owner-db" ||
     clean === "business-real-estate-leads" ||
     clean === "sample-product" ||
+    clean === "car-owners-database" ||
     LEGACY_LIVE_PURCHASE_SLUGS.includes(clean)
   );
 }
@@ -91,6 +94,7 @@ const REGISTERED_PRODUCTS: StoreProductConfig[] = [
   hniDatabase,
   panIndiaLeadsDiscount297,
   sampleProduct,
+  carOwnersDatabase,
 ];
 
 export const storeProducts: StoreProductConfig[] =
