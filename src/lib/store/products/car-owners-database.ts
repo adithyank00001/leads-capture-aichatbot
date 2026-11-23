@@ -23,7 +23,7 @@ export const carOwnersDatabase: StoreProductConfig = {
   driveDownloadUrl:
     "https://drive.google.com/drive/folders/1ftcocEL3OIco7WHsFt5Kb0r1DxVWseRY?usp=sharing",
 
-  price: 1,
+  price: 397,
   compareAtPrice: 4997,
   currency: "INR",
   currencySymbol: "₹",
