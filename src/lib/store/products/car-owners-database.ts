@@ -8,7 +8,7 @@ import type { StoreProductConfig } from "@/lib/store/product-content";
 export const carOwnersDatabase: StoreProductConfig = {
   slug: "car-owners-database",
   contentId: "car-owners-database",
-  published: false,
+  published: true,
 
   catalogSubtitle:
     "70 Lakh+ Verified Indian Car Owners · Instant download · Auto & insurance leads",
